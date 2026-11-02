@@ -1,0 +1,48 @@
+PROMPT DE CONTINUIDADE — V139
+
+VERSÃO ATUAL / BASE DE TESTE
+- V139 é a versão mais recente trabalhada.
+- V137 é a referência visual congelada.
+- V138 foi a base imediata.
+
+REGRAS PERMANENTES
+- Não quebrar funcionalidades validadas.
+- Não alterar núcleos fiscais protegidos sem autorização explícita.
+- Toda nova versão deve partir da base autorizada.
+- Identidade visual da V137/V139 deve permanecer preservada sem alteração visual não autorizada.
+
+AUTH / USUÁRIOS
+- Bruno Elias é Administrador principal.
+- E-mail: brunoalbano.elias8@gmail.com
+- A senha nunca deve ser registrada em documentação.
+- Novo usuário faz cadastro simples com nome/e-mail/senha e entra imediatamente.
+- Não existe aprovação administrativa no fluxo normal.
+- Administrador pode bloquear, ativar e redefinir senha.
+- “Esqueci minha senha” cria solicitação para o administrador.
+- Usuários, histórico e recuperações usam o banco dedicado `usuarios.db`.
+- Login deve permanecer persistente entre versões no mesmo ambiente de dados.
+
+PERSISTÊNCIA
+- Área de dados: %LOCALAPPDATA%\Exato\Central Fiscal\Dados
+- Fiscal: central_fiscal.db
+- Autenticação: usuarios.db
+- Não apagar ou substituir a área de dados durante atualização.
+
+PRÓXIMOS PONTOS JÁ DISCUTIDOS
+- Busca Global 2.0 (nome da empresa e outros campos).
+- Exatinho contextual com usuário logado.
+- Permissões mais avançadas por perfil.
+- Dashboard inteligente por usuário.
+- Futuramente autenticação centralizada entre computadores.
+
+NÚCLEOS PROTEGIDOS
+- Auditoria SAT × XML
+- Captura NF-e / Emitente / Destinatário
+- Captura NFC-e
+- Captura CT-e
+- Organização XMLs
+- DANFE/DACTE individual
+- PDFs consolidados
+- contexto da Auditoria a partir de Documentos Fiscais
+- classificação da Auditoria
+- sincronização geral

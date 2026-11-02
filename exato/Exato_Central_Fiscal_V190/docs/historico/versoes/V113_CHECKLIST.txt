@@ -1,0 +1,15 @@
+V113 CHECKLIST
+
+[OK] Exato IA agora possui olhar contínuo e suave seguindo o cursor, sem troca brusca de imagem.
+[OK] Olhar calculado por posição contínua do mouse e interpolado em tempo real.
+[OK] Microanimação de repouso preservada.
+[OK] Frases espontâneas contextuais com intervalo controlado e sem repetição imediata.
+[OK] Estados contextuais por tela preservados.
+[OK] Mascote pequeno e sem cobertura do workspace.
+[OK] 9 núcleos fiscais protegidos preservados.
+[OK] 4 renderizadores/rotinas PDF congelados preservados.
+[OK] Fluxo NF-e Entrada/Saída V101 preservado.
+[OK] Salvamento XML + PDF/DANFE preservado.
+[OK] py_compile.
+[OK] Smoke test estrutural da IA.
+[OK] Mascote no PDF permanece estatico, transparente e sem balao para evitar clipping.

@@ -1,0 +1,12 @@
+V158 — VISUAL, RODADA 2
+
+PEDIDO DO USUÁRIO
+- Depois de aprovar o visual novo da V157: seguir para a próxima rodada de melhorias de layout.
+
+O QUE FOI FEITO
+1. Situação em selos coloridos (verde, azul, cinza, amarelo) na primeira coluna das tabelas de Documentos, NFS-e e Histórico; o texto da situação continua guardado (busca, filtros e exportação não mudam).
+2. Caixas de seleção e botões de opção desenhados no estilo do Exato (vermelho da marca), com estados de mouse e desativado, nos temas claro e escuro.
+3. Nenhuma regra fiscal alterada (13/13 núcleos e 31/31 ativos iguais à V145).
+
+LIMITES / A CONFERIR
+- Conferido em capturas no Linux; no Windows (Segoe UI) confira se os selos ficam bem alinhados à altura das linhas.

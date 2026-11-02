@@ -1,0 +1,15 @@
+V112 - EXATO IA VIVA + PDF AUDITORIA ENQUADRADO
+
+Base: V111.
+
+Principais pontos desta versao:
+- IA fixa discreta na sidebar com mascote pequeno e transparente;
+- microanimacao de repouso;
+- olhar em 3 direcoes (esquerda/centro/direita) conforme a posicao do cursor, usando variantes transparentes do mascote;
+- frases ocasionais de personalidade, humor leve e motivacao, sem interromper operacoes ativas;
+- estados contextuais preservados para Busca XML, Auditoria, Documentos, Relatorios, Pendencias e Historico;
+- PDF de Auditoria multi-tipo: cabecalho com data/periodo dentro da area segura;
+- PDF de Auditoria multi-tipo: mascotinho sem balao de fala para evitar clipping e manter composicao limpa;
+- preservacao dos nucleos fiscais e dos renderizadores PDF congelados.
+
+Regra: PDF usa mascote estatico, transparente e totalmente enquadrado. A interacao visual animada e reservada a interface da Central.

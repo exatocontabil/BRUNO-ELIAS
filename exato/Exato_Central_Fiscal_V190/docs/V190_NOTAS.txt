@@ -1,0 +1,26 @@
+V190 — NFS-e POR PROCURAÇÃO (CERTIFICADO DO ESCRITÓRIO)
+
+PEDIDO DO USUÁRIO
+"No Emissor Nacional dá para emitir/consultar notas por procuração (certificado do contador). Pesquise e coloque no programa." O usuário confirmou que é a mesma procuração eletrônica da Receita Federal que o escritório já usa.
+
+O QUE SE SABE (conferido com o texto oficial do Portal da NFS-e, mandado pelo usuário)
+- "No Emissor Nacional Web, mais praticidade para atuar em nome de terceiros": após o login, o usuário atua em nome de pessoas que representa, por (1) procuração eletrônica cadastrada nos serviços da Receita Federal ou (2) vínculos na base do CNPJ (responsável legal, mesma raiz de CNPJ, terceiros com procuração eletrônica válida para os serviços da NFS-e). Detalhe no tópico 11 do manual do Emissor Público Nacional Web.
+- NÃO CONFIRMADO: se a consulta direta ao Ambiente Nacional (a que o Exato usa) também aceita o certificado do contador com procuração. Fonte de terceiros (resumo do Guia do Emissor Web v1.3, tópico 11) diz que as APIs de emissão e distribuição passam a aceitar a partir de 01/11/2026. A seção "Para além do Emissor Web" do texto oficial não foi vista.
+
+O QUE FOI FEITO
+1. `exato_nfse_procuracao.py` (sem Tkinter): modo por empresa (próprio x procuração, pela raiz do CNPJ do certificado), memória `config['nfse_acesso'][cnpj]`, espera de 12 h depois de uma recusa na rodada automática (busca manual tenta sempre), mensagem em linguagem simples.
+2. Empresas sem certificado próprio neste computador entram na busca de NFS-e pelo certificado escolhido na tela NFS-e (`App._nfse_trabalho`), com `cnpjConsulta` da empresa (o que o programa já enviava). Vale para "Buscar todas", rodada automática, "Buscar sozinho ao abrir" e Exatinho.
+3. Aceita: registrada e lembrada (`por procuração`); recusada: causa nova `procuracao_nao_aceita` (Situação da busca e "Por que?"), sem janela de erro na rodada automática; na busca manual a mensagem fala da procuração eletrônica. Causa prevista `procuracao_a_tentar` para quem ainda não foi tentada.
+4. Situação da busca: "por procuração" na célula da NFS-e (`cel['via']`). Opção na tela NFS-e (`nfse_prefs.procuracao`, padrão ligada).
+5. exato.log: cada tentativa por procuração registra a resposta do Emissor Nacional.
+6. A emissão de notas NÃO faz parte (o Exato só consulta e guarda).
+
+REVISÃO FEITA NESTA VERSÃO (regra do usuário)
+- Releitura do diff; teste novo `test_v190_nfse_procuracao` (módulo, causas, tela: aceita/recusada/rodada sem insistir/busca manual/uma empresa/Situação/opção desligada).
+- Atenção ao Windows: gravação da configuração a partir da linha de trabalho segue o padrão já usado (save_nsu_state); nenhuma chamada de Tk fora da fila.
+- Núcleos protegidos 13/13 e ativos 31/31.
+- Suíte inteira (sem o teste do portal) conferida antes da entrega.
+
+LIMITES CONHECIDOS
+- Testado só com o Emissor Nacional simulado. Se uma consulta sem permissão devolver "nenhum documento" em vez de erro, a empresa poderia aparecer como "por procuração" sem notas: conferir na primeira empresa real e enviar o exato.log.
+- Troca de empresa dentro do portal (usuário e senha) NÃO foi feita: aguarda o retorno do portal real.

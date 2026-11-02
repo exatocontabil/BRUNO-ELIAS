@@ -1,0 +1,74 @@
+V124 — EXATINHO 4.0 / EXPRESSÕES + INTERAÇÕES ESPONTÂNEAS
+
+Base: V123
+Data: 25/09/2026 14:44
+
+OBJETIVO
+- Dar ao Exatinho mais presença visual e personalidade sem torná-lo invasivo.
+- Melhorar a leitura da fala no painel/bolha.
+- Aumentar discretamente o tamanho visual do personagem.
+- Introduzir microexpressões procedurais e variação de linguagem corporal.
+- Criar falas espontâneas de humor leve, inspiração e companhia durante longos períodos de inatividade.
+
+EXATINHO
+- Nome oficial mantido: Exatinho.
+- Exato IA continua sendo o nome técnico da inteligência.
+- Personagem permanece masculino, profissional, amigável, discreto e levemente carismático.
+- Exatinho continua clicável e com painel contextual da V123.
+- Fonte da fala no painel ampliada para melhorar legibilidade.
+- Título e botões do painel receberam leve ganho de hierarquia tipográfica.
+- Exatinho foi ampliado de 48px para 60px no dock lateral, com render procedural correspondente.
+- O dock inferior do sidebar foi ampliado para acomodar o personagem com segurança.
+
+MICROEXPRESSÕES
+- Novos estados comportamentais: CURIOSO, HUMOR, SURPRESA, DÚVIDA, ALÍVIO e CONCENTRADO.
+- Estados usam energia, respiração, inclinação de cabeça e composição ocular diferentes.
+- Olhos recebem variações sutis de abertura, assimetria e inclinação para transmitir curiosidade, dúvida, humor, surpresa, alívio e concentração.
+- As expressões permanecem discretas e não trocam o personagem inteiro para simular uma emoção.
+- O motor continua procedural e baseado no mesmo mascote oficial.
+
+INTERAÇÕES ESPONTÂNEAS
+- Banco de frases dividido por humor, inspiração, companhia e contexto de tela.
+- Exemplos incluem: “Está tudo bem por aí?”, “Acho que essa tela gostou de você.”, “Ainda estou aqui. Só observando. 👀”, “Um passo de cada vez.”
+- Falas espontâneas só aparecem após uma janela longa de inatividade, com cooldown e memória curta para evitar repetição.
+- Se houver evento relevante recente, a IA posterga a fala espontânea para não competir com a mensagem contextual do evento.
+- A expressão escolhida acompanha o tom da frase: HUMOR, CURIOSO ou CONCENTRADO.
+- Eventos de sucesso, auditoria conforme, divergência, pendências e geração concluída também podem utilizar microexpressões específicas, sem alterar os motores fiscais.
+
+REGRAS DE PERSONALIDADE
+- O Exatinho não fala o tempo todo.
+- Humor é leve e profissional; não infantilizar.
+- Frases não devem interromper processamento ou ações do usuário.
+- Evitar repetição imediata e ciclos previsíveis.
+- O silêncio continua sendo parte da personalidade.
+
+PRESERVAÇÃO
+- Nenhum dos 13 núcleos protegidos foi alterado.
+- A função generate_documents_pdf também permaneceu idêntica nesta versão; o PDF da V123 foi mantido congelado.
+- A requisição/fluxo NF-e não foi alterada.
+- O tratamento de cStat 657 continua separado de cStat 656.
+
+TESTES
+- py_compile / compileall.
+- Teste real da interação do Exatinho via Xvfb.
+- Teste de aumento de escala do personagem e painel.
+- Teste de render procedural com os novos estados de expressão.
+- Teste de variação temporal dos frames.
+- Teste de escolha de falas sem repetição imediata.
+- Teste do disparo de fala após inatividade simulada.
+- Regressão NF-e.
+- Regressão Auditoria multi-tipo + PDF.
+- QA do Exato IA.
+- Event bus + cStat 656/657 + diagnóstico local.
+- Comparação SHA-256 dos 13 núcleos protegidos.
+- Smoke da interface sob Xvfb.
+
+RESULTADO DOS NÚCLEOS PROTEGIDOS
+13/13 idênticos ao baseline V123 por hash SHA-256 de segmentos AST.
+
+PENDÊNCIAS / DIREÇÃO FUTURA
+- Continuar evoluindo o Exatinho para comportamento ainda mais contextual e natural.
+- Avaliar uma timeline operacional visível para alimentar o contexto do Exatinho.
+- Evoluir pesquisa universal, pendências e centro de notificações em versões futuras.
+- Manter a organização do projeto em pastas lógicas.
+- Continuar gerando notas cumulativas de continuidade em cada versão.

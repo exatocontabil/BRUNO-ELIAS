@@ -1,0 +1,14 @@
+V104 — CHECKLIST DE VALIDAÇÃO
+
+[OK] Auditoria com seleção múltipla NF-e + NFC-e
+[OK] PDF multi-tipo com resumo consolidado inicial
+[OK] Seções independentes por tipo documental no PDF
+[OK] Filtro por tipo documental na tabela (Todos / NF-e / NFC-e / CT-e)
+[OK] Filtro de tipo independente do filtro de situação e busca textual
+[OK] Coluna Modelo preservada
+[OK] Fluxo NF-e Entrada/Saída V101 preservado
+[OK] Salvamento XML + PDF individual + consolidado preservado
+[OK] py_compile
+[OK] testes de regressão históricos
+[OK] teste específico V104
+[OK] ZIP com uma única pasta raiz e sem __pycache__/.pyc

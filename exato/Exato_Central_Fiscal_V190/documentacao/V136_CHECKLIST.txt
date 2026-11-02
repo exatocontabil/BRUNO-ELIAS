@@ -1,0 +1,32 @@
+V136 — CHECKLIST FINAL
+
+[OK] V136 criada a partir da V135 com autorização expressa.
+[OK] Tela de login mantém acesso normal dos usuários já cadastrados.
+[OK] Botão ESQUECI MINHA SENHA.
+[OK] Registro de solicitação de recuperação por e-mail.
+[OK] Não exposição da existência do e-mail no fluxo público de recuperação.
+[OK] Evita solicitações duplicadas pendentes.
+[OK] Contador SENHAS PENDENTES na área de usuários.
+[OK] Área SOLICITAÇÕES DE SENHA para administrador.
+[OK] Atendimento da solicitação pelo fluxo de redefinição existente.
+[OK] Cancelamento de solicitações pendentes.
+[OK] Histórico de atividades para o fluxo de recuperação.
+[OK] Tabela password_reset_requests criada de forma aditiva no banco persistente.
+[OK] Usuários e dados de autenticação permanecem no banco persistente fora da pasta da versão.
+[OK] V136 não exige nova ativação do cadastro existente apenas por atualizar a aplicação.
+[OK] Hash de senha continua PBKDF2 + salt; sem senha em texto puro.
+[OK] Teste do núcleo de recuperação de senha.
+[OK] Teste de UI de recuperação sob Xvfb.
+[OK] Regressão da autenticação V135.
+[OK] Regressão do Arquivo Fiscal Local.
+[OK] Regressão da UI de Documentos Fiscais.
+[OK] Regressão de SALVAR XMLs NOVOS.
+[OK] Regressão do comportamento do Exatinho.
+[OK] py_compile.
+[OK] compileall.
+[OK] Proteção 13/13 núcleos por SHA-256/AST.
+
+OBSERVAÇÃO
+- Nesta arquitetura local, a recuperação depende do administrador do escritório.
+- O futuro envio por e-mail/OTP fica registrado para a etapa de autenticação centralizada.
+- Testes históricos que fixam APP_VERSION de versões antigas não são critérios de falha desta versão.

@@ -1,0 +1,104 @@
+V129 — BUSCA AUTOMÁTICA MULTIEMPRESAS + SALVAMENTO AUTOMÁTICO DE XMLs
+
+BASE
+- V128.
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Criar uma operação de Busca Automática que percorra as empresas cadastradas, uma por vez.
+- Reutilizar o motor de sincronização fiscal já validado da empresa ativa, sem duplicar nem alterar a lógica NF-e/NFC-e/CT-e protegida.
+- Permitir salvar XMLs automaticamente em uma pasta raiz escolhida pelo usuário, com uma pasta própria para cada cliente.
+- Permitir cadastro em massa de empresas por planilha Excel (.xlsx).
+
+BUSCA AUTOMÁTICA MULTIEMPRESAS
+- Novo botão “BUSCA AUTOMÁTICA” na tela Buscar XML.
+- Novo acesso à mesma função na tela Empresas.
+- A operação percorre todas as empresas cadastradas na base local, em sequência, nunca em paralelo.
+- A empresa atual é confirmada automaticamente e o período escolhido é aplicado à execução.
+- O certificado atualmente selecionado na Central é utilizado para todas as empresas daquela execução; isso fica explícito na interface.
+- Uma empresa com erro/observação não encerra a fila: o sistema registra o resultado e segue para a próxima.
+- O usuário pode cancelar a fila; a empresa em processamento encerra o lote atual com segurança e a fila é interrompida.
+
+PERÍODO
+- A caixa de Busca Automática possui período próprio.
+- Se o usuário já tiver definido um período na tela Buscar XML, esse período é reaproveitado como padrão.
+- Caso contrário, o sistema sugere o mês atual.
+- O período escolhido fica salvo na configuração local para a próxima execução.
+
+SALVAR XML AUTOMATICAMENTE
+- Opção “Salvar XML automaticamente” dentro da Busca Automática.
+- Ao habilitar, o usuário deve selecionar uma pasta raiz/diretório dos clientes.
+- A pasta selecionada é persistida na configuração local e pode ser alterada em futuras execuções.
+- O sistema usa a estrutura fiscal já validada: Empresa → Ano → Mês → Entrada/Saída → Tipo documental.
+- Cada empresa é salva em sua própria pasta pelo nome empresarial já utilizado pelo motor de organização existente.
+- Não foi criada pasta “PDFs Fiscais”.
+- XMLs permanecem ao lado das representações fiscais quando a opção de geração de PDF estiver habilitada.
+
+PDF FISCAL
+- A Busca Automática possui também a opção “Gerar PDF fiscal junto”.
+- Ela respeita o motor fiscal existente e permanece opcional.
+- A geração usa save_documents_organized existente, sem alterar sua implementação protegida.
+
+CADASTRO DE EMPRESAS VIA EXCEL
+- Nova ação “IMPORTAR EMPRESAS (EXCEL)” na tela Empresas.
+- O mesmo recurso também pode ser acionado dentro da janela de Busca Automática.
+- Formato aceito: .xlsx.
+- Cabeçalhos esperados: CNPJ e Razão Social (também aceita Empresa/Nome/Nome da Empresa).
+- O parser usa ZIP/XML nativo do XLSX, sem dependência adicional de pacote de planilha.
+- Empresas importadas passam a existir na tabela local de companies mesmo antes da primeira sincronização.
+- CNPJs inválidos são ignorados e contabilizados no resumo.
+- Duplicidades são ignoradas.
+- O arquivo modelo é distribuído no projeto em docs/modelos/Modelo_Cadastro_Empresas_Exato.xlsx.
+
+ORGANIZAÇÃO / UX
+- O checkbox antigo “Busca automática” da empresa ativa foi renomeado para “Atualização automática (empresa ativa)” para não confundir com a nova Busca Automática multiempresas.
+- A nova interface mostra contagem de empresas, status por empresa, período, pasta raiz, opção de PDF e ações de iniciar/cancelar.
+- A janela foi ajustada para 920px de largura e centralizada sobre a Central, evitando clipping da coluna de status em telas 1366x768.
+- A janela informa claramente que o certificado atualmente selecionado será utilizado em todas as empresas da execução.
+
+PRESERVAÇÃO FISCAL
+- Nenhuma função protegida foi alterada.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- Nenhum núcleo de Auditoria foi alterado.
+- Nenhum gerador de documento fiscal protegido foi alterado.
+- Tratamento de cStat 657 permanece como divergência do órgão autorizador.
+- Busca Global da V128 que retorna zero para pesquisas como “elyon” permanece registrada como pendência separada para futura correção; não foi alterada nesta versão.
+
+NÚCLEOS PROTEGIDOS
+- 13/13 permaneceram idênticos à V128 por SHA-256 sobre o segmento AST/source.
+- Funções protegidas:
+  _audit_build_rows
+  _audit_compare_pair
+  _audit_fallback_key
+  _audit_key
+  _audit_xml_rows
+  choose_nfe_actor
+  mark_nfe_sync_cycle
+  sync_documents_automatically
+  test_sef_nfe_webservice
+  generate_fiscal_representation_pdf
+  open_document_fiscal_representation
+  save_documents_organized
+  generate_documents_pdf
+
+TESTES REALIZADOS
+- py_compile.
+- Teste do parser XLSX com arquivo produzido por artifact_tool.
+- Teste de cadastro de empresas em base SQLite isolada.
+- Teste de salvamento organizado em pasta raiz de clientes: criação de Empresa → Ano → Mês → Entrada/Saída → Tipo documental.
+- Smoke de UI sob Xvfb.
+- Teste da janela Busca Automática.
+- Teste de habilitação/desabilitação de “Salvar XML automaticamente” e seleção de pasta.
+- Teste da fila multiempresa com duas empresas simuladas, confirmando processamento sequencial 1 → 2 sem chamadas SEFAZ reais.
+- Verificação do comportamento de cancelamento e estado da fila no smoke de UI.
+- Comparação SHA-256/AST dos 13 núcleos protegidos.
+- ZIP final a ser validado após limpeza de __pycache__, .pyc e temporários.
+
+PENDÊNCIAS / PRÓXIMA EVOLUÇÃO
+- Corrigir Busca Global para pesquisar de forma confiável por nome da empresa, CNPJ, número, série, chave, tipo e valor.
+- Futuramente permitir configuração individual de certificado por empresa, caso o escritório necessite.
+- Evoluir ainda mais o Exatinho para usar os eventos da fila multiempresa, como início, conclusão, erro e salvamento de cada cliente.
+
+CONTINUIDADE
+- A V129 passa a ser a base atual do projeto.
+- O histórico cumulativo está em docs/CONTINUIDADE_PROJETO_V129.txt.

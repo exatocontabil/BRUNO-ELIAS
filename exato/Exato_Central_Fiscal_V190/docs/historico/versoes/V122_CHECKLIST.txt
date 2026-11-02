@@ -1,0 +1,24 @@
+V122 CHECKLIST
+
+[OK] Base técnica V121 preservada.
+[OK] APP_VERSION atualizado para V122.
+[OK] Exato IA recebeu contexto de sessão working/result/attention/idle.
+[OK] Exato IA recebeu foco visual contextual após cliques/eventos.
+[OK] Olhar pode priorizar um alvo contextual e retornar ao comportamento autônomo.
+[OK] Curiosidade controlada adicionada sem fala obrigatória.
+[OK] Frases ociosas ficaram mais silenciosas e contextuais.
+[OK] Estados de sucesso, atenção, divergência e erro continuam derivados de eventos reais.
+[OK] cStat 657 permanece como divergência do órgão autorizador, sem falso bloqueio de consumo indevido.
+[OK] Painel DIAGNÓSTICO NF-e adicionado à Manutenção.
+[OK] Diagnóstico NF-e é somente leitura e não executa nova consulta.
+[OK] Fluxo SOAP/protegido NF-e não foi alterado.
+[OK] 13/13 núcleos protegidos permanecem idênticos à V121 por SHA-256.
+[OK] py_compile / compileall.
+[OK] Regressão NF-e / scheduler.
+[OK] Regressão Auditoria multi-tipo + PDF.
+[OK] Regressão relatório PDF e separação NF-e/NFC-e/CT-e.
+[OK] Regressão Exato IA / QA.
+[OK] Teste event bus / cStat / atenção contextual.
+[OK] Teste do motor procedural do Exato IA.
+[OK] Smoke de UI sob Xvfb.
+[OK] ZIP final limpo de __pycache__, .pyc e temporários.

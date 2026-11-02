@@ -1,0 +1,206 @@
+EXATO CENTRAL FISCAL
+Versão: V190
+
+COMO ABRIR
+- Dê dois cliques em INICIAR.bat (não aparece mais a janela preta).
+- Para ter o logo da Exato na Área de Trabalho e na barra de tarefas: abra a pasta ferramentas e execute CRIAR_ATALHO.bat; depois clique com o botão direito no atalho e escolha "Fixar na barra de tarefas".
+- Se o programa não abrir: ferramentas\EXECUTAR_COM_DIAGNOSTICO.bat mostra a mensagem do problema (envie para o suporte).
+
+COMO A PASTA É ORGANIZADA
+- INICIAR.bat, LEIA-ME.txt, VERSAO.txt
+- programa\  : o programa e as imagens (não mexa)
+- ferramentas\ : CRIAR_ATALHO, INSTALAR_COMPONENTE_NFSE (busca de NFS-e por usuário e senha) e a abertura com diagnóstico
+- ajuda\ : como instalar o Exato e como configurar a Central
+- Os seus dados NÃO ficam nesta pasta: %LOCALAPPDATA%\Exato\Central Fiscal\Dados (trocar de versão não perde nada).
+
+NOVIDADES DA V190 (NFS-e POR PROCURAÇÃO)
+- O Emissor Nacional passou a aceitar atuação em nome de terceiros com a procuração eletrônica cadastrada na Receita Federal. Agora, empresas sem certificado próprio neste computador são buscadas com o certificado escolhido na tela NFS-e (o do escritório), informando o CNPJ da empresa.
+- Se o Emissor Nacional aceitar, a empresa passa a ser buscada assim também na atualização automática. Se recusar, o Exato explica o motivo e o que conferir na procuração, e só tenta de novo depois de algumas horas (na tela NFS-e, o botão Buscar tenta na hora).
+- Empresas > Situação da busca: a NFS-e das empresas buscadas assim mostra "por procuração"; as que ainda serão tentadas mostram "Será buscada pelo certificado do escritório".
+- Na tela NFS-e há uma opção para ligar ou desligar isso (vem ligada).
+- Atenção: esta função foi testada só com o Emissor Nacional simulado. Se o Emissor Nacional agir diferente, envie o exato.log (as linhas "NFS-e por procuração" mostram a resposta).
+
+NOVIDADES DA V189 (DESEMPENHO AO TROCAR DE ABA)
+- Documentos fiscais e NFS-e: ao voltar para a tela sem que nada tenha mudado, a lista aparece na hora (antes era relida do banco a cada clique). Se chegou nota nova ou você mudou um filtro, ela é atualizada sozinha.
+- A leitura do banco para montar essas listas e a tela Manutenção acontece em segundo plano: o programa não congela enquanto carrega, mesmo com muitas notas.
+- O backup do banco (automático e manual) é feito em blocos grandes e com pausas curtas, para não deixar a tela pesada durante a cópia.
+- Se ainda sentir alguma aba lenta, envie o exato.log: as linhas "Tela sem responder" dizem qual era.
+
+NOVIDADES DA V188 ("SEM NOTAS" HONESTO E CLIENTE RECÉM-VINCULADO)
+- Quando a SEFAZ recusa a consulta (por exemplo, o vínculo do cliente com o contador ainda não vale), o Exato não diz mais "Sem notas": mostra o motivo, em português, e o que fazer. Em "Situação da busca" cada tipo mostra o que a SEFAZ respondeu.
+- Cliente novo ou recém-vinculado: o Exato busca sozinho e tenta de novo a cada hora nos primeiros 3 dias (com o programa aberto). Se continuar sem acesso, avisa uma vez.
+- Quando só falta consultar o fluxo de entrada da NF-e, o aviso é azul e diz quanto falta esperar (antes aparecia um aviso vermelho de erro).
+
+NOVIDADES DA V187 (COMPRAS: SIMPLES NACIONAL E CRÉDITO DE ICMS)
+- Documentos fiscais > Relatório PDF, seção NF-e (ENTRADA): duas colunas novas, "Optante pelo Simples Nacional?" e "Permite aproveitamento?". A segunda mostra Sim com o valor e a alíquota do crédito de ICMS informados pelo fornecedor (CSOSN 101/201 e frase nas informações complementares), Não ou "—" quando a nota não traz a informação.
+- Uma linha antes da tabela soma o crédito informado das notas autorizadas.
+
+NOVIDADES DA V186 (NFS-e PELO ACESSO DIGITADO E AUDITORIA NA SITUAÇÃO DA BUSCA)
+- NFS-e por usuário e senha: a busca agora é da empresa do CNPJ que você digitou no acesso (antes seguia a empresa escolhida antes e dizia "nenhum documento novo"). O aviso e o registro dizem se foi pelo portal ou pelo certificado.
+- Se o portal só trouxer notas de outra empresa, o Exato explica e manda conferir o usuário.
+- Empresas > Situação da busca: nova coluna "Auditoria" (Auditada, Com divergência, Auditada em parte, Não auditada). Clique nela para abrir a Auditoria da empresa. Filtros novos: "Só sem auditoria" e "Só com divergência na auditoria".
+- Atenção: se você digitou o acesso de uma empresa estando com outra escolhida, a senha ficou guardada na empresa errada. Em NFS-e > Usuário e senha, escolha a empresa e use "Esquecer senha salva".
+
+NOVIDADES DA V185 (AUDITORIA BUSCA SÓ O XML QUE FALTA)
+- Quando a auditoria acha nota do SAT sem XML na Central, o Exato pergunta se quer buscar só o que falta. Ele procura apenas a faixa de notas em volta das que faltam, confere de novo e atualiza a auditoria sozinho.
+- Botão novo na Auditoria: "Buscar XML que falta".
+- As notas que a SEFAZ não entregou ficam explicadas na própria linha ("Procurei na SEFAZ em ... e ela não entregou este XML").
+
+NOVIDADES DA V184 (BUSCA COM ANDAMENTO E ABERTURA RÁPIDA)
+- Buscar XML mostra o andamento real: há quanto tempo busca, quantas consultas, quantas notas chegaram e se está aguardando a SEFAZ.
+- Se uma consulta à SEFAZ travar, o Exato desiste dela depois de pouco mais de 1 minuto e avisa, em vez de ficar parado.
+- O Exato abre bem mais rápido na primeira vez de cada versão (a cópia de segurança agora é feita depois, sozinha).
+- O aviso de "já existe uma busca" diz qual busca está rodando.
+- Se o programa ficar lento, ele anota no registro de erros o que estava fazendo, para o suporte achar a causa.
+
+NOVIDADES DA V183 (ESPAÇO EM DISCO, LIMPEZA SEGURA E PRIORIDADE NA FILA)
+- Manutenção > ESPAÇO USADO: mostra quanto o Exato ocupa e deixa limpar o que pode ser refeito. A limpeza mexe SÓ em arquivos do Exato Central Fiscal (pasta de dados do Exato): nunca em notas, banco, configurações, pastas dos clientes, servidor ou outros programas. Antes de apagar, mostra a pasta e o tamanho e pede confirmação.
+- O diagnóstico das buscas (que enchia o disco) vem desligado. Os backups automáticos ficam só os 2 mais novos.
+- Disco quase cheio: o Exato avisa e pausa as buscas e cópias automáticas até liberar espaço.
+- Repositório: "Fila por empresa" e "Copiar esta empresa" para dar prioridade a uma empresa.
+- A busca de NF-e mostra o motivo quando a SEFAZ não responde; certificado de outra empresa tem mensagem clara.
+
+NOVIDADES DA V182 (SINCRONIA COM O SERVIDOR E REPOSITÓRIO EM ORDEM ALFABÉTICA)
+- Repositório: as pastas das empresas passam a se chamar "Nome - CNPJ" e ficam em ordem alfabética. As pastas antigas são reorganizadas sozinhas, sem perder nada.
+- Sempre que o computador alcança o servidor do escritório, o Exato sincroniza sozinho: empresas, notas e histórico de auditoria ficam iguais em qualquer computador. Fora do escritório o Exato mostra a última cópia sincronizada e avisa de forma discreta.
+- Só o administrador remove empresa (botão "Remover empresa" em Empresas). Remover não apaga notas nem XMLs.
+- Novo aviso de numeração faltando (NF-e e NFC-e de saída) no relatório de Documentos fiscais.
+- Resumo diário por e-mail (Empresas > Resumo diário): uma linha por empresa, todo dia depois das 7h.
+- Quando houver versão mais nova no servidor, o Exato oferece instalar (a versão atual não é alterada).
+
+NOVIDADES DA V181 (RELATÓRIO DE DOCUMENTOS POR FATURAMENTO x DESPESA)
+- Documentos fiscais > Relatório PDF refeito: cada tipo aparece separado por movimentação (NF-e saída e entrada, NFC-e, NFS-e prestados e tomados, CT-e prestados e tomados). Faturamento = NF-e e NFC-e de saída, NFS-e e CT-e prestados; o resto é despesa.
+- A capa e a página "Faturamento x despesa" comparam sempre os dois lados (gráficos por mês, resultado, maiores clientes e fornecedores). Não existe mais "total de autorizadas" misturando tudo.
+- Nomes longos são cortados com "..." e não passam mais por cima da chave de acesso; "&amp;" nos nomes foi corrigido.
+
+NOVIDADES DA V180 (AUDITORIA COM NOTA CANCELADA, RELATÓRIO PDF DE DOCUMENTOS)
+- Auditoria: nota CANCELADA não aparece mais como "sem correspondência" (o SAT só traz notas autorizadas). Nova coluna "Documento" (Autorizada/Cancelada) e filtro "Cancelada". Se uma nota ainda consta autorizada mas você sabe que foi cancelada, clique nela com o botão direito > "Marcar como cancelada".
+- Documentos fiscais: novo botão "Relatório PDF". Gera o relatório da empresa conforme o filtro (ou só das notas marcadas), com capa, gráficos e uma seção separada para cada tipo (NF-e, NFC-e, CT-e, NFS-e); autorizadas e canceladas somadas separadamente. O PDF abre sozinho.
+- Tema escuro: os botões de tipo de documento da Auditoria ficaram legíveis.
+
+NOVIDADES DA V179 (AUTORIZADAS X CANCELADAS, ISS FORA? E CANCELAMENTOS)
+- Relatórios em PDF e planilhas: as notas AUTORIZADAS e as CANCELADAS aparecem em linhas separadas, cada uma com o seu total (NFS-e, fechamento do mês e, nos relatórios de NF-e/NFC-e/CT-e, uma página final "Autorizadas e canceladas").
+- NFS-e: nova coluna "ISS fora?" (SIM quando o município de incidência não é o do prestador) e o nome do município, na tela, no PDF e na planilha; os resumos mostram o "ISS pago fora".
+- Cancelamentos: o aviso de cancelamento que a SEFAZ envia para quem recebeu a nota agora cancela a nota no Exato. Ao abrir esta versão, o Exato confere as notas já guardadas e marca as que estavam canceladas.
+- Cancelada sem o XML completo do cancelamento: o Exato avisa (a Domínio precisa do XML completo).
+
+NOVIDADES DA V178 (ROLAGEM, ATUALIZAÇÃO AUTOMÁTICA MAIS LEVE E BUSCA COMPARTILHADA)
+- As tabelas de Empresas (Carteira e Situação da busca) rolam lisas, sem rastro nem texto sobreposto.
+- A atualização automática não trava mais a tela: não recarrega a empresa inteira, só guarda os XMLs novos na pasta dos clientes e espera enquanto você está usando o Exato.
+- Busca compartilhada: quando um computador termina uma busca, o ponto onde parou fica registrado no servidor. Os outros computadores continuam dali e não baixam tudo de novo. No Repositório, o botão "Trazer do servidor..." coloca neste computador as notas que já estão no servidor, sem baixar nada da SEFAZ.
+
+NOVIDADES DA V177 (POR QUE A BUSCA NÃO ACONTECEU E NOTAS CANCELADAS)
+- Empresas > Situação da busca: quando um tipo (NF-e, NFC-e, CT-e ou NFS-e) não foi buscado, o selo mostra o motivo em português (falta certificado, falta usuário e senha, SEFAZ ou portal com problema...). Clique no selo para ver o que aconteceu, o que fazer e as últimas tentativas; "Relatório em PDF" gera o relatório da empresa ou de todas.
+- Cada selo mostra também a data da última nota e até que dia buscou. A tela avisa "Lendo a situação das empresas..." enquanto carrega.
+- Notas canceladas: o XML do cancelamento é salvo ao lado da nota (subpasta "Eventos") e também vai dentro do ZIP, para a Domínio cancelar ao importar. O portal da NFS-e passa a marcar as canceladas. Se não houver o XML do cancelamento, o Exato avisa.
+
+NOVIDADES DA V176 (SITUAÇÃO DA BUSCA E FECHAMENTO DO MÊS)
+- Empresas > "Situação da busca": para cada empresa, NF-e, NFC-e, CT-e e NFS-e com "Em dia" (até que dia e quantas notas), "Atrasado" (última busca há mais de 3 dias), "Ainda não buscado" ou "Sem notas". O botão "Buscar o que falta" (por empresa ou geral) busca só o que ainda não foi buscado.
+- Fechamento do mês corrigido: um tipo de nota raro (como CT-e) não impede mais o fechamento; o mês aparece como "Mês fechado" assim que fecha; a tabela do Repositório mostra "Por que ainda não fechou"; "Fechar agora" fecha todos os meses prontos e mostra o andamento.
+
+NOVIDADES DA V175 (RELATÓRIO DE NFS-e)
+- No resumo do relatório de NFS-e (PDF e planilha) o "ISS retido" agora aparece separado: "ISS retido (prestados)" e "ISS retido (tomados)".
+
+NOVIDADES DA V174 (FECHAMENTO DO MÊS E ZIP DE TUDO)
+- Fechamento do mês: quando um mês de uma empresa para de receber notas (5 dias sem nota nova e tudo já copiado no servidor), o Exato guarda sozinho no Repositório, na pasta "Fechamento" do mês, o relatório em PDF (NF-e/NFC-e/CT-e e, à parte, o de NFS-e com alíquota e ISS) e os ZIPs prontos para importar. Um aviso só no fim: "Repositório: 12 mês(es) fechado(s) de 5 empresa(s)."
+- Se chegar uma nota atrasada depois do fechamento, o Exato faz uma "revisão" ao lado (nome com "revisado" e a data), sem apagar nem sobrescrever o que já estava.
+- Na tela Repositório: cartão "Fechamento do mês e ZIPs" (desligar o automático, "Fechar agora"), etiqueta "Mês fechado" em cada mês e filtros "Só meses fechados" / "Só meses abertos".
+- ZIP de todos os tipos: NF-e, NFC-e, CT-e e NFS-e. O botão "Gerar ZIPs dos meses já salvos..." cria o ZIP dos meses que foram salvos antes de os ZIPs existirem (não refaz o que já está igual).
+
+NOVIDADES DA V173 (RELATÓRIO COM ISS E BUSCA QUE SÓ PEGA O QUE FALTA)
+- Relatórios de NFS-e (relatório mensal em PDF, resumo mensal, relação em PDF e planilhas): agora mostram a alíquota, o valor do ISS e se o ISS é retido (Sim/Não), com o total de ISS por mês e tipo e no período. Se a nota não traz a informação (por exemplo, Simples Nacional não tem alíquota/ISS na nota), aparece "—".
+- Busca inteligente: o Exato sabe até que dia cada empresa já tem notas (pela última busca, pelo arquivo deste computador ou pelo repositório no servidor) e busca só o que veio depois, com 3 dias de folga para notas que chegam atrasadas. Na NFS-e por usuário e senha, sem período digitado ele busca desde onde parou (não mais o mês anterior inteiro). Vale para a busca manual e para a automática.
+- Aviso na busca manual: se a empresa já tem notas guardadas, aparece "Esta empresa já tem notas guardadas até DD/MM/AAAA" com as opções "Buscar só o novo (recomendado)", "Buscar o período todo" e "Cancelar". Marque "Lembrar a minha escolha para esta empresa" para não perguntar de novo.
+- Na tela NFS-e e em Buscar XML aparece "Arquivo até DD/MM/AAAA": é de onde a próxima busca continua.
+- Empresas de muito movimento: a busca deixou de carregar na tela o XML de todas as notas da empresa (40 mil notas: de 4,5 para 1 segundo, e só a cada 4 segundos durante a busca), então não trava mais.
+
+NOVIDADES DA V172 (BUSCA SEM TRAVAR)
+- Corrigido o travamento ao clicar em Buscar XML (e o aviso "Algo não saiu como esperado" com "banco de dados ocupado"): a sincronização da Central compartilhada segurava o banco por tempo demais e agora trabalha em lotes curtos (uns 100 vezes mais rápida nessa parte). A fila de envio da Central também deixou de recolocar todo o arquivo fiscal a cada ciclo.
+- Se, mesmo assim, o banco estiver ocupado na hora de buscar, a busca segue (sem travar a tela) e o exato.log diz quais trabalhos em segundo plano estavam rodando.
+
+NOVIDADES DA V171 (EMPRESA NA AUDITORIA E BUSCA MAIS TRANQUILA)
+- Auditoria Fiscal: agora você escolhe a empresa a auditar numa caixa no próprio cartão "Empresa" (lista das empresas cadastradas; também dá para digitar o CNPJ). A escolha fica lembrada e não muda a empresa da tela Buscar XML. Ao trocar de empresa, o resultado da auditoria anterior é limpo.
+- Quando você abre a auditoria pela tela Documentos Fiscais, ela audita a empresa de lá.
+- Enquanto uma busca está em andamento (Buscar XML, NFS-e ou atualização automática), a cópia automática para o servidor e o envio ao Box-e esperam o fim, para não competirem com a busca. "Copiar agora" continua funcionando.
+
+NOVIDADES DA V170 (UM CERTIFICADO POR TELA)
+- Buscar XML e NFS-e agora têm cada uma a sua escolha de certificado. Escolher na NFS-e não muda o de Buscar XML, e o contrário também.
+- "Escolher certificado" (NFS-e) e "Trocar certificado" (Buscar XML) abrem a escolha para aquela tela e, ao clicar no botão, você VOLTA para ela (não vai mais direto para Buscar XML).
+- O item Certificado do menu continua: ali você marca "Usar em: Buscar XML e NFS-e / Só Buscar XML / Só NFS-e".
+- Clicar numa linha só marca; o certificado passa a valer quando você clica no botão. A tela mostra "Em uso agora: Buscar XML ... NFS-e ...", e o topo mostra o certificado da tela em que você está.
+- Quem já tinha um certificado escolhido fica com o mesmo nas duas telas; pode trocar um deles quando quiser.
+
+NOVIDADES DA V169 (REPOSITÓRIO IGUAL EM TODOS OS COMPUTADORES E BOX-E COM ERROS CLAROS)
+- Repositório: os números da tela (XMLs no servidor, Empresas, Ainda faltam, Com conteúdo diferente) agora vêm do próprio servidor e são os mesmos em todos os computadores do escritório. A linha "Números do servidor, atualizados em ..." mostra quando e por qual computador. A atualização é feita sozinha (no máximo a cada 5 minutos).
+- O que é só deste computador (documentos aguardando) virou um aviso pequeno, com o MOTIVO em português (sem permissão na pasta, servidor não respondeu, arquivo em uso...) e a hora da próxima tentativa. "Copiar agora" tenta de novo na hora, sem esperar 1 hora.
+- Computador novo: aparece "Conferindo o que já está no servidor (só desta vez)" e, no fim, o aviso de que os documentos já estavam no servidor e nada foi copiado de novo.
+- Clique em "Com conteúdo diferente" para ver a lista (empresa, mês, nota e tamanhos) e abrir a pasta; clique em "Ainda faltam" para filtrar a tabela.
+- Box-e: erros separados em português (servidor não encontrado, rede ou antivírus bloqueando a porta, conexão que caiu, usuário/senha com "senha de aplicativo"); o servidor, a porta e a segurança são preenchidos sozinhos para e-mails Gmail, Outlook e Hotmail; aviso se o e-mail for colocado no campo "Servidor"; botão "Testar a conexão", que diz em qual etapa deu problema (sem enviar e-mail).
+
+NOVIDADES DA V168 (ZIP PARA A DOMÍNIO, ENVIAR BOX-E E ABERTURA SEM TRAVAR)
+- ZIP para importar na Domínio: ao salvar os XMLs na pasta dos clientes, cada pasta (empresa > ano > mês > Entrada/Saída ou Prestados/Tomados > NF-e/NFC-e/CT-e/NFS-e) ganha, ao lado dos XMLs soltos, um ZIP: CNPJ_AAAA-MM_Tipo_Direção.zip, com todos os XMLs da pasta (sem subpastas) e os eventos de cancelamento. Só é refeito quando chega nota nova. Opção "ZIP para a Domínio" (Buscar XML) / "Deixar também o ZIP para importar na Domínio" (NFS-e): vem ligada.
+- Enviar Box-e (só NFS-e): na tela NFS-e, opção "Enviar Box-e" + botão "E-mail do Box-e...". Configure uma vez o e-mail de envio (servidor, porta, usuário, senha, com botão de teste). Depois, toda NFS-e nova (prestada, de agora em diante; o histórico só se você marcar a caixa no diálogo) é enviada sozinha para exatoara@dominioboxe.com.br, UMA vez só, mesmo havendo vários computadores (a marca de "já enviada" fica na pasta do servidor). Se o envio falhar, tenta de novo sozinho e avisa em português claro.
+- Abertura mais rápida: a conferência única do arquivo fiscal (que deixava o programa parado em "Arquivo Fiscal Local: .../...") agora roda em segundo plano, com aviso na barra de baixo, e não confere mais as NFS-e.
+
+NOVIDADES DA V167 (NOME CORRETO DAS EMPRESAS E FILTRO NO REPOSITÓRIO)
+- Corrigido: o nome de um fornecedor podia virar o nome da empresa (aconteceu com a pasta "SHPS TECNOLOGIA..." que era da Benvale). Agora o nome da empresa só vem de nota em que ela é parte (emitente ou destinatário; tomador no CT-e; prestador/tomador na NFS-e). Nota em que a empresa não participa nunca muda o nome.
+- Repositório no servidor: a pasta da empresa acompanha o nome correto. Se o nome estava errado, a pasta é renomeada sozinha (com todos os XMLs dentro) e, se existirem duas pastas da mesma empresa, elas são unidas, sem perder nada. Nomes de pasta mais longos (até 60 letras).
+- Tela Repositório: filtros na tabela (só o que falta copiar / só o que já está no servidor, empresa por nome ou CNPJ, mês). Clicar em "Na fila" já filtra pelo que falta. O Exato lembra a escolha.
+- Observação: as pastas "Salvar XMLs" dos clientes (fora do repositório) que já foram criadas com nome errado não são renomeadas; as novas já saem certas.
+
+NOVIDADES DA V166 (TROCA DE TELAS MUITO MAIS RÁPIDA E CORREÇÃO DOS ERROS DE "BANCO TRAVADO")
+- Corrigidos os avisos "Algo não saiu como esperado" (banco de dados ocupado) que apareciam enquanto o Repositório copiava arquivos para o servidor, e o "Acesso negado" ao gravar a configuração: o banco não fica mais travado durante a cópia pela rede e a configuração tenta de novo sozinha.
+- O Exatinho gastava quase todo o tempo do programa (redesenhava a imagem dele 25 vezes por segundo, sempre do zero). Agora cada imagem é preparada uma vez só: o programa inteiro fica bem mais leve, inclusive parado.
+- Documentos, NFS-e e Empresas abrem muito mais rápido: as listas não carregam mais o conteúdo dos XMLs (só quando você exporta ou abre uma nota) e entram na tela em fatias, então navegar pelas abas não trava mais, mesmo com muitos documentos.
+- Contagens e ordenação do banco mais rápidas (novos índices; nenhum dado muda).
+
+NOVIDADES DA V165 (ATUALIZAÇÃO AUTOMÁTICA DE TODAS AS EMPRESAS)
+- A opção "Atualização automática" (tela Buscar XML) agora percorre TODAS as empresas cadastradas, a cada 4 horas e logo ao abrir o Exato (se já passou esse tempo): NF-e, NFC-e e CT-e com o certificado escolhido e a NFS-e das empresas que têm certificado neste computador. Empresa nova entra sozinha na próxima rodada.
+- Tudo em silêncio: no fim aparece um único aviso resumido (empresas em dia, NFS-e novas, empresas sem certificado que foram puladas, pontos de atenção). Os detalhes ficam no Histórico.
+- Antes, a opção parava de funcionar ao fechar e abrir o Exato (só voltava depois de uma busca manual). Agora o relógio é lembrado.
+- Ao cadastrar uma empresa nova (ou importar do Excel) o Exato pergunta se quer buscar as notas dela agora.
+- Repositório com vários computadores: a conferência é rápida (lista a pasta do servidor e compara os tamanhos, sem ler os arquivos), então o segundo computador já vê tudo o que o primeiro copiou, sem duplicar.
+
+NOVIDADES DA V164 (REPOSITÓRIO DE XML NO SERVIDOR)
+- Nova tela "Repositório" (menu, abaixo de Empresas): todo XML buscado ou importado é copiado sozinho para a pasta do servidor do escritório (\\SERVER\Arquivos Compartilhados\Clientes\Exato Serviços Contábeis Ltda\Exato Central Fiscal), organizado por empresa, ano, mês e tipo. Assim você consulta as notas daqui a um ano, mesmo depois dos 90 dias do Web Service.
+- Na primeira vez o Exato copia TUDO o que já tem neste computador. Se o servidor estiver fora do ar, os XMLs ficam numa fila e seguem sozinhos quando ele voltar.
+- Nunca sobrescreve: se um arquivo igual já existir com conteúdo diferente, guarda os dois e avisa.
+- Cópia do banco de dados todo dia (uma por computador) na pasta Backups do servidor; conferência automática de que os arquivos continuam lá.
+- Prazo de guarda (padrão 12 meses, você pode mudar): o Exato só avisa o que passou do prazo e pede confirmação para apagar (nunca apaga sozinho). Atenção: o prazo legal costuma ser de 5 anos.
+- "Restaurar do repositório": reconstrói o banco deste computador lendo a pasta do servidor.
+
+NOVIDADES DA V163 (CNPJ CONFIRMADO SÓ UMA VEZ)
+- Na tela Buscar XML, depois de confirmar o CNPJ aparece só o aviso verde "CNPJ confirmado"; o botão cinza repetido some (volta se você trocar o CNPJ).
+
+NOVIDADES DA V162 (UM SÓ CERTIFICADO NA TELA)
+- Corrigido: na tela Buscar XML, o cartão "Certificado digital" podia mostrar um certificado diferente do que aparece no topo (o escolhido de verdade). Agora os dois mostram sempre o mesmo, inclusive quando você troca o certificado depois.
+
+NOVIDADES DA V161 (CORREÇÃO DO AVISO "ALGO NÃO SAIU COMO ESPERADO")
+- Corrigido o aviso que aparecia na tela NFS-e (e podia aparecer em outras) ao abrir a tela: um cartão usava a cor padrão do Windows pelo nome e o desenho falhava. Agora qualquer cor é aceita e, se ainda assim o desenho de um cartão falhar, ele fica liso, sem aviso.
+
+NOVIDADES DA V160 (SEM "RASTRO" AO ROLAR)
+- Corrigido o defeito de imagem que aparecia ao rolar telas pesadas (como a Auditoria): pedaços antigos da tela ficavam "borrados" no meio dos cartões. Agora cada movimento é desenhado por inteiro antes do próximo e, se o computador estiver sofrendo para desenhar, a rolagem passa a pular direto, sem animação.
+
+NOVIDADES DA V159 (ROLAGEM MAIS LISA)
+- A roda do mouse e o touchpad rolam sempre o que está sob o ponteiro: tabelas e listas primeiro, depois a página, sem "pular" no fim da tabela.
+- Touchpad do notebook: movimentos pequenos agora rolam a página (antes eram ignorados).
+- Rolagem da página com movimento suave; janelas de diálogo não mexem mais na página de trás; listas de escolha não trocam o valor ao rolar por cima.
+- Redimensionar a janela fica sem tremedeira; a linha sob o mouse acompanha a tabela ao rolar.
+
+NOVIDADES DA V158 (VISUAL, RODADA 2)
+- Situação das notas em selos coloridos (Autorizada, Exportada, Cancelada...) nas telas Documentos, NFS-e e Histórico.
+- Caixas de seleção e botões de opção redondinhos, no mesmo estilo (claro e escuro).
+
+NOVIDADES DA V157 (VISUAL NOVO E TEMA ESCURO)
+- Visual totalmente renovado: cartões de cantos arredondados com sombra suave, botões e campos arredondados, ícones modernos no menu, topo com busca em pílula e avatar, indicadores com ícones e gráfico dos últimos 6 meses no Início, janela de login redesenhada.
+- Tema escuro: clique na lua (topo, à direita) para alternar entre claro e escuro. O Exato lembra a escolha. PDFs e planilhas continuam com as cores normais.
+- Linha da tabela destacada ao passar o mouse; avisos e telas vazias mais bonitos.
+
+NOVIDADES DA V156
+- Logo da Exato na barra de tarefas (o programa se identifica como Exato; atalho com o logo).
+- Pasta organizada: sem arquivos soltos, sem __pycache__.
+- Exatinho mais inteligente (Ctrl+J): lembra o assunto da conversa ("e em outubro?", "e as tomadas?"), entende erros de digitação, "últimos 3 meses", "trimestre", vários pedidos numa frase; responde maiores clientes e fornecedores, maiores notas, comparação entre meses e ranking de empresas; explica como calculou e sugere o próximo passo.
+- Piloto automático (opcional, desligado): todo dia busca as NFS-e das empresas com certificado, salva os XMLs novos, gera o relatório do mês anterior e mostra o que fez. Abra em Exatinho > Piloto automático. Só roda com o Exato aberto.
+
+NOVIDADES DA V155 E ANTERIORES
+- Consulte docs/ e ajuda/ no repositório; resumo: Exatinho conversando (V155), captcha sem pular nota e relatório mensal completo (V154), portal por usuário e senha com download corrigido (V153), senha salva, "Buscar e salvar tudo" (V152).

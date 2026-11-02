@@ -1,0 +1,24 @@
+V124 — CHECKLIST DE VALIDAÇÃO
+Data: 25/09/2026 14:44
+Base: V123
+
+[OK] py_compile do exato_central_fiscal.py
+[OK] compileall da base Python após limpeza
+[OK] APP_VERSION = V124
+[OK] painel do Exatinho com tipografia ampliada
+[OK] personagem ampliado para 60px no dock
+[OK] novos estados: CURIOSO / HUMOR / SURPRESA / DÚVIDA / ALÍVIO / CONCENTRADO
+[OK] render procedural com novos estados
+[OK] falas espontâneas com cooldown e memória curta
+[OK] nenhuma repetição imediata nas falas espontâneas
+[OK] reação a eventos preservada
+[OK] regressão NF-e
+[OK] regressão Auditoria multi-tipo + PDF
+[OK] QA Exato IA
+[OK] event bus + cStat 656/657
+[OK] diagnóstico local NF-e
+[OK] smoke de UI sob Xvfb
+[OK] 13/13 núcleos protegidos idênticos ao V123 por SHA-256
+[OK] ZIP final sem __pycache__, .pyc ou temporários
+
+Observação: esta versão não altera o motor fiscal, Auditoria ou geração do PDF protegido.

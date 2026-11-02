@@ -1,0 +1,10 @@
+Central Fiscal V018 - CT-e
+Fonte oficial: SEF/SC - BT 2023-001 - Serviço de Distribuição de Conhecimento de Transporte Eletrônico - v1.00-1.
+URL: https://dfe.sat.sef.sc.gov.br/cte/ws/distribuicao/DistribuicaoCteDownload.asmx
+Método: cteDownloadContab
+Namespace: http://www.satcte.sef.sc.gov.br/ws/distribuicao-v1
+
+Fluxo desta versão: CT-e como TOMADOR (indAtor=2), tratado como entrada da empresa consultada.
+O serviço também aceita 1=Emitente, 2=Tomador, 3=Emitente ou Tomador e 9=Emitente e Tomador.
+Resposta: loteDistComp em Base64, compactado em GZIP; agrupadores distCTeSC com cteProc e procEventoCTe.
+A SEF/SC informa atraso mínimo de 8 horas para entrega e orienta aguardar 12 horas após sincronismo completo/retorno sem documentos; 1 hora para cStat 110.

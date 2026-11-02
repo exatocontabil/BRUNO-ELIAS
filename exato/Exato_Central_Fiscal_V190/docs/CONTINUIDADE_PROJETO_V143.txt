@@ -1,0 +1,29 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL V143
+
+ESTADO ATUAL
+- V143 é a nova versão trabalhada a partir da V142.
+- V142 e versões anteriores continuam intactas.
+- A V143 adiciona apenas a separação visual entre recência da atualização e resultado da última busca na tela Empresas.
+
+TELA EMPRESAS
+- “Atualização” responde “há quanto tempo houve uma busca?”
+- “Última busca” responde “qual foi o resultado da tentativa mais recente?”
+- A legenda abaixo da tabela explica os três estados:
+  • Atualizada — busca nos últimos 24h.
+  • Atenção — última busca entre 24h e 72h.
+  • Desatualizada — mais de 72h sem busca ou nunca buscada.
+
+RESULTADO DA BUSCA
+- Concluída, Com observação, Cancelada, Em andamento, Aguardando, Erro e Não realizada são estados da tentativa de busca, não da idade da atualização.
+
+PERSISTÊNCIA
+- Não criar nova base de dados por versão.
+- O Arquivo Fiscal Local continua persistente.
+- O histórico document_exports continua sendo a fonte de verdade para saber o que já foi exportado para cada destino.
+
+PROTEÇÃO
+- Não alterar os 13 núcleos fiscais protegidos sem autorização explícita.
+- Preservar Exatinho, logos, assets, sidebar e identidade visual.
+
+PRÓXIMA PENDÊNCIA JÁ REGISTRADA
+- Melhorar fluidez da troca das abas laterais, especialmente reduzindo o custo de renderização do Exatinho e deslocando carregamentos pesados para fora do caminho do clique.

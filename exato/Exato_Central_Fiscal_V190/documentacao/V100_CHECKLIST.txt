@@ -1,0 +1,15 @@
+V100 — CHECKLIST DE ENTREGA
+
+[OK] py_compile
+[OK] Exportação Empresa/Ano/Mês/Entrada/Saída/Tipo
+[OK] XML original preservado
+[OK] PDF individual ao lado do XML
+[OK] PDF consolidado por pasta Entrada/Saída + Tipo documental
+[OK] Sem pasta separada de PDFs no nível do mês
+[OK] Consolidado recomposto a partir de todos os XMLs já presentes na pasta
+[OK] Cards mostram total por tipo + Entrada/Saída no período
+[OK] Relatório V099/V098/V097/V096 regressão
+[OK] Auditoria UI/regressão V095
+[OK] Exato IA V092
+[OK] 9/9 núcleos protegidos sem alteração
+[OK] ZIP reaberto e estrutura verificada

@@ -1,0 +1,16 @@
+Exato Central Fiscal — V069
+
+Testes locais realizados antes da distribuição:
+- compilação Python do arquivo principal;
+- importação do módulo;
+- teste da montagem do SOAP NF-e com indAtor=9;
+- teste de continuidade com cursor combinado;
+- teste de migração de cursor legado para cursor combinado usando o menor ator salvo;
+- teste de não resetar cursor após cStat 117;
+- teste de proteção contra a sequência actor=1 -> 117 -> actor=2 -> 657;
+- teste sintético de múltiplos lotes NF-e com avanço de NSU;
+- teste da criação do NetLog do Edge;
+- integridade do pacote ZIP.
+
+Limitação:
+A autenticação real do SAT e a confirmação dos documentos disponíveis na SEF/SC exigem execução no Windows do usuário com o certificado digital instalado.

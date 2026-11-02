@@ -1,0 +1,5 @@
+V101 — FUNÇÕES DE PDF PRESERVADAS
+
+As funções generate_fiscal_representation_pdf, open_document_fiscal_representation, save_documents_organized e generate_documents_pdf permanecem idênticas à V100 por SHA-256 do segmento-fonte.
+
+Orientação: o fluxo de salvar XML + PDF individual + PDF consolidado não foi alterado nesta versão.

@@ -1,0 +1,19 @@
+V093 — CHECKLIST DE VALIDAÇÃO
+
+[OK] Busca XML em segundo plano
+[OK] Resultado limitado ao período selecionado
+[OK] Aviso de documentos fora do período
+[OK] Salvar XMLs + DANFE/DACTE por pasta/tipo
+[OK] PDF consolidado usa todos os XMLs da pasta
+[OK] Ordem por emissão + número
+[OK] Auditoria NF-e/NFC-e
+[OK] Validação do Excel por tipo documental
+[OK] Exato IA contextual e perguntas
+[OK] Bolhas sem overflow no teste de interface
+[OK] PDF Auditoria nos estados Conforme/Atenção/Divergência
+[OK] Ícone Exato na aplicação
+[OK] Sem Organizar XML na navegação principal
+[OK] Núcleos protegidos não alterados
+[OK] Persistência/backup/diagnóstico
+[OK] Pacote com pasta raiz única
+[OK] Execução BAT atualizada para V093

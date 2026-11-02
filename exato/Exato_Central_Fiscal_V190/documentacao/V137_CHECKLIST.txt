@@ -1,0 +1,21 @@
+V137 — CHECKLIST FINAL
+
+[OK] V137 criada mediante autorização expressa.
+[OK] V135 usada como referência visual/empacotamento conservadora.
+[OK] Assets visuais da V135 preservados por hash.
+[OK] Exatinho preservado.
+[OK] Logo Exato e logo mark preservados.
+[OK] Sidebar/header/layout principal não alterados propositalmente.
+[OK] Recuperação de senha da V136 mantida.
+[OK] Tabela password_reset_requests preservada.
+[OK] Recuperação administrada localmente.
+[OK] Persistência de usuários entre versões mantida.
+[OK] Rótulos de inicialização corrigidos para V137.
+[OK] py_compile.
+[OK] compileall.
+[OK] Proteção 13/13 núcleos por SHA-256/AST.
+[OK] Teste de autenticação.
+[OK] Teste de recuperação de senha.
+[OK] Teste de UI de recuperação.
+[OK] Teste de paridade dos assets visuais.
+[OK] Smoke visual sob Xvfb.

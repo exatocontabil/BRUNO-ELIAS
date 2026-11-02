@@ -1,0 +1,23 @@
+V149 — CHECKLIST
+[x] py_compile exato_central_fiscal.py
+[x] 11 telas abrem sem erro (test_v146_theme_ui)
+[x] Topo acompanha a navegação
+[x] Tela Certificado: busca, filtros, vencimento, seleção e Continuar
+[x] 13/13 núcleos fiscais SAME
+[x] 31/31 assets SAME
+[x] Botões em capitalização normal / cabeçalhos alinhados
+[x] Importação de usuários da Central sem elevação de perfil (teste reproduz falha na V145)
+[x] Layout responsivo: 1366x650, 1100x600 e 1000x560 (menu de ícones, botões que quebram, rolagem de segurança)
+[x] Exatinho flutuante sem alterar o menu
+[x] Painel Hoje, selos de situação e telas vazias (test_v146_theme_ui)
+[x] Contador de pendências no menu (completo e de ícones)
+[x] Atalhos Ctrl+1..9 e F1
+[x] Avisos que somem sozinhos
+[x] Registro de erros (exato.log) e aviso amigável
+[x] Histórico e Documentos mais rápidos (medido)
+[x] Suíte atual + test_versao_consistente + GitHub Actions
+[x] Aba NFS-e: certificado (ADN simulado), importação, exportação, cancelamento, barreira para fluxos antigos
+[x] Modo usuário/senha testado contra portal simulado
+[ ] Primeira busca REAL pelo ADN no Windows com certificado (pendente do usuário)
+[ ] Primeiro acesso REAL pelo portal com usuário e senha (pendente do usuário)
+[ ] Conferência visual no Windows (fontes/DPI) — pendente do usuário

@@ -1,0 +1,19 @@
+V152 — FEEDBACKS DA NFS-e: PORTAL, RELATÓRIO MENSAL, SENHA SALVA E AUTOMAÇÃO
+
+PEDIDO DO USUÁRIO
+- Lista de notas espremida depois da busca; relatório mensal de verdade (em lote, somando as notas do mês); senha do portal salva por empresa; "Alguns XMLs não foram baixados" no acesso por usuário e senha; fazer o acesso sem abrir o navegador; menos cliques e menos trabalho manual.
+
+O QUE FOI FEITO
+1. Lista não espreme mais: a página reajusta a altura quando o resultado da busca aparece (App._workspace_watch); lista com no mínimo 12 linhas; cartões de totais em uma linha. Testado em 1366x650 e 1366x768.
+2. Relatório mensal em lote (generate_monthly_report_pdf): resumo por mês + uma seção por mês e tipo (Prestados/Tomados) com TODAS as notas e o total do mês; canceladas listadas e somadas à parte. Sai sozinho na pasta do mês ao salvar os XMLs (Relatorio_mensal_NFS-e_<Tipo>_<AAAA-MM>.pdf, no lugar do PDF consolidado) e pelo botão "Relatório mensal (PDF)" para o período escolhido. O antigo "Resumo mensal" ficou em Mais como "Só os totais por mês (PDF)".
+3. Portal (calibrado com o diagnóstico real, erro 403): XML baixado de dentro da página; períodos divididos em janelas de 30 dias; mensagem de falha mais clara.
+4. Sem janela: o acesso tenta primeiro oculto; se o portal pedir captcha (ou não liberar), abre o navegador só nessa hora. A sessão do portal é lembrada (protegida) e as próximas buscas entram sem senha e sem captcha enquanto valer. Não há (e não haverá) resolução automática de captcha.
+5. Senha salva por empresa (opcional, caixa "Lembrar a senha desta empresa"): criptografada com a proteção do Windows (DPAPI), arquivo nfse_acessos.json em Dados, fora dos backups; "Esquecer senha salva". Nunca no config.json, no registro de erros ou em texto aberto.
+6. Automação: botão "Buscar e salvar tudo" (busca + salva os XMLs novos com PDF e relatório mensal na pasta dos clientes, sem perguntar); empresa, forma de acesso e opções lembradas; sem período usa o mês anterior fechado; "Buscar sozinho ao abrir o Exato" (todas as empresas com certificado, salvando na pasta dos clientes); "Buscar todas as empresas e salvar tudo" em Mais.
+7. A data do cabeçalho aparece sempre em português ("Sexta-feira, 02 de outubro de 2026").
+
+LIMITES / A CONFERIR
+- O download pela página e o modo oculto não puderam ser testados no portal real (só em portal simulado que devolve 403 para pedidos soltos). Se falhar, enviar a pasta Dados\Logs\nfse_portal.
+- Se o portal exigir captcha em todo acesso, a janela vai abrir em toda busca sem sessão válida.
+- Senhas salvas só abrem no mesmo computador e usuário do Windows.
+- Valores/nomes/endereços do PDF da NFS-e continuam dependendo de XML real para calibrar.

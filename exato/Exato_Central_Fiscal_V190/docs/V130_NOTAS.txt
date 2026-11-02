@@ -1,0 +1,57 @@
+V130 — CONFIRMAÇÃO EXPLÍCITA DA BUSCA AUTOMÁTICA
+
+BASE
+- V129.
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Corrigir somente o fluxo operacional solicitado pelo usuário: adicionar uma etapa formal de confirmação na tela “Busca Automática — Todas as empresas”, antes de permitir o início do processamento.
+
+ALTERAÇÃO IMPLEMENTADA
+- Novo botão “CONFIRMAR CONFIGURAÇÃO”.
+- O botão valida formalmente:
+  - certificado selecionado;
+  - período inicial e final;
+  - ordem das datas;
+  - existência de empresas cadastradas;
+  - pasta raiz quando “Salvar XML automaticamente” estiver ativado;
+  - acesso/criação da pasta raiz quando necessária.
+- O processamento NÃO começa ao alterar os campos.
+- O botão “INICIAR BUSCA AUTOMÁTICA” permanece desabilitado até a confirmação.
+- Após a confirmação:
+  - o botão passa para “✓ CONFIGURAÇÃO CONFIRMADA” e fica desabilitado;
+  - os campos de configuração e importação ficam bloqueados para impedir que a fila seja alterada depois da validação;
+  - “INICIAR BUSCA AUTOMÁTICA” fica habilitado.
+- O status da janela passa a informar: “Configuração confirmada • X empresa(s) • pronta para iniciar”.
+- A barra de ações foi posicionada antes da lista para permanecer visível em telas menores.
+- O diálogo foi reduzido para uma geometria mais compacta e centralizado com limite de tela para evitar que os botões fiquem fora do monitor.
+- O título da aplicação foi atualizado para V130.
+
+PRESERVAÇÃO
+- Nenhuma captura NF-e/NFC-e/CT-e foi alterada.
+- Nenhuma função fiscal protegida foi alterada.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- Auditoria e PDF protegido permanecem intactos.
+- Tratamento de cStat 657 permanece inalterado nesta versão.
+- Busca Global da V128/V129 permanece como pendência separada.
+
+NÚCLEOS PROTEGIDOS
+- Comparação V129 → V130 por SHA-256 sobre AST/source.
+- Resultado: 13/13 idênticos.
+- Arquivo: documentacao/V130_PROTECAO_NUCLEOS_SHA256.txt.
+
+TESTES REALIZADOS
+- py_compile do arquivo principal.
+- compileall do projeto.
+- Teste específico de confirmação: início desabilitado antes da confirmação e habilitado somente depois.
+- Teste de bloqueio dos campos após confirmação.
+- Teste sequencial da fila multiempresa com duas empresas simuladas, sem chamada real à SEFAZ.
+- Smoke Office Center V122: aprovado.
+- Smoke do Exatinho V126: aprovado.
+- Motor comportamental V123: aprovado.
+- Um teste histórico V120 foi identificado como não aplicável porque exige APP_VERSION == V120; não foi tratado como falha da V130.
+- Preview visual da Busca Automática revisado em tela 1366x768.
+- ZIP final deve ser extraído e conferido após limpeza de temporários.
+
+RESULTADO
+- A V130 corrige somente o fluxo de confirmação solicitado, preservando o funcionamento da Busca Automática Multiempresas implementada na V129.

@@ -1,0 +1,22 @@
+V145 — CHECKLIST DE ENTREGA
+
+[OK] Base derivada diretamente da V144.
+[OK] APP_VERSION atualizado para V145; EXECUTAR.bat e INICIAR.bat atualizados.
+[OK] Chave de acesso gravada com 44 dígitos (NF-e, NFC-e, CT-e).
+[OK] Eventos gravados como Evento, com identificador próprio.
+[OK] Cancelamento antes ou depois da nota marca o documento como Cancelado.
+[OK] Carta de correção e cancelamento não homologado não alteram a situação.
+[OK] Auditoria SAT x XML confere pela chave.
+[OK] Relatório por período recebe os eventos das notas carregadas.
+[OK] Reparo único do banco legado, com backup prévio e segunda execução nula.
+[OK] document_exports e document_sources acompanham o documento reparado.
+[OK] import sys em central_client.py (autostart do servidor).
+[OK] Compilação dos três módulos.
+[OK] testes/test_v145_chave_e_eventos.py.
+[OK] 19 testes antigos sem interface: mesmo resultado da V144.
+[OK] 13/13 núcleos fiscais protegidos SAME por AST.
+[OK] 31/31 assets oficiais SAME por SHA-256.
+[PENDENTE] Abrir a interface no Windows real.
+[PENDENTE] Rodar o reparo sobre uma cópia do banco real do escritório.
+[PENDENTE] Captura real na SEF/SC com certificado.
+[PENDENTE] Central Compartilhada com duas máquinas na V145.

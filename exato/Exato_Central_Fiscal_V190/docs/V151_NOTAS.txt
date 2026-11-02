@@ -1,0 +1,25 @@
+V151 — NFS-e COM A MESMA LÓGICA DA NF-e
+
+PEDIDO DO USUÁRIO
+- Fazer as 7 ideias propostas: PDF de cada nota, buscar várias empresas, resumo do mês, NFS-e nos totais do Início, lista em Excel, aviso de cancelada exportada e modo técnico. Tudo "com a mesma lógica do XML NF-e" e, se já foi exportada, aparecer na tela.
+
+O QUE FOI FEITO
+1. PDF de cada NFS-e (exato_nfse_pdf.generate_nfse_pdf; exato_nfse.parse_nfse_details lê serviço, valores, endereços): uma página por nota, marca d'água CANCELADA, rodapé informando que não substitui o DANFSe oficial. Campos que o XML não traz saem como "—".
+2. Exportação como a NF-e (save_nfse_documents): XML em Empresa/Ano/Mês/Prestados|Tomados/NFS-e, PDF ao lado de cada XML e PDF consolidado por pasta (NFS-e_<Prestados|Tomados>_<AAAA-MM>_consolidado.pdf). "Salvar XMLs" de Documentos continua só XML (igual à NF-e); a aba NFS-e tem a opção de PDF junto (padrão ligado) e "Salvar XMLs novos". O registro de exportação (document_exports) é o mesmo das demais notas.
+3. Representação em PDF também em Documentos Fiscais: Ver/gerar representação e Gerar representações em lote funcionam para NFS-e (open_nfse_representation; cache em Representacoes_Fiscais/<cnpj>/nfse).
+4. Exportada / cancelada já exportada: coluna Exportação, filtro Exportação (inclui "Canceladas já exportadas"), linha em destaque, texto de ATENÇÃO e aviso ao fim da busca (db_upsert_nfse_items devolve cancelled_exported). Em Documentos Fiscais a situação mostra "Cancelado · já exportado".
+5. Buscar todas as empresas (App._nfse_run_all): para cada empresa cadastrada com certificado no Windows (CNPJ do certificado = CNPJ da empresa), busca, grava, avança o ponto de continuação e registra no Histórico; falhas individuais não param as demais; cancelável; resumo com as empresas que falharam.
+6. Resumo mensal em PDF e Excel e Lista em Excel (menu Mais). exato_xlsx.py grava .xlsx sem componentes externos (títulos em destaque, colunas largas, moeda, filtro e cabeçalho congelado). Canceladas não entram nos valores de prestados/tomados.
+7. Início: cartões NFS-e prestadas/tomadas/canceladas (db_nfse_totals). db_get_stats deixa de contar NFS-e, para que os totais de NF-e/NFC-e/CT-e não misturem serviços.
+8. Modo técnico (Manutenção): Diagnóstico do sistema, Diagnóstico NF-e e Testar humor do Exatinho só aparecem com a opção ligada (config technical_mode).
+
+LIMITES / A CONFERIR
+- O leiaute do XML da NFS-e foi montado de memória do padrão nacional e de um uso real só para nomes/valores simples; endereços, código de serviço, alíquota e retenções do PDF podem sair "—" se o XML real usar outros nomes. Enviar um XML real (prestada e tomada) para calibrar.
+- O PDF é uma representação do Exato, não o DANFSe oficial.
+- Início: os cartões de NFS-e seguem a empresa ativa em Buscar XML/Início (não a empresa da aba NFS-e).
+
+PROTEÇÃO
+- 13/13 núcleos fiscais SAME e 31/31 assets SAME em relação à V145.
+
+TESTES
+- test_v151_features (exportação com PDF e consolidado, páginas, cancelada com marca, alerta de exportada, filtros de exportação, lote de representações, resumo mensal PDF/Excel lidos de volta, cartões do Início, modo técnico, busca de todas as empresas com um certificado recusado) mais todos os testes anteriores.

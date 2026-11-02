@@ -1,0 +1,16 @@
+V161 — AVISO "ALGO NÃO SAIU COMO ESPERADO" NA NFS-e
+
+PEDIDO DO USUÁRIO
+- Print do aviso ao clicar em "Buscar e salvar tudo" (V160), com o exato.log.
+
+CAUSA (confirmada no log)
+- ModernCard lia o fundo do pai com cget('bg'). No Windows, um Frame sem cor definida devolve o NOME 'SystemButtonFace', não '#RRGGBB'; o desenho do cartão (exato_ui._hex) tentava ler "Sy" como número e falhava (ValueError) a cada redimensionamento, gerando vários avisos. No Linux a cor padrão é hexadecimal, por isso os testes não pegavam.
+
+O QUE FOI FEITO
+1. exato_ui._hex aceita #RGB, #RRGGBB, nomes de cor e, em último caso, usa cinza claro (nunca levanta erro).
+2. exato_ui.to_hex converte qualquer cor do Tk (inclusive nomes do sistema) por winfo_rgb; ModernCard usa para fundo, borda e fundo do pai.
+3. Se o desenho de um cartão falhar por qualquer motivo, o cartão fica liso e não mostra aviso.
+4. Teste novo test_v161_cores_do_sistema.py (simula o Windows devolvendo nomes de cor).
+
+A CONFERIR
+- No Windows: abrir NFS-e e clicar em "Buscar e salvar tudo"; o aviso não deve mais aparecer. A busca em si (33 notas) já havia terminado normalmente; confirmar se os XMLs/PDF/relatório foram salvos na pasta.

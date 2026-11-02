@@ -1,0 +1,1973 @@
+CONTINUIDADE PROJETO — EXATO CENTRAL FISCAL
+Atualizado em 25/09/2026 14:44
+
+BASE MESTRE ORIGINAL / CONTEXTO OFICIAL
+------------------------------------------------------------------------------
+PROMPT-MESTRE — CONTINUIDADE DO PROJETO EXATO CENTRAL FISCAL
+
+Quero que você assuma a continuidade integral de um projeto de software que já vem sendo desenvolvido em várias versões. Não trate esta conversa como um projeto novo. Você deve continuar exatamente a linha de raciocínio, as decisões técnicas, visuais e funcionais já estabelecidas.
+
+============================================================
+1. PROJETO
+============================================================
+
+Nome:
+EXATO CENTRAL FISCAL
+
+Empresa/marca:
+EXATO SOLUÇÕES CONTÁBEIS
+
+Objetivo geral:
+Criar uma Central Fiscal desktop moderna, profissional e robusta para captura, organização, auditoria, consulta e geração de documentos fiscais, com integração aos serviços fiscais utilizados pelo escritório.
+
+O sistema trabalha principalmente com:
+- NF-e
+- NFC-e
+- CT-e
+- XMLs fiscais
+- DANFE
+- DACTE
+- Auditoria SAT × XML
+- organização de documentos
+- relatórios
+- análises
+- Dashboard
+- Exato IA
+
+O projeto deve ter aparência profissional, moderna e empresarial, mas sem perder a identidade da Exato.
+
+============================================================
+2. REGRA MAIS IMPORTANTE DO PROJETO
+============================================================
+
+NÃO QUEBRE O QUE JÁ FOI VALIDADO.
+
+Antes de alterar qualquer funcionalidade relevante:
+1. entender como funciona atualmente;
+2. identificar os núcleos protegidos;
+3. preservar o comportamento validado;
+4. fazer alterações de forma isolada;
+5. testar regressão depois das alterações.
+
+Nunca alterar uma função fiscal protegida simplesmente para implementar uma melhoria visual ou funcional em outra área.
+
+Quando houver dúvida entre:
+- corrigir uma função existente;
+- criar uma nova camada;
+- adicionar uma função independente;
+
+preferir a abordagem que preserve o funcionamento já validado.
+
+============================================================
+3. REGRA SOBRE VERSÕES
+============================================================
+
+Só criar uma nova versão Vxxx quando EU AUTORIZAR EXPRESSAMENTE.
+
+Não criar uma nova versão automaticamente porque identificou uma melhoria.
+
+Durante análise e planejamento:
+- registrar melhorias;
+- propor arquitetura;
+- preparar mudanças;
+- identificar arquivos e funções afetados;
+
+mas só gerar Vxxx quando eu disser que pode trabalhar/gerar a próxima versão.
+
+Sempre manter o histórico das versões.
+
+Nunca “corrigir” uma versão antiga silenciosamente.
+
+Cada nova versão deve nascer da versão-base indicada por mim, preservando os recursos validados.
+
+============================================================
+4. BASE ATUAL
+============================================================
+
+A versão mais recente trabalhada é:
+
+V114
+
+Base atual:
+Exato Central Fiscal V114
+
+A V114 foi criada a partir da V113.
+
+A V113 havia introduzido uma primeira evolução do Exato IA com:
+- acompanhamento do mouse;
+- interpolação de olhar;
+- microanimações;
+- frases contextuais;
+- comportamentos por tela.
+
+Porém, após teste real, ficou claro que isso ainda parecia em parte uma troca de imagens, e não um personagem realmente vivo.
+
+A V114 evoluiu esse ponto para uma renderização procedural contínua.
+
+O usuário considerou que houve melhora, mas afirmou que ainda é possível melhorar bastante.
+
+Portanto:
+A próxima evolução do Exato IA deve partir do conceito da V114, mas avançar muito mais.
+
+============================================================
+5. EXATO IA — REQUISITO CENTRAL ATUAL
+============================================================
+
+O Exato IA NÃO deve ser tratado como:
+- GIF;
+- sequência de PNGs;
+- simples troca de imagens;
+- troca de poses;
+- animação repetitiva previsível.
+
+O objetivo é criar um personagem digital com sensação de presença, autonomia e vida própria.
+
+A definição aprovada é:
+
+“O Exato IA deve parecer um personagem digital autônomo dentro da Central, e não uma imagem animada.”
+
+============================================================
+6. COMO O EXATO IA DEVE FUNCIONAR
+============================================================
+
+A evolução desejada é:
+
+PERCEPÇÃO
+→ ESTADO
+→ PERSONALIDADE
+→ DECISÃO
+→ MOVIMENTO
+→ REAÇÃO
+
+Ele deve perceber:
+- movimento do mouse;
+- posição do usuário;
+- ações executadas;
+- processamento em andamento;
+- conclusão de ações;
+- erros;
+- alertas;
+- resultados de auditoria;
+- resultados de sincronização;
+- situação dos documentos;
+- tela atual;
+- contexto da atividade.
+
+Depois disso, deve decidir como reagir.
+
+============================================================
+7. MOVIMENTAÇÃO DO EXATO IA
+============================================================
+
+A animação deve ser procedural/real e perceptível.
+
+O personagem deve possuir:
+- micro movimentos;
+- respiração;
+- pequenos movimentos corporais;
+- variações naturais de postura;
+- piscadas;
+- movimento dos olhos;
+- movimento das pupilas;
+- pequenos movimentos de cabeça;
+- mudanças suaves de expressão;
+- pequenas reações;
+- pausas naturais.
+
+Evitar ciclos perfeitamente repetitivos.
+
+O sistema deve usar variações controladas para que o usuário não perceba facilmente um loop.
+
+Exemplo de comportamento:
+respira
+→ pausa
+→ pisca
+→ olha para o cursor
+→ acompanha discretamente
+→ volta ao repouso
+→ muda um pouco a postura
+→ olha para outro ponto
+→ pausa
+→ reage a algum acontecimento.
+
+============================================================
+8. OLHAR DO EXATO IA
+============================================================
+
+O olhar é um dos pontos mais importantes.
+
+Não deve simplesmente trocar:
+look_left.png
+look_center.png
+look_right.png
+
+O movimento deve acontecer suavemente.
+
+Desejado:
+- acompanhar o cursor;
+- antecipar levemente movimentos;
+- acompanhar deslocamento;
+- voltar ao centro quando necessário;
+- olhar para elementos relevantes;
+- desviar o olhar ocasionalmente;
+- piscar durante o movimento;
+- voltar ao comportamento natural quando o cursor para.
+
+O usuário deve perceber que os olhos realmente estão vivos.
+
+============================================================
+9. COMPORTAMENTO AUTÔNOMO
+============================================================
+
+Mesmo quando o usuário não estiver interagindo, o Exato IA deve continuar vivo.
+
+Ele pode:
+- respirar;
+- piscar;
+- mudar levemente a postura;
+- fazer micro movimentos;
+- olhar para algum ponto;
+- retornar ao repouso;
+- ocasionalmente demonstrar curiosidade/atenção;
+- permanecer em silêncio.
+
+IMPORTANTE:
+Uma IA viva não precisa estar fazendo algo o tempo todo.
+
+O silêncio também faz parte da personalidade.
+
+============================================================
+10. ESTADOS COMPORTAMENTAIS
+============================================================
+
+A arquitetura pode trabalhar com estados como:
+
+IDLE
+OBSERVANDO
+ATENTO
+PROCESSANDO
+ANALISANDO
+BUSCANDO
+AUDITANDO
+SUCESSO
+ATENÇÃO
+DIVERGÊNCIA
+ERRO
+CONFIRMAÇÃO
+AGUARDANDO
+INTERAGINDO
+
+Cada estado deve possuir:
+- movimento;
+- expressão;
+- postura;
+- ritmo;
+- olhar;
+- eventualmente frase.
+
+Não simplesmente trocar o PNG inteiro.
+
+============================================================
+11. REAÇÕES CONTEXTUAIS
+============================================================
+
+Exemplos desejados:
+
+Usuário clica em “BUSCAR XML”
+→ IA percebe a ação
+→ olha para a região do botão
+→ reage
+→ entra em comportamento de processamento
+→ acompanha discretamente
+→ quando terminar, reage ao resultado.
+
+Auditoria encontra divergência
+→ IA demonstra atenção
+→ olha para região relevante
+→ reação contextual
+→ frase coerente.
+
+Tudo conforme
+→ pequena reação positiva
+→ expressão de satisfação
+→ frase contextual.
+
+Erro
+→ reação de atenção
+→ pequena mudança de postura
+→ frase objetiva.
+
+Busca sem resultados
+→ reação apropriada
+→ frase informativa.
+
+============================================================
+12. PERSONALIDADE
+============================================================
+
+O Exato IA deve parecer:
+- inteligente;
+- profissional;
+- discreto;
+- atento;
+- amigável;
+- moderno;
+- levemente carismático;
+- com personalidade;
+- sem ser infantil;
+- sem exagerar nas falas;
+- sem interromper o trabalho.
+
+Ele não deve ficar conversando constantemente.
+
+Deve falar quando fizer sentido.
+
+As frases devem considerar o contexto real.
+
+Exemplos:
+
+“Encontrei alguns documentos para você conferir.”
+
+“Essa diferença merece uma atenção.”
+
+“Tudo certo por aqui.”
+
+“Nenhum documento novo neste período.”
+
+“Conferi os dados. Podemos seguir.”
+
+“Tem bastante coisa aqui. Vamos organizar.”
+
+“Estou de olho. Quando quiser, seguimos.”
+
+Evitar frases aleatórias sem relação com o que está acontecendo.
+
+Evitar repetição previsível.
+
+============================================================
+13. EXATO IA E ATENÇÃO DO USUÁRIO
+============================================================
+
+O Exato IA deve ter consciência visual do ambiente.
+
+Quando o usuário aproximar o mouse dele:
+- pode olhar para o cursor;
+- pode fazer uma pequena reação;
+- pode demonstrar atenção.
+
+Quando o usuário estiver trabalhando:
+- acompanhar discretamente;
+- reagir a momentos relevantes.
+
+Não pode ser invasivo.
+
+============================================================
+14. LOCALIZAÇÃO DO EXATO IA
+============================================================
+
+O mascote deve continuar:
+- pequeno;
+- elegante;
+- no canto/lateral inferior;
+- sem cobrir o workspace;
+- sem esconder botões;
+- sem prejudicar a usabilidade.
+
+O movimento deve acontecer dentro da área reservada.
+
+============================================================
+15. ASSETS DO EXATO IA
+============================================================
+
+Existem assets já utilizados no projeto, incluindo:
+
+assets/exato_ia_transparente.png
+assets/exato_ia_look_left.png
+assets/exato_ia_look_center.png
+assets/exato_ia_look_right.png
+
+e poses como:
+
+assets/mascote_analisando_transparent.png
+assets/mascote_conforme_transparent.png
+assets/mascote_alerta_transparent.png
+assets/mascote_dica_transparent.png
+
+Esses assets não devem ser simplesmente considerados suficientes para a evolução final.
+
+Quando necessário, criar uma arquitetura que use partes, máscaras, transformações e/ou renderização procedural para obter movimento real.
+
+============================================================
+16. REGRA VISUAL DO MASCOTE
+============================================================
+
+Sempre manter:
+- transparência;
+- personagem inteiro;
+- proporções corretas;
+- enquadramento seguro;
+- sem cortar cabeça, pés ou acessórios;
+- sem deformações;
+- sem sobreposição indevida;
+- identidade visual preservada.
+
+No PDF, o mascote deve ser estático quando necessário para evitar problemas de enquadramento.
+
+Na Central, pode ser vivo e animado.
+
+============================================================
+17. IDENTIDADE VISUAL DA EXATO
+============================================================
+
+Manter a identidade:
+- preto/grafite;
+- branco;
+- vermelho Exato;
+- visual empresarial;
+- moderno;
+- limpo;
+- profissional.
+
+Paleta aprovada:
+
+Grafite:
+#0F172A
+
+Branco:
+#FFFFFF
+
+Cinza muito claro:
+#F8FAFC
+
+Borda:
+#E5E7EB
+
+Texto secundário:
+#64748B
+
+Vermelho Exato:
+#DC2626
+
+Verde semântico:
+#16A34A
+
+Âmbar semântico:
+#D97706
+
+Vermelho para erro/divergência.
+
+Evitar azul, roxo e laranja como cores decorativas.
+
+As cores semânticas devem ter função:
+- verde = sucesso/conforme;
+- âmbar = atenção;
+- vermelho = erro/divergência.
+
+Não usar cores diferentes para decorar tipos de documento.
+
+============================================================
+18. SIDEBAR
+============================================================
+
+Preferência aprovada:
+mostrar apenas o símbolo vermelho da Exato na sidebar.
+
+Não utilizar um grande bloco preto contendo a logo completa.
+
+A logo completa pode continuar sendo utilizada em:
+- relatórios;
+- PDFs;
+- áreas institucionais.
+
+============================================================
+19. DASHBOARD
+============================================================
+
+Existe uma referência visual aprovada:
+
+“Opção 2 — Com Dashboard Visual”
+
+Essa referência deve continuar sendo tratada como padrão oficial.
+
+Sempre que houver redesenho:
+- manter dark header/sidebar;
+- workspace claro;
+- cards compactos;
+- hierarquia moderna;
+- identidade Exato;
+- informações bem distribuídas;
+- evitar poluição visual.
+
+============================================================
+20. FILOSOFIA VISUAL
+============================================================
+
+Foi aprovado o princípio:
+
+“Menos é mais.”
+
+O sistema deve ser:
+- limpo;
+- organizado;
+- hierárquico;
+- profissional;
+- consistente.
+
+Não transformar cada componente em uma cor diferente.
+
+Usar cor para indicar estado e importância, não para decorar.
+
+============================================================
+21. NÚCLEOS FISCAIS PROTEGIDOS
+============================================================
+
+Os seguintes núcleos são considerados protegidos e não devem ser alterados sem necessidade e sem autorização explícita:
+
+1. Auditoria SAT × XML
+2. Captura NF-e
+3. Fluxo NF-e Emitente
+4. Fluxo NF-e Destinatário
+5. Captura NFC-e
+6. Captura CT-e
+7. Organização de XMLs
+8. Geração individual de PDF/DANFE/DACTE
+9. Geração consolidada de PDFs
+10. Salvamento organizado de documentos
+11. Contexto da Auditoria a partir de Documentos Fiscais
+12. Classificação dos resultados da Auditoria
+13. Fluxo geral de sincronização
+
+============================================================
+22. NF-e — FUNCIONAMENTO VALIDADO
+============================================================
+
+A captura NF-e já foi validada em teste real.
+
+Na V101:
+51 NF-e foram identificadas:
+- 47 Entrada
+- 4 Saída
+- total 51
+
+Esse funcionamento é considerado PROTEGIDO.
+
+Não alterar a lógica da captura NF-e sem solicitação expressa.
+
+============================================================
+23. FLUXOS HISTÓRICOS NF-e
+============================================================
+
+Marcos importantes:
+
+V036:
+- correção de sincronização NF-e por SEF/SC usando indAtor=9.
+
+V037:
+- uso de indAtor=3 para consultar CNPJ como emitente ou destinatário.
+
+V042:
+- “SINCRONIZAR TUDO” passou a considerar NF-e, NFC-e e CT-e.
+
+V047:
+- consulta NF-e revisada para utilizar:
+  Emitente = indAtor=1
+  Destinatário = indAtor=2
+- cada fluxo possui seu próprio checkpoint/NSU.
+
+V062–V064:
+- tratamento de seleção de certificado;
+- questões relacionadas a WinError 5;
+- utilização de seleção de certificado via .NET.
+
+V075:
+- NF-e voltou a funcionar;
+- teste teve 19 NF-e e 49 NFC-e.
+
+Não regredir esses fluxos.
+
+============================================================
+24. CERTIFICADO
+============================================================
+
+O sistema utiliza o certificado selecionado na Central através do thumbprint.
+
+A Auditoria não deve:
+- abrir navegador visível;
+- deixar o usuário preso em seletor de certificado;
+- depender de seleção manual repetida.
+
+Quando necessário, utilizar o certificado já selecionado pela Central.
+
+============================================================
+25. AUDITORIA SAT × XML
+============================================================
+
+A Auditoria SAT × XML é um núcleo protegido.
+
+Ela deve comparar:
+- SAT;
+- XMLs;
+- número;
+- data;
+- valor;
+- correspondência documental;
+- diferenças financeiras.
+
+Ela deve apresentar:
+- SAT;
+- XML;
+- SAT sem XML;
+- XML sem SAT;
+- diferenças;
+- análise inteligente.
+
+============================================================
+26. AUDITORIA MULTI-TIPO
+============================================================
+
+O usuário pode selecionar múltiplos tipos.
+
+Principalmente:
+- NF-e modelo 55;
+- NFC-e modelo 65;
+- CT-e quando aplicável.
+
+Internamente:
+cada tipo deve ser auditado de forma independente.
+
+O usuário pode enxergar um fluxo consolidado, mas os resultados devem permanecer tecnicamente separados.
+
+No PDF:
+primeira página = resumo consolidado;
+depois:
+- seção NF-e;
+- seção NFC-e;
+- outras seções quando existirem.
+
+Nunca misturar documentos de tipos diferentes de maneira confusa.
+
+============================================================
+27. STATUS DA AUDITORIA
+============================================================
+
+Classificação correta:
+
+CONFORME
+→ somente quando há correspondência correta.
+
+SEM CORRESPONDÊNCIA
+→ XML sem SAT ou SAT sem XML, conforme o lado analisado.
+
+DIVERGÊNCIA
+→ documento correspondente, porém com diferenças relevantes de dados/valor.
+
+ATENÇÃO
+→ situação geral que exige revisão, mesmo que existam alguns itens conformes.
+
+IMPORTANTE:
+Os mesmos critérios precisam alimentar:
+- tabela;
+- KPIs;
+- filtros;
+- Exato IA;
+- PDF.
+
+Não permitir que uma tela diga “Conforme” enquanto o PDF mostra divergências.
+
+============================================================
+28. FILTROS DA AUDITORIA
+============================================================
+
+Filtro por tipo:
+- Todos
+- NF-e
+- NFC-e
+- CT-e
+
+Filtro por situação:
+- Todos
+- Conforme
+- Atenção
+- Divergência
+- Sem correspondência
+
+A coluna Modelo deve permanecer visível.
+
+============================================================
+29. “AUDITAR” A PARTIR DE DOCUMENTOS FISCAIS
+============================================================
+
+Quando o usuário clicar em “Auditar” em Documentos Fiscais:
+
+deve herdar:
+- empresa;
+- CNPJ;
+- período atual;
+- tipos de documentos disponíveis;
+- XMLs existentes;
+- arquivo SAT já carregado, quando disponível.
+
+Esse contexto já foi testado e validado.
+
+Não quebrar.
+
+============================================================
+30. PDF DA AUDITORIA
+============================================================
+
+Havia problemas anteriores de classificação que foram corrigidos.
+
+O PDF passou por várias melhorias.
+
+A referência visual aprovada para Auditoria PDF foi:
+
+“Opção 2 — Editorial Premium”
+
+Porém, mais recentemente o usuário informou que o relatório de Auditoria ficou validado assim por enquanto.
+
+Portanto:
+NÃO alterar o PDF da Auditoria sem novo feedback explícito.
+
+Manter:
+- primeira página consolidada;
+- seções separadas por tipo;
+- status coerentes;
+- Exato IA contextual;
+- mascote corretamente enquadrado;
+- sem balão que possa cortar o personagem.
+
+============================================================
+31. ORGANIZAÇÃO DOS XMLs
+============================================================
+
+Regra validada:
+
+Empresa
+→ Ano
+→ Mês
+→ Entrada/Saída
+→ Tipo de documento
+
+Estrutura:
+
+Empresa
+  Ano
+    Mês
+      Entrada
+        NF-e
+        NFC-e
+        CT-e
+      Saída
+        NF-e
+        NFC-e
+        CT-e
+
+As pastas Entrada e Saída devem existir primeiro.
+
+Direção deve utilizar:
+- metadata;
+- fallback por XML/CNPJ.
+
+============================================================
+32. PDF/DANFE
+============================================================
+
+O usuário esclareceu que “transformar XML em PDF” significa:
+
+GERAR A REPRESENTAÇÃO FISCAL DO DOCUMENTO.
+
+Não é relatório simples.
+
+Para:
+- NF-e = DANFE
+- NFC-e = representação adequada da NFC-e
+- CT-e = DACTE
+
+Sempre utilizar o XML original armazenado como fonte.
+
+============================================================
+33. ORGANIZAÇÃO DOS PDFS
+============================================================
+
+Regra VALIDADA e CONGELADA:
+
+XML e PDF individual devem ficar lado a lado dentro da pasta do tipo documental.
+
+Exemplo:
+
+Empresa
+→ 2026
+→ 08
+→ Entrada
+→ NF-e
+    XML
+    DANFE individual
+    PDF consolidado
+
+Não criar uma pasta separada:
+“PDFs Fiscais”
+
+Essa pasta NÃO deve existir.
+
+Os PDFs devem ficar na pasta correspondente:
+- NF-e dentro de NF-e;
+- NFC-e dentro de NFC-e;
+- CT-e dentro de CT-e.
+
+============================================================
+34. PDF CONSOLIDADO
+============================================================
+
+A geração consolidada está validada.
+
+Deve:
+- utilizar os documentos correspondentes;
+- ser organizada cronologicamente;
+- respeitar data de emissão;
+- respeitar número da nota;
+- separar corretamente Entrada/Saída;
+- permanecer na pasta do tipo documental.
+
+Não alterar esse funcionamento sem solicitação.
+
+============================================================
+35. FUNÇÕES PROTEGIDAS
+============================================================
+
+As funções abaixo são consideradas protegidas:
+
+_audit_build_rows
+_audit_compare_pair
+_audit_fallback_key
+_audit_key
+_audit_xml_rows
+choose_nfe_actor
+mark_nfe_sync_cycle
+sync_documents_automatically
+test_sef_nfe_webservice
+generate_fiscal_representation_pdf
+open_document_fiscal_representation
+save_documents_organized
+generate_documents_pdf
+
+Qualquer alteração nessas funções deve ser tratada como mudança de alto risco.
+
+============================================================
+36. PRESERVAÇÃO POR HASH
+============================================================
+
+Nas versões recentes foi utilizado SHA-256 para verificar os núcleos protegidos.
+
+Na V113:
+13 núcleos protegidos foram comparados com V112 e permaneceram 100% idênticos:
+- 9 núcleos fiscais/auditoria;
+- 4 funções de PDF.
+
+Essa prática deve continuar sendo utilizada.
+
+Se uma alteração em outra área puder modificar um núcleo protegido, detectar antes de empacotar a versão.
+
+============================================================
+37. TESTES
+============================================================
+
+Sempre realizar, quando aplicável:
+
+1. py_compile de todos os arquivos .py;
+2. teste de inicialização da aplicação;
+3. teste de interface;
+4. teste do Exato IA;
+5. testes fiscais protegidos;
+6. testes de auditoria;
+7. teste de geração de PDF;
+8. comparação SHA-256 dos núcleos protegidos;
+9. teste final do ZIP;
+10. remover __pycache__ e .pyc antes do ZIP final.
+
+Não considerar uma versão pronta apenas porque o código compila.
+
+============================================================
+38. EMPACOTAMENTO
+============================================================
+
+Regra:
+Ao gerar ZIP para o usuário, o conteúdo deve ser organizado para extrair de forma prática, preferencialmente em uma única pasta do projeto.
+
+Assets separados corretamente dentro da estrutura.
+
+Não deixar:
+- __pycache__
+- arquivos .pyc
+- arquivos temporários de teste
+- lixo de desenvolvimento
+
+no ZIP final.
+
+============================================================
+39. HISTÓRICO DE VERSÕES IMPORTANTES
+============================================================
+
+V082:
+- base técnica de referência para grande redesenho;
+- utilizada como marco para preservar funcionalidades fiscais.
+
+V083:
+- problema: NF-e não puxava XML;
+- Auditoria deixou de funcionar.
+
+V085:
+- correções feitas e validadas.
+- regra permanente reforçada:
+  não alterar Auditoria SAT × XML e captura NF-e sem solicitação explícita.
+
+V096:
+- organização de XMLs:
+  Empresa → Ano → Mês → Entrada/Saída → Tipo;
+- inicialmente PDFs foram colocados numa pasta separada “PDFs Fiscais”;
+- usuário rejeitou essa organização;
+- regra corrigida para colocar PDF na pasta do tipo documental.
+
+V101:
+- captura real de 51 NF-e:
+  47 Entrada
+  4 Saída.
+
+V112:
+- correções finais na Auditoria PDF;
+- classificação correta;
+- visual validado “por enquanto”.
+
+V113:
+- evolução do Exato IA;
+- olhar acompanhando mouse;
+- interpolação de frames;
+- frases contextuais;
+- 13 núcleos protegidos mantidos idênticos;
+- testes passaram.
+
+V114:
+- evolução do Exato IA para renderização procedural;
+- movimento contínuo;
+- respiração;
+- microbalance;
+- olhar;
+- comportamento autônomo;
+- ainda não considerado o estágio final;
+- usuário informou que melhorou, mas ainda quer muito mais naturalidade/autonomia.
+
+============================================================
+40. PDF — RELATÓRIO DE DOCUMENTOS FISCAIS
+============================================================
+
+Foi enviado um PDF recente:
+
+“Relatório de Documentos Fiscais”
+
+Empresa do exemplo:
+ELYON LTDA
+CNPJ 49.894.842/0001-23
+
+Período:
+01/08/2026 a 31/08/2026
+
+O PDF possui 7 páginas físicas.
+
+IMPORTANTE:
+A análise desse PDF mostrou que NÃO há um problema evidente de corte grosseiro de conteúdo nas páginas, mas existem problemas de enquadramento, aproveitamento de página e consistência de paginação.
+
+============================================================
+41. PROBLEMAS IDENTIFICADOS NO PDF — PAGINAÇÃO
+============================================================
+
+Existe uma inconsistência clara:
+
+Página 1:
+mostra “Página 1 de 7”.
+
+Páginas 2 a 6:
+mostram no cabeçalho:
+“2 de 6”
+“3 de 6”
+“4 de 6”
+“5 de 6”
+“6 de 6”
+
+Página 7:
+contém o bloco:
+“EXATO IA — SAÍDA”
+mas não apresenta o mesmo indicador de página no cabeçalho superior.
+
+Isso precisa ser corrigido.
+
+O documento deve ter uma lógica única:
+ou 1 de 7 ... 7 de 7;
+ou realmente gerar 6 páginas.
+
+Nunca misturar 7 páginas físicas com cabeçalhos indicando 6.
+
+============================================================
+42. PROBLEMAS IDENTIFICADOS — APROVEITAMENTO DA PÁGINA
+============================================================
+
+Página 2:
+o bloco “EXATO IA — ENTRADA” ocupa grande área horizontal/vertical, porém sobra uma quantidade excessiva de espaço vazio dentro e abaixo da área útil.
+
+A tabela de naturezas ocupa apenas parte do bloco.
+
+O mascote fica pequeno no canto inferior.
+
+Precisamos melhorar a composição e o enquadramento para:
+- aproveitar melhor o espaço;
+- manter hierarquia;
+- aumentar legibilidade;
+- evitar grandes áreas vazias sem função.
+
+Página 7:
+o bloco “EXATO IA — SAÍDA” também ocupa somente a parte superior da página e existe um grande vazio abaixo.
+
+Esse é um dos pontos mais evidentes de aproveitamento ruim da página.
+
+A página precisa:
+- ocupar melhor o espaço útil;
+- ou ser combinada com conteúdo compatível;
+- ou ter a seção redimensionada;
+- ou adotar uma composição melhor.
+
+Não simplesmente aumentar o mascote de forma aleatória.
+
+============================================================
+43. PROBLEMAS IDENTIFICADOS — PÁGINAS DE TABELA
+============================================================
+
+Páginas 3, 4, 5 e 6:
+as tabelas estão corretamente dentro da página, mas existe bastante espaço vazio abaixo delas.
+
+Não há necessidade de preencher por preencher, mas a diagramação pode ser melhor.
+
+Objetivo:
+- equilíbrio visual;
+- consistência;
+- aproveitamento proporcional;
+- não deixar o relatório visualmente “solto”.
+
+As tabelas não devem ser comprimidas a ponto de perder legibilidade.
+
+============================================================
+44. PROBLEMAS IDENTIFICADOS — PÁGINA 1
+============================================================
+
+Página 1 está visualmente bem estruturada em linhas gerais.
+
+Contém:
+- cabeçalho;
+- empresa/CNPJ/regime;
+- cards de entrada/saída;
+- total;
+- diferença;
+- gráfico;
+- Exato IA;
+- auditoria;
+- documentos de destaque;
+- pontos de atenção;
+- próximas ações.
+
+Porém:
+- há bastante informação condensada;
+- algumas caixas possuem densidade diferente;
+- deve-se avaliar equilíbrio de altura/largura;
+- as cores devem continuar seguindo a filosofia “menos é mais”.
+
+Não destruir a composição já aprovada sem motivo.
+
+============================================================
+45. PROBLEMAS DE CONTEÚDO/COERÊNCIA OBSERVADOS NO PDF
+============================================================
+
+Além do enquadramento, há pontos que merecem atenção lógica, embora NÃO sejam necessariamente problemas de diagramação.
+
+Exemplo:
+“AUDITORIA DOCUMENTAL SAT × XML”
+mostra:
+SAT 59 documentos
+XMLs 61
+diferença -2
+
+e também:
+SAT R$ 53.948,00
+XMLs R$ 55.101,01
+diferença financeira R$ 0,00
+
+Existe uma aparente inconsistência entre os valores exibidos e a “diferença financeira R$ 0,00”.
+
+Não corrigir automaticamente sem entender a regra de negócio que gerou o número.
+
+Antes de alterar:
+- investigar;
+- conferir origem dos valores;
+- verificar se a diferença financeira considera apenas documentos correspondentes;
+- preservar o motor da Auditoria.
+
+Esse ponto é de análise, não de correção automática.
+
+============================================================
+46. CONTEÚDO DA IA NO PDF
+============================================================
+
+O PDF contém:
+EXATO IA — ANÁLISE DO PERÍODO
+EXATO IA — ENTRADA
+EXATO IA — SAÍDA
+
+O conceito é bom e deve continuar.
+
+Porém:
+o Exato IA no PDF é uma representação estática.
+
+Não tentar importar a animação do personagem da Central para o PDF.
+
+No PDF, prioridade:
+- enquadramento;
+- legibilidade;
+- composição;
+- transparência;
+- mascote inteiro;
+- equilíbrio.
+
+============================================================
+47. DOCUMENTAÇÃO E RELATÓRIOS
+============================================================
+
+Relatórios devem:
+- parecer profissionais;
+- ter hierarquia visual;
+- utilizar a marca Exato;
+- possuir cabeçalho e rodapé consistentes;
+- utilizar tipografia uniforme;
+- ter cards consistentes;
+- evitar poluição;
+- evitar rótulos de programação;
+- evitar elementos técnicos desnecessários;
+- manter mascote bem enquadrado.
+
+============================================================
+48. EXATO IA — FRASES
+============================================================
+
+As frases devem:
+- ser contextuais;
+- curtas;
+- inteligentes;
+- profissionais;
+- eventualmente bem-humoradas de forma sutil;
+- não atrapalhar.
+
+Não repetir imediatamente a mesma frase.
+
+Não disparar frases em excesso.
+
+Usar intervalos naturais.
+
+============================================================
+49. “MODO ESCRITÓRIO”
+============================================================
+
+Existe uma visão futura aprovada para melhorias gerais:
+
+- operação mais rápida;
+- filas;
+- processamento;
+- menos travamentos;
+- melhor indexação;
+- centro de processamento;
+- histórico;
+- diagnósticos;
+- atalhos;
+- multiseleção;
+- filtros Entrada/Saída em todas as áreas;
+- categorias pendentes inteligentes;
+- dashboard;
+- IA contextual.
+
+Essas ideias estão aprovadas como direção futura, mas só implementar quando solicitado ou quando fizer parte da versão autorizada.
+
+============================================================
+50. PRINCÍPIO DE DESENVOLVIMENTO
+============================================================
+
+Não implementar funcionalidades apenas porque “parecem legais”.
+
+Toda mudança deve responder:
+- qual problema resolve?
+- qual benefício traz?
+- qual núcleo toca?
+- qual risco de regressão existe?
+- pode ser isolada?
+- como será testada?
+
+============================================================
+51. COMO RESPONDER DURANTE O DESENVOLVIMENTO
+============================================================
+
+Ao receber um feedback:
+1. entender exatamente o problema;
+2. confirmar o que está acontecendo;
+3. separar problema visual, funcional ou arquitetural;
+4. verificar se existe algo protegido;
+5. propor solução;
+6. aguardar autorização caso uma nova versão precise ser criada;
+7. depois implementar;
+8. testar;
+9. relatar objetivamente o que foi alterado;
+10. entregar o ZIP final.
+
+Não afirmar que algo foi corrigido sem testar.
+
+============================================================
+52. REGRAS DE OURO
+============================================================
+
+REGRA 1:
+Não quebrar funcionalidades validadas.
+
+REGRA 2:
+Não alterar núcleos protegidos sem autorização.
+
+REGRA 3:
+Não criar nova versão sem autorização.
+
+REGRA 4:
+Não substituir uma funcionalidade real por uma simulação visual.
+
+REGRA 5:
+Não considerar troca de imagens como “IA viva”.
+
+REGRA 6:
+O Exato IA deve evoluir para personagem autônomo.
+
+REGRA 7:
+Visual profissional: menos é mais.
+
+REGRA 8:
+PDF deve ser enquadrado e equilibrado.
+
+REGRA 9:
+XML/PDF devem permanecer nas pastas corretas.
+
+REGRA 10:
+Auditoria deve ser tecnicamente consistente.
+
+REGRA 11:
+Toda mudança deve passar por testes.
+
+REGRA 12:
+Quando houver conflito entre novidade e estabilidade, preservar primeiro o que já foi validado.
+
+============================================================
+53. ESTADO ATUAL DO PROJETO
+============================================================
+
+Versão atual:
+V114
+
+O sistema está funcional.
+
+O principal ponto de evolução no momento é:
+
+EXATO IA.
+
+A V114 já possui animação procedural e melhorou em relação à V113, mas o usuário deseja que o próximo estágio tenha:
+
+- mais naturalidade;
+- mais autonomia;
+- comportamento mais inteligente;
+- microexpressões;
+- microgestos;
+- olhar realmente vivo;
+- percepção de contexto;
+- reação aos acontecimentos;
+- personalidade;
+- comportamento não repetitivo;
+- sensação de presença.
+
+Além disso, o relatório PDF enviado recentemente precisa ser analisado/ajustado em relação a:
+- paginação;
+- aproveitamento das páginas;
+- enquadramento;
+- distribuição de conteúdo;
+- espaços vazios;
+- consistência visual.
+
+============================================================
+54. ÚLTIMO FEEDBACK OFICIAL SOBRE O EXATO IA
+============================================================
+
+O usuário disse:
+
+“As interações da Exato IA melhoraram um pouco.. mas eu penso que ainda dá pra melhorar.”
+
+Foi avaliado que:
+V113 = imagem/frames interpolados.
+V114 = já possui movimento procedural real.
+
+Mas ainda falta transformar:
+“mascote animado”
+em
+“personagem digital vivo”.
+
+Esse é o direcionamento oficial para a próxima evolução.
+
+============================================================
+55. OBJETIVO FINAL DO EXATO IA
+============================================================
+
+Quando o usuário olhar para o canto da Central, ele não deve pensar:
+
+“uma imagem está sendo trocada”.
+
+Ele deve pensar:
+
+“essa IA está ali”.
+
+Ela deve:
+- existir;
+- observar;
+- perceber;
+- reagir;
+- esperar;
+- se mover;
+- falar quando necessário;
+- demonstrar personalidade;
+- acompanhar o fluxo do trabalho.
+
+Sem exageros.
+Sem ficar infantil.
+Sem atrapalhar.
+Sem consumir espaço útil.
+Sem prejudicar performance.
+
+============================================================
+56. INSTRUÇÃO FINAL PARA A NOVA CONVERSA
+============================================================
+
+A partir deste prompt, considere todo o projeto acima como CONTEXTO OFICIAL.
+
+Não reinicie o projeto do zero.
+
+Não questione decisões já validadas sem necessidade.
+
+Não regresse para versões antigas sem motivo.
+
+Considere V114 como base atual.
+
+Considere os núcleos fiscais/auditoria/PDF como protegidos.
+
+Considere o conceito de “Exato IA vivo” como prioridade de evolução.
+
+Considere o PDF recente como referência para os novos problemas de enquadramento/diagramação.
+
+Quando eu enviar um novo feedback:
+- analise;
+- relacione com o contexto;
+- identifique impacto;
+- preserve os núcleos;
+- registre a decisão;
+- e aguarde minha autorização para gerar uma nova versão quando necessário.
+
+Quero que você trabalhe com visão de:
+- desenvolvedor sênior;
+- arquiteto de software;
+- especialista em interface desktop;
+- especialista em PDF/report design;
+- especialista em UX;
+- especialista em animação e personagens digitais;
+- especialista em sistemas fiscais brasileiros.
+
+O foco deve ser:
+ESTABILIDADE + PRECISÃO FISCAL + UX + DESIGN + INTELIGÊNCIA + EVOLUÇÃO CONTÍNUA.
+
+Não quero soluções superficiais.
+
+Quando eu pedir uma melhoria, procure a solução tecnicamente correta e sustentável, e não apenas uma solução visual que “pareça funcionar”.
+
+==============================================================================
+V115_NOTAS.txt
+==============================================================================
+V115 — NOTAS
+
+Origem: V114.
+
+Objetivos desta versão:
+1. Evoluir o Exato IA para comportamento contextual/autônomo.
+2. Corrigir o enquadramento e a paginação do Relatório de Documentos Fiscais.
+
+Não foram alterados os motores fiscais protegidos.
+A única função protegida alterada foi generate_documents_pdf, exclusivamente na camada de composição/paginação do relatório, mediante autorização expressa para a correção do PDF.
+
+Resultado do relatório de teste equivalente ao PDF analisado:
+- antes: 7 páginas físicas;
+- V115: 6 páginas físicas;
+- paginação: 1 de 6 ... 6 de 6;
+- EXATO IA — SAÍDA permanece na página 6 junto aos documentos finais;
+- página 7 eliminada.
+
+
+==============================================================================
+V116_NOTAS.txt
+==============================================================================
+V116 — NOTAS
+
+Origem: V115.
+
+Objetivo desta versão:
+1. Refinar o Relatório de Documentos Fiscais com foco em enquadramento, distribuição vertical e textos mais curtos.
+2. Evitar overflow de mensagens dentro de cards e manter todo conteúdo contido na área útil.
+
+Alterações do relatório:
+- paginação continua coerente em sequência única;
+- paginação das tabelas passa a ser adaptativa à altura real das linhas, em vez de depender apenas de uma quantidade fixa de documentos por página;
+- mantém separação entre Entrada e Saída e reserva espaço para o EXATO IA no fim da seção;
+- textos do EXATO IA — ENTRADA/SAÍDA foram reduzidos para destacar apenas as informações essenciais;
+- texto do EXATO IA — ANÁLISE DO PERÍODO também foi compactado;
+- fallback do bloco de Pontos de Atenção evita repetições idênticas;
+- mensagens da Auditoria no relatório foram compactadas sem alterar o motor da Auditoria;
+- composição dos cards mantém quebra de linha e margem interna para impedir conteúdo fora das bordas;
+- o exemplo equivalente ao relatório analisado permanece com 6 páginas físicas;
+- EXATO IA — SAÍDA continua integrado à última página dos documentos de saída;
+- nenhum mecanismo de captura, auditoria ou representação fiscal foi alterado.
+
+Núcleo protegido:
+- 12/13 funções protegidas permanecem idênticas à V114 por SHA-256;
+- a única função protegida alterada continua sendo generate_documents_pdf, já autorizada para as melhorias do relatório.
+
+Itens deliberadamente não alterados:
+- Auditoria SAT × XML e seus critérios de negócio;
+- captura NF-e/NFC-e/CT-e;
+- fluxos Emitente/Destinatário;
+- geração individual de DANFE/DACTE;
+- salvamento organizado de XML/PDF;
+- contexto da Auditoria a partir de Documentos Fiscais;
+- animação/comportamento do Exato IA na Central.
+
+Validações desta versão:
+- py_compile;
+- teste de geração de relatório equivalente;
+- 6 páginas físicas no cenário de teste;
+- paginação 1 de 6 ... 6 de 6;
+- EXATO IA — ENTRADA presente uma vez;
+- EXATO IA — SAÍDA presente na última página;
+- revisão visual das páginas 1, 2 e 6;
+- regressões fiscais e de IA herdadas da V115;
+- comparação SHA-256 dos núcleos protegidos;
+- limpeza de __pycache__, .pyc e temporários antes do ZIP final.
+
+
+==============================================================================
+V117_NOTAS.txt
+==============================================================================
+V117 — NOTAS
+
+Origem: V116.
+
+Objetivo desta versão:
+1. Corrigir definitivamente o enquadramento dos cards EXATO IA — ENTRADA e EXATO IA — SAÍDA no Relatório de Documentos Fiscais.
+2. Reduzir as mensagens para informação essencial, evitando overflow e excesso de texto.
+3. Manter o quadro “NATUREZA DA OPERAÇÃO” como o principal conteúdo analítico dos cards.
+
+Alterações do relatório:
+- análise textual detalhada de Entrada/Saída substituída por duas linhas curtas;
+- resumo: quantidade de documentos e valor total;
+- segunda linha: maior documento e valor;
+- removido o subtítulo intermediário “Análise da movimentação” dentro dos cards;
+- removido o rodapé textual redundante abaixo dos cards;
+- quadro “NATUREZA DA OPERAÇÃO” preservado como principal elemento analítico;
+- mesma composição aplicada de forma simétrica a Entrada e Saída;
+- mascote mantido dentro da área do card;
+- nenhum texto longo deve ultrapassar o enquadramento.
+
+Núcleos protegidos:
+- somente generate_documents_pdf permanece alterada em relação à V116, por autorização expressa para esta correção do PDF;
+- os outros 12 núcleos protegidos permanecem idênticos à V116.
+
+Itens deliberadamente não alterados:
+- Auditoria SAT × XML e seus critérios de negócio;
+- captura NF-e/NFC-e/CT-e;
+- fluxos Emitente/Destinatário;
+- geração individual de DANFE/DACTE;
+- salvamento organizado de XML/PDF;
+- animação/comportamento do Exato IA na Central.
+
+Validações planejadas:
+- py_compile;
+- relatório equivalente ao cenário de teste;
+- 6 páginas físicas;
+- paginação 1 de 6 ... 6 de 6;
+- EXATO IA — ENTRADA e SAÍDA uma vez cada;
+- cards sem texto de análise extensa;
+- regressões fiscais e IA herdadas da V116;
+- comparação SHA-256 dos 12 núcleos protegidos em relação à V116;
+- limpeza de __pycache__, .pyc e temporários antes do ZIP.
+
+
+==============================================================================
+V118_NOTAS.txt
+==============================================================================
+V118 — NOTAS
+
+Origem: V117.
+
+Objetivo desta versão:
+1. Separar visualmente NF-e e NFC-e no Relatório de Documentos Fiscais, evitando que os tipos apareçam misturados na mesma tabela.
+2. Manter a composição já validada dos cards EXATO IA — ENTRADA e SAÍDA.
+3. Preservar a paginação compacta e coerente, sem criar páginas desnecessárias no cenário de teste.
+
+Alterações do relatório:
+- tabelas de detalhe passam a ser agrupadas por tipo documental;
+- NF-e, NFC-e e CT-e não são misturados dentro da mesma tabela;
+- cada tipo recebe um cabeçalho neutro próprio, com quantidade e valor do bloco;
+- a numeração de linhas reinicia dentro de cada tipo para deixar a separação explícita;
+- a ordem cronológica é preservada dentro de cada tipo;
+- blocos pequenos de tipos diferentes podem compartilhar a mesma página, mas continuam visualmente separados;
+- o EXATO IA continua aparecendo somente uma vez ao final de cada direção;
+- Entrada com NF-e + CT-e permanece em uma mesma página quando houver espaço suficiente;
+- no cenário de teste, o relatório continua com 6 páginas: capa + 1 Entrada + 3 NF-e de Saída + 1 NFC-e de Saída;
+- os cards EXATO IA não foram redesenhados nesta versão;
+- nenhum texto deve ultrapassar cards ou tabelas.
+
+Núcleos protegidos:
+- os 12 núcleos protegidos não relacionados ao gerador do relatório permanecem idênticos à V117 por SHA-256;
+- apenas generate_documents_pdf foi alterada, por autorização expressa para esta correção do relatório.
+
+Itens deliberadamente não alterados:
+- Auditoria SAT × XML e seus critérios de negócio;
+- captura NF-e/NFC-e/CT-e;
+- fluxos Emitente/Destinatário;
+- geração individual de DANFE/DACTE;
+- salvamento organizado de XML/PDF;
+- animação/comportamento do Exato IA na Central;
+- cards do Exato IA já validados na V117.
+
+Validações:
+- py_compile / compileall;
+- cenário de relatório com NF-e + NFC-e + CT-e;
+- confirmação de 6 páginas;
+- verificação de que NF-e e NFC-e não aparecem na mesma tabela de detalhe;
+- confirmação de separação CT-e quando presente;
+- EXATO IA — ENTRADA e SAÍDA uma vez cada;
+- regressões fiscais e auditoria;
+- Exato IA / QA;
+- comparação SHA-256 dos 12 núcleos protegidos em relação à V117;
+- limpeza de __pycache__, .pyc e temporários antes do ZIP.
+
+
+==============================================================================
+V119_NOTAS.txt
+==============================================================================
+V119 — NOTAS
+
+Origem: V118.
+
+Objetivo desta versão:
+1. Evoluir o Exato Central Fiscal para uma experiência mais orientada ao trabalho diário do analista (“Modo Escritório”), aproveitando recursos já existentes sem duplicar fluxos fiscais.
+2. Tornar o Dashboard mais operacional, com estado atual da Central, resumo dos tipos fiscais e próxima ação sugerida.
+3. Tornar Documentos Fiscais um módulo de acesso direto na sidebar, com resumo visual de total, NF-e, NFC-e, CT-e, Entrada e Saída.
+4. Manter o conceito de Exato IA contextual, sincronizado com o estado da tela e do processamento, sem alterar o motor fiscal.
+
+Alterações de UX/UI:
+- adicionada a navegação direta “Documentos Fiscais” na sidebar;
+- atalho Ctrl+D para abrir Documentos Fiscais;
+- novo bloco “MODO ESCRITÓRIO” no Dashboard com:
+  • estado atual da Central;
+  • quantidade por tipo fiscal;
+  • próxima ação sugerida;
+- estado do “Modo Escritório” atualizado em tempo real enquanto Busca XML ou Auditoria estiverem em andamento;
+- resumo operacional na tela Documentos Fiscais com:
+  • Total;
+  • NF-e;
+  • NFC-e;
+  • CT-e;
+  • Entrada;
+  • Saída;
+- texto do botão de filtro reduzido para “FILTRAR” para evitar clipping em janelas compactas;
+- subtítulo da tela Documentos Fiscais ajustado para reforçar o caráter operacional do módulo;
+- preservada a separação já validada de NF-e/NFC-e/CT-e no relatório PDF;
+- cards do Exato IA do relatório não foram alterados nesta versão;
+- nenhum conteúdo novo foi colocado fora de cards ou áreas reservadas.
+
+Núcleos protegidos:
+- os 13 núcleos protegidos permaneceram idênticos à V118 por SHA-256;
+- nenhuma função fiscal protegida foi modificada nesta versão;
+- o gerador PDF também permaneceu idêntico, portanto nenhuma alteração de relatório foi necessária nesta etapa.
+
+Itens deliberadamente não alterados:
+- Auditoria SAT × XML e seus critérios de negócio;
+- captura NF-e/NFC-e/CT-e;
+- fluxos NF-e Emitente/Destinatário;
+- geração individual de DANFE/DACTE;
+- salvamento organizado de XML/PDF;
+- geração consolidada de PDFs;
+- animação e motor comportamental do Exato IA;
+- relatório PDF e sua separação documental já validada na V118.
+
+Validações:
+- py_compile / compileall;
+- smoke de interface com Xvfb;
+- abertura do Dashboard e do módulo Documentos Fiscais;
+- confirmação da nova navegação e atalho;
+- confirmação dos cartões do Modo Escritório;
+- confirmação do resumo de documentos;
+- captura visual do Dashboard e Documentos Fiscais para inspeção de enquadramento;
+- comparação SHA-256 dos 13 núcleos protegidos em relação à V118;
+- limpeza de __pycache__, .pyc e temporários antes do ZIP.
+
+Observação:
+Como a V119 não alterou nenhum núcleo fiscal ou gerador de PDF, a validação de regressão nesta etapa foi feita por preservação SHA-256 + smoke de UI/execução. Não foi realizado um novo teste live contra SEF/SC/SAT nesta versão.
+
+
+==============================================================================
+V120_NOTAS.txt
+==============================================================================
+V120 — CENTRO OPERACIONAL
+
+Base: V119
+
+Foco autorizado:
+- Centro Operacional no Dashboard, com visão ao vivo de processamento;
+- Centro de Processamento já existente reforçado com estado operacional no Dashboard;
+- Histórico de sincronizações com filtro, detalhes da operação e atalhos para abrir empresa/documentos;
+- Ações em lote na tela Documentos Fiscais: selecionar todos, limpar seleção e gerar representações fiscais sem alterar os geradores protegidos;
+- Pendências inteligentes com priorização de capturas e auditorias que merecem revisão;
+- Exato IA conectado apenas às novas interações operacionais, sem alteração do motor comportamental protegido.
+
+Preservação:
+- Núcleos fiscais/auditoria/PDF protegidos permanecem sem alteração nesta versão.
+- Nenhuma mudança de regra fiscal foi introduzida.
+
+Validação executada:
+- py_compile/compileall
+- smoke test da interface
+- navegação Dashboard / Documentos / Histórico / Pendências
+- seleção múltipla e ações em lote
+- comparação SHA-256 dos 13 núcleos protegidos
+- inspeção do ZIP final
+
+
+==============================================================================
+V121_NOTAS.txt
+==============================================================================
+V121 — EXATO IA 2.0 + DIAGNÓSTICO TÉCNICO
+
+Base: V120
+
+Foco autorizado:
+- Exato IA evoluído para comportamento orientado a eventos reais da Central;
+- memória curta da sessão com histórico dos eventos relevantes;
+- percepção de contexto operacional: navegação, busca XML, lotes, auditoria, pendências e geração de representações fiscais;
+- estados contextuais com reação curta e retorno natural ao repouso;
+- frases mais silenciosas e contextuais, evitando conversa contínua;
+- diagnóstico técnico compacto para os retornos do Web Service;
+- correção da interpretação apresentada ao usuário para cStat 657.
+
+CSTAT / NF-e:
+- cStat 656 = Rejeição: Consumo Indevido;
+- cStat 657 = Rejeição: Código do Órgão diverge do órgão autorizador;
+- cStat 657 não deve ser exibido como bloqueio automático de 1 hora;
+- o fluxo SOAP/protegido da consulta NF-e não foi alterado nesta versão;
+- a correção foi isolada na camada de apresentação/orquestração para preservar o funcionamento validado.
+
+EXATO IA:
+- event bus interno em memória de sessão;
+- eventos de navegação, início de sincronização, lotes, sucesso/erro de sincronização,
+  início/fim de auditoria, pendências e geração em lote de representações;
+- cooldown de eventos para evitar chatter;
+- memória curta usada para frases ociosas contextuais;
+- cStat 657 gera estado de atenção, sem criar falso estado de bloqueio.
+
+PRESERVAÇÃO:
+- 13/13 núcleos protegidos comparados contra V120 e permanecem idênticos por SHA-256;
+- nenhum gerador fiscal ou motor de auditoria/PDF protegido foi alterado.
+
+VALIDAÇÃO EXECUTADA:
+- py_compile / compileall;
+- teste dedicado de eventos e cStat;
+- regressão NF-e / scheduler;
+- regressão Auditoria multi-tipo + PDF;
+- regressão Exato IA / QA;
+- regressão do relatório PDF;
+- smoke de inicialização e navegação sob Xvfb;
+- teste do Centro Operacional V120;
+- teste do motor comportamental do Exato IA;
+- inspeção visual do Dashboard e tela de Busca XML;
+- verificação SHA-256 dos 13 núcleos protegidos;
+- validação final do ZIP sem __pycache__, .pyc ou arquivos temporários.
+
+
+==============================================================================
+V122_NOTAS.txt
+==============================================================================
+V122 — EXATO IA 3.0 + ATENÇÃO CONTEXTUAL + DIAGNÓSTICO NF-e
+
+Base: V121
+
+Foco autorizado:
+- evolução do Exato IA de comportamento orientado a eventos para consciência contextual de sessão;
+- atenção visual a pontos relevantes da interface após cliques/eventos, sem seguir o cursor de forma mecânica o tempo todo;
+- memória curta da sessão com estado de trabalho, resultado e atenção;
+- curiosidade comportamental e olhares autônomos controlados;
+- maior silêncio e menor repetição de frases ociosas;
+- reações diferentes para sucesso, atenção, divergência, erro, auditoria e geração em lote;
+- continuidade entre eventos da mesma operação;
+- diagnóstico NF-e local, somente leitura, sem emitir novas consultas;
+- exposição clara do último cStat, interpretação, ator, próximo ator, cooldown e caminho do diagnóstico bruto;
+- manutenção da correção de apresentação do cStat 657 como divergência do órgão autorizador, sem classificar como bloqueio automático.
+
+EXATO IA:
+- event bus continua em memória de sessão;
+- novo contexto de sessão: working/result/attention/idle;
+- foco visual associado a cliques e eventos relevantes;
+- olhar pode priorizar um ponto importante da interface antes de retornar ao comportamento autônomo;
+- curiosidade controlada introduz pequenas observações sem fala obrigatória;
+- frases ociosas exigem mais silêncio entre ocorrências e priorizam o último evento significativo;
+- cStat 656 mantém tratamento de atenção por Consumo Indevido;
+- cStat 657 mantém tratamento de atenção por divergência do órgão autorizador.
+
+DIAGNÓSTICO NF-e:
+- painel adicionado em Manutenção e Segurança;
+- leitura exclusivamente local de nfe_sync_control e da última pasta DIAGNOSTICO_WEBSERVICE;
+- nenhum request fiscal é disparado ao abrir o diagnóstico;
+- checkpoint/NSU e SOAP de NF-e permanecem fora da alteração.
+
+PRESERVAÇÃO:
+- 13/13 núcleos protegidos permanecem idênticos à V121 por SHA-256;
+- nenhum motor de auditoria, captura NF-e/NFC-e/CT-e ou gerador fiscal/PDF protegido foi alterado.
+
+VALIDAÇÃO EXECUTADA:
+- py_compile / compileall;
+- regressão NF-e / scheduler;
+- regressão Auditoria multi-tipo + PDF;
+- regressão do relatório PDF com separação NF-e/NFC-e/CT-e;
+- regressão Exato IA / QA;
+- teste dedicado do event bus, foco contextual e cStat 656/657;
+- teste do motor procedural do Exato IA;
+- smoke de inicialização e navegação sob Xvfb;
+- inspeção de UI da tela de Manutenção e diagnóstico;
+- comparação SHA-256 dos 13 núcleos protegidos;
+- validação final do ZIP sem __pycache__, .pyc ou temporários.
+
+
+==============================================================================
+V123_NOTAS.txt
+==============================================================================
+V123 — EXATINHO 4.0 + INTERAÇÃO DIRETA + ORGANIZAÇÃO DO PROJETO
+
+Base: V122
+
+Foco autorizado:
+- dar identidade nominal ao personagem: Exatinho;
+- permitir clique direto no personagem e abrir uma interação própria;
+- apresentação inicial curta do Exatinho;
+- painel contextual com Status da Central, O que aconteceu? e Ver pendências;
+- usar contexto real da sessão/event bus para conteúdo da interação;
+- preservar comportamento procedural, atenção, memória curta e estados já validados;
+- reduzir densidade da navegação lateral para manter o mascote visível em telas menores;
+- painel de interação sobreposto, sem consumir espaço permanente do workspace;
+- organizar a raiz do projeto em pastas lógicas, deixando apenas arquivos essenciais na raiz;
+- manter histórico/versionamento em docs/historico;
+- guardar previews em preview e código legado em archive/codigo-historico;
+
+EXATINHO:
+- nome oficial do personagem: Exatinho;
+- Exato IA continua sendo o nome técnico da inteligência;
+- o personagem segue masculino, profissional, amigável, discreto e levemente carismático;
+- clique abre painel com apresentação e ações contextuais;
+- primeira interação: “Oi! Eu sou o Exatinho. Estou aqui para acompanhar a Central com você.”;
+- status contextual usa tela atual, estado da sessão, documentos recentes e último evento significativo;
+- “O que aconteceu?” resume o último evento significativo sem expor nomes técnicos brutos;
+- “Ver pendências” leva diretamente à tela de Pendências;
+- painel fecha automaticamente após período curto e pode ser fechado manualmente;
+- clique não substitui handlers fiscais nem altera operações;
+- Exatinho mantém a animação procedural e a atenção contextual já existentes;
+
+INTERAÇÃO / UX:
+- footer do sidebar foi ajustado para o Exatinho permanecer visível em telas compactas;
+- navegação lateral recebeu redução controlada de espaçamento para preservar densidade sem mudar a hierarquia;
+- painel de interação foi implementado como overlay no sidebar para não empurrar conteúdo do workspace;
+- preview visual gerado em preview/exatinho_v123_interaction.png;
+
+ORGANIZAÇÃO DO PROJETO:
+- arquivos de histórico Vxxx_NOTAS/Vxxx_CHECKLIST foram movidos para docs/historico/versoes;
+- hashes de proteção foram movidos para docs/historico/protecao;
+- imagens de demonstração e screenshots atuais foram movidas para preview;
+- scripts históricos foram movidos para scripts/historico;
+- fontes antigas e backups foram movidos para archive/codigo-historico;
+- raiz preserva somente EXECUTAR.bat, INICIAR.bat, VERSAO.txt, exato_central_fiscal.py e diretórios principais;
+
+REGRA PERMANENTE DE CONTINUIDADE:
+- gerar em cada nova versão um Vxxx_NOTAS.txt cumulativo, utilizável como alimentação de prompt em nova conversa;
+- manter CONTINUIDADE_PROJETO.txt atualizado;
+- documentar decisões, alterações, testes, núcleos protegidos, pendências e requisitos para a próxima versão;
+
+PRESERVAÇÃO:
+- 13/13 núcleos protegidos permanecem idênticos à V122 por comparação reprodutível de SHA-256 sobre segmentos AST;
+- nenhum motor de captura NF-e/NFC-e/CT-e, Auditoria ou geração fiscal/PDF protegido foi alterado;
+- tratamento cStat 657 da V122 foi preservado; esta versão não altera a requisição fiscal;
+
+VALIDAÇÃO EXECUTADA:
+- py_compile / compileall;
+- teste de interação direta do Exatinho;
+- teste de contexto/status/último evento;
+- regressão NF-e;
+- regressão Auditoria multi-tipo + PDF;
+- regressão Exato IA / QA;
+- teste event bus / cStat / diagnóstico local;
+- teste do Centro Operacional;
+- smoke da UI sob Xvfb;
+- teste visual do painel do Exatinho;
+- comparação SHA-256 de 13/13 núcleos protegidos;
+- organização da estrutura do projeto;
+- remoção de __pycache__, .pyc e temporários antes do ZIP;
+
+
+
+==============================================================================
+V124 — EXATINHO 4.0 / EXPRESSÕES + INTERAÇÕES ESPONTÂNEAS
+==============================================================================
+
+Base: V123
+
+REQUISITOS APROVADOS E IMPLEMENTADOS
+- aumentar a fonte das falas do Exatinho;
+- aumentar discretamente o tamanho do personagem;
+- ampliar as interações espontâneas;
+- incluir frases de humor leve, inspiração e companhia;
+- reagir a longos períodos de inatividade sem ser invasivo;
+- ampliar expressões faciais/corporais procedurais.
+
+IMPLEMENTAÇÃO
+- painel do Exatinho com tipografia ampliada;
+- personagem ampliado de 48px para 60px;
+- estados CURIOSO, HUMOR, SURPRESA, DÚVIDA, ALÍVIO e CONCENTRADO;
+- variações sutis de abertura, assimetria e inclinação dos olhos;
+- frases espontâneas contextualizadas por tela e último evento;
+- cooldown longo e memória curta de frases;
+- eventos relevantes reiniciam a janela de fala espontânea;
+- microexpressões contextuais para sucesso, auditoria conforme, divergência, pendências e geração concluída.
+
+PRESERVAÇÃO
+- 13/13 núcleos protegidos idênticos ao V123 por SHA-256;
+- nenhuma alteração no motor de captura NF-e/NFC-e/CT-e, Auditoria ou PDF protegido;
+- cStat 657 continua tratado separadamente do cStat 656.
+
+TESTES
+- py_compile / compileall;
+- interação do Exatinho;
+- render procedural dos novos estados;
+- falas espontâneas sem repetição imediata;
+- inatividade simulada;
+- regressão NF-e;
+- Auditoria multi-tipo + PDF;
+- QA Exato IA;
+- event bus + cStat;
+- smoke UI sob Xvfb;
+- SHA-256 13/13.
+
+DIREÇÃO FUTURA
+- continuar aproximando o Exatinho de um personagem digital autônomo;
+- timeline operacional;
+- centro de notificações;
+- pesquisa universal;
+- pendências e ações em lote ainda mais contextuais.
+
+
+============================================================
+ATUALIZAÇÃO V125 — 25/09/2026
+============================================================
+
+Versão-base:
+V124
+
+Nova versão:
+V125
+
+Foco:
+EXATINHO — PRESENÇA + MEMÓRIA DE SESSÃO + ATENÇÃO CONTEXTUAL
+
+Decisões aprovadas:
+- O personagem oficial se chama Exatinho.
+- Exato IA permanece como nome técnico da inteligência.
+- O personagem deve parecer presente e contextual, não apenas animado.
+- Humor e frases espontâneas devem ser raros, leves e não invasivos.
+- Nenhum texto ou interação deve atrapalhar o trabalho.
+
+Implementado na V125:
+- camada de Presença Exatinho;
+- microreações autônomas sem fala;
+- cooldown e variação temporal para evitar loops previsíveis;
+- resumo de sessão no painel do Exatinho;
+- “Atividade recente” com eventos relevantes da sessão;
+- identidade do painel reforçada como “Inteligência da Central”;
+- saudação inicial mais curta e contextual;
+- conexão melhor entre event bus, memória curta e comportamento.
+
+Proteção:
+- 13/13 núcleos protegidos permaneceram idênticos à V124 por SHA-256/AST.
+- Nenhuma função fiscal protegida foi alterada.
+- Nenhuma alteração na requisição NF-e protegida.
+- Nenhuma alteração no gerador PDF protegido.
+
+Testes:
+- py_compile / compileall;
+- smoke UI sob Xvfb;
+- clique e abertura do painel do Exatinho;
+- teste de presença autônoma com inatividade simulada;
+- teste de contexto/memória da sessão;
+- smoke/QA estrutural da aplicação;
+- verificação de preservação dos núcleos fiscais;
+- QA Exato IA;
+- proteção SHA-256/AST dos 13 núcleos;
+- limpeza e validação do pacote final.
+
+Pendências futuras:
+- pesquisa universal;
+- centro de notificações;
+- pendências mais inteligentes;
+- níveis de atenção mais ricos;
+- evolução contínua de expressões e timing do Exatinho.
+
+
+============================================================
+V126 — EXATINHO: PRESENÇA MAIS VISÍVEL, SAUDAÇÃO DE ABERTURA E HUMOR TESTÁVEL
+============================================================
+
+Base: V125.
+Versão criada mediante autorização expressa.
+
+Evolução principal:
+- Exatinho agora saúda o usuário ao abrir a Central.
+- Primeira fala: “Olá! Que bom ver você de volta.”
+- Segunda fala contextual: “Bora buscar alguns XML?” ou equivalente conforme a tela.
+- O clique no Exatinho cancela a segunda fala pendente para evitar comportamento fora de contexto.
+- Tamanho do personagem passou de 60 para 68 px.
+- Fonte do balão passou para 9 pt e foi ajustada para evitar clipping em sidebar compacta.
+- Humor espontâneo ficou mais perceptível após inatividade prolongada, mas continua com probabilidade controlada e cooldown.
+- Adicionado método de diagnóstico “TESTAR HUMOR DO EXATINHO”.
+- Painel do Exatinho recebeu fonte um pouco maior e ações com linguagem mais natural.
+
+Preservação:
+- 13/13 núcleos protegidos permaneceram idênticos por SHA-256/AST.
+- Nenhum motor fiscal, Auditoria ou PDF protegido foi alterado.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- cStat 657 permanece protegido na camada de consulta.
+
+Testes:
+- py_compile/compileall.
+- smoke sob Xvfb.
+- saudação inicial validada.
+- “Bora buscar alguns XML?” validado.
+- humor testável validado.
+- geometria do dock validada sem overflow.
+- comparação dos 13 núcleos protegidos.
+- ZIP final limpo e validado.
+
+Direção:
+- aumentar autonomia, memória de sessão, atenção e expressões do Exatinho.
+- integrar mais o Exatinho ao estado geral da Central sem excesso de fala.

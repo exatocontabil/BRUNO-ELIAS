@@ -1,0 +1,23 @@
+AUDITORIA_V073_TESTE
+
+TESTE REAL PRINCIPAL
+1. Abrir o Exato Central Fiscal V073.
+2. Selecionar/confirmar a empresa.
+3. Selecionar o período da auditoria.
+4. Confirmar que o certificado mostrado na Central é o certificado que deverá ser usado.
+5. Clicar em AUDITAR SAT × XML.
+6. Não selecionar certificado novamente.
+7. O programa deve autenticar o SAT usando o certificado selecionado do Windows.
+8. O fluxo esperado é:
+   Login → CertificateAuth.ashx → redirecionamentos → Apps.aspx → 1. NFe / NFCe - Consulta.
+9. Se o SAT estiver lento, aguardar a conclusão; não interpretar alguns segundos como falha.
+10. Executar as consultas de NF-e/NFC-e e exportar os resultados automaticamente.
+11. Comparar os documentos oficiais obtidos com os XMLs armazenados na Central.
+12. Conferir principalmente número da nota, data e valor.
+
+ARQUIVOS DE DIAGNÓSTICO
+A execução cria SAT_AUDITORIA/<CNPJ>_<data_hora>/AUTENTICACAO_SAT.txt.
+Esse arquivo registra a cadeia HTTP e a quantidade de cookies, sem registrar valores de cookies ou material de chave privada.
+
+NF-e
+Confirmar também, em uma atualização normal de Documentos Fiscais, que NF-e de saída e NF-e de entrada continuam sendo capturadas.

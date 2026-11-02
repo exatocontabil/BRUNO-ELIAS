@@ -1,0 +1,53 @@
+V133 — ESCOLHA DA PASTA AO SALVAR XMLs
+
+BASE
+- V132.
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Corrigir exclusivamente o fluxo do botão “SALVAR XMLs” da tela Documentos Fiscais.
+- O usuário deve sempre poder escolher a pasta de destino no momento da exportação dos XMLs já armazenados no Arquivo Fiscal Local.
+
+ALTERAÇÃO IMPLEMENTADA
+- “SALVAR XMLs” agora sempre abre o seletor de pasta.
+- A pasta previamente configurada na Busca Automática é usada apenas como ponto inicial do diálogo, para facilitar a navegação; ela não bloqueia a escolha de outro destino.
+- A pasta escolhida passa a ser a nova pasta raiz configurada para exportações posteriores.
+- Cancelar o seletor interrompe a exportação sem qualquer alteração nos documentos fiscais.
+- A exportação continua usando exclusivamente os XMLs já persistidos no Arquivo Fiscal Local, sem nova consulta fiscal.
+- A estrutura de organização existente permanece a mesma.
+
+PRESERVAÇÃO
+- Nenhum núcleo fiscal protegido foi alterado.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- Auditoria permanece intacta.
+- Geração de representação fiscal permanece intacta.
+- `save_documents_organized` permanece idêntica à V132.
+- `generate_documents_pdf` permanece intacta.
+- Busca Automática Multiempresas permanece intacta.
+- Arquivo Fiscal Local permanece intacto.
+- Busca Global continua registrada como pendência separada.
+
+NÚCLEOS PROTEGIDOS
+- Comparação V132 → V133 por SHA-256 sobre AST/source.
+- Resultado: 13/13 idênticos.
+- Arquivo: documentacao/V133_PROTECAO_NUCLEOS_SHA256.txt.
+
+TESTES REALIZADOS
+- `py_compile`.
+- `compileall`.
+- Teste específico V133 garantindo que o seletor de pasta é chamado sempre e recebe a pasta configurada anteriormente como `initialdir` quando válida.
+- Teste específico de exportação de XML persistido para uma nova pasta escolhida, sem nova consulta fiscal.
+- Teste da ação na tela Documentos Fiscais com seleção de documento.
+- Regressão do Arquivo Fiscal Local V131.
+- Teste visual da ação SALVAR XMLs V132.
+- Comparação dos 13 núcleos protegidos.
+- Extração e inspeção do pacote final.
+
+OBSERVAÇÃO SOBRE TESTES HISTÓRICOS
+- O teste `test_v130_multicompany_confirmation.py` foi executado e interrompido apenas por sua asserção fixa `APP_VERSION == 'V130'`, não por falha funcional da V133. Testes históricos com versão fixa devem ser considerados testes arquivados da versão original.
+
+PENDÊNCIAS / PRÓXIMOS PASSOS
+- Corrigir Busca Global para pesquisar de forma confiável por nome da empresa, CNPJ, número, série, chave, tipo e valor.
+- Continuar evolução do Exatinho sem comprometer núcleos fiscais.
+- Evoluir Busca Automática Multiempresas conforme feedback prático.
+- Manter continuidade cumulativa em arquivo TXT em cada nova versão.

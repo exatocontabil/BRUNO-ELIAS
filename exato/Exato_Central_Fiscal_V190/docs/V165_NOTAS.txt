@@ -1,0 +1,20 @@
+V165 — ATUALIZAÇÃO AUTOMÁTICA DE TODAS AS EMPRESAS (A CADA 4 HORAS)
+
+PEDIDO DO USUÁRIO
+- Empresa nova cadastrada não era buscada sozinha. Decisões: rodada a cada 4 horas; empresas sem certificado neste computador são puladas em silêncio, com um único aviso resumido; aceitar as duas melhorias do repositório (passada rápida e marcação compartilhada).
+
+O QUE FOI FEITO
+1. Atualização automática (tela Buscar XML) = rodada em TODAS as empresas: NF-e/NFC-e/CT-e com o certificado escolhido (fila da Busca Automática, sem janela) e depois NFS-e das empresas com certificado instalado. Executa ao abrir (quando já passou de 4 h) e a cada 4 h; ocupado com outra busca/auditoria: tenta de novo em 5 min; sem nada a fazer (ex.: sem certificado): tenta em 30 min.
+2. Relógio gravado (auto_round_last): fechar/abrir o Exato não perde o ritmo; corrige a falha em que a opção parava até a próxima busca manual.
+3. Silêncio: nenhuma janela; avisos individuais (por empresa) omitidos durante a rodada; no fim UM aviso resumido (laranja se houver ponto de atenção). Restaura a empresa/período que estavam na tela.
+4. Empresa nova (cadastro ou importação do Excel): pergunta "Buscar notas agora?" e, se sim, roda só para ela; se não, entra na próxima rodada.
+5. Repositório: passada rápida (lista a pasta uma vez e compara tamanho; não abre arquivo pela rede); a conferência por SHA-256 continua por amostra diária. A "marcação compartilhada pela Central" foi trocada por uma solução melhor: a própria pasta do servidor é a fonte da verdade (vale mesmo com a Central fora do ar). Motivo: gravar essa marca em document_exports faria todas as notas aparecerem como "Exportado" e confundiria o alerta de nota cancelada já exportada.
+
+REVISÃO FEITA NESTA VERSÃO (regra do usuário)
+- Releitura do diff; rodada simulada com 3 empresas (visita todas, restaura a tela, 1 só aviso, nenhuma janela); caso sem certificado; ocupado; relógio; empresa nova; passada rápida sem ler arquivos.
+- Armadilhas: avisos de eventos por empresa durante a rodada (suprimidos); rodada travada (libera após 3 h); NFS-e sem aviso duplicado (quiet).
+- Simulação de roda/touchpad em todas as telas (inclusive Repositório): 0 erros; captura da tela Buscar XML em 1366x650 (rótulo longo quebra bem).
+
+A CONFERIR NO WINDOWS
+- Com o certificado selecionado, deixar o Exato aberto: a rodada começa 1 min depois de abrir (se passou de 4 h) e termina com o aviso resumido.
+- Empresas cujo certificado escolhido não tem permissão aparecerão como "com observação" a cada rodada (detalhe no Histórico).

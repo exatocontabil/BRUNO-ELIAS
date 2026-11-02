@@ -1,0 +1,15 @@
+V101 — PROTEÇÃO DOS NÚCLEOS FISCAIS
+Comparação: V100 → V101
+
+Os corpos das 9 funções protegidas foram comparados por SHA-256 do segmento-fonte após análise AST.
+_audit_build_rows: OK — idêntico
+_audit_compare_pair: OK — idêntico
+_audit_fallback_key: OK — idêntico
+_audit_key: OK — idêntico
+_audit_xml_rows: OK — idêntico
+choose_nfe_actor: OK — idêntico
+mark_nfe_sync_cycle: OK — idêntico
+sync_documents_automatically: OK — idêntico
+test_sef_nfe_webservice: OK — idêntico
+
+RESULTADO: 9/9 núcleos protegidos sem alteração de corpo.

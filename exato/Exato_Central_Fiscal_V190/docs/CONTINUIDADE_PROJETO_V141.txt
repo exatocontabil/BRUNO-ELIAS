@@ -1,0 +1,25 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL V141
+
+BASE ATUAL
+- V141 é a evolução autorizada da V140.
+- V137 continua como referência visual congelada.
+- V140 continua como base arquitetural da Central Compartilhada.
+
+MUDANÇAS DA V141
+- Servidor Exato com inicialização automática no Windows por usuário (registro HKCU\Software\Microsoft\Windows\CurrentVersion\Run).
+- Status visual da Central no cabeçalho.
+- Novo painel CENTRAL COMPARTILHADA na Manutenção.
+- Saúde operacional com conectividade, sincronização, autostart e backup.
+- Backup automático diário no processo do Servidor Central, preservando a função de backup manual existente.
+- Retenção padrão de até 30 backups automáticos; backups manuais e pré-atualização não são removidos pela rotina automática.
+
+PROTEÇÕES
+- Os 13 núcleos fiscais protegidos da V140 não foram modificados.
+- Assets visuais oficiais não foram modificados.
+- Arquivo Fiscal Local e exportação posterior permanecem preservados.
+- Nenhuma consulta fiscal foi alterada para implementar estas funções.
+
+REGRA DE CONTINUIDADE
+- Não alterar núcleos fiscais protegidos sem autorização explícita.
+- Só criar Vxxx após autorização explícita.
+- V141 deve ser validada em duas máquinas reais do escritório antes de considerar a Central operacionalmente aprovada.

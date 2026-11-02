@@ -1,0 +1,23 @@
+V115 CHECKLIST
+
+[OK] Base técnica V114 preservada.
+[OK] APP_VERSION atualizado para V115.
+[OK] Exato IA ganhou camada de estados comportamentais e transições contextuais.
+[OK] Olhar 2D, micro-saccades, respiração baseada em tempo e microgestos preservados/evoluídos.
+[OK] Reação contextual a cliques implementada sem substituir handlers fiscais.
+[OK] Frases espontâneas ficaram mais silenciosas e contextuais.
+[OK] Relatório de Documentos Fiscais com paginação coerente.
+[OK] EXATO IA — ENTRADA recomposto.
+[OK] EXATO IA — SAÍDA integrado à última página dos documentos de saída quando compatível.
+[OK] Exemplo equivalente ao PDF analisado: 6 páginas físicas.
+[OK] Página 7 exclusiva e praticamente vazia eliminada.
+[OK] PDF fiscal individual/representação fiscal não foi alterado.
+[OK] 12/13 funções protegidas permaneceram idênticas à V114 por SHA-256.
+[OK] Única função protegida alterada: generate_documents_pdf, por autorização explícita para correção do relatório.
+[OK] py_compile de todos os arquivos.
+[OK] Testes de exportação V098/V099 executados.
+[OK] Teste de regressão V115 (NF-e, Auditoria, IA QA, proteção) executado.
+[OK] Teste do motor Exato IA V115 executado.
+[OK] Smoke test de inicialização/UI V115 executado sob Xvfb.
+[OK] Preview visual de página 2, 3 e 6 conferido.
+[OK] __pycache__, .pyc e temporários de desenvolvimento removidos do pacote final.

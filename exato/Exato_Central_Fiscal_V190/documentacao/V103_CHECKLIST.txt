@@ -1,0 +1,17 @@
+EXATO CENTRAL FISCAL — V103 CHECKLIST
+
+[OK] APP_VERSION = V103
+[OK] py_compile
+[OK] Auditoria permite selecionar NF-e e NFC-e simultaneamente
+[OK] Cada tipo é conciliado de forma independente
+[OK] Múltiplos Excel(s) do mesmo tipo são agrupados e deduplicados
+[OK] Mistura de tipos dentro de um único arquivo é rejeitada
+[OK] Tipo não identificado com segurança é rejeitado
+[OK] Resultado consolidado preserva subresultados por tipo
+[OK] Exato IA roteia perguntas explícitas para o tipo correspondente
+[OK] PDF multi-tipo validado
+[OK] UI smoke validado
+[OK] 9/9 núcleos fiscais protegidos
+[OK] 4/4 funções de PDF preservadas
+[OK] pacote final com uma única pasta raiz
+[OK] sem __pycache__ / .pyc

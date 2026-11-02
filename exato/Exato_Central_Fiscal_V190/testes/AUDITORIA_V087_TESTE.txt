@@ -1,0 +1,43 @@
+V087 - REGISTRO DE TESTES
+
+PDF / IDENTIDADE VISUAL
+-----------------------
+- Geração do PDF de Auditoria Fiscal: OK
+- Renderização com pdfium: OK
+- PDF final de teste: 2 páginas com 49 documentos
+- Verificação visual da primeira página: OK
+- Verificação visual da continuação da tabela: OK
+- Sem campo FONTE no PDF
+- Sem bloco PRINCIPAIS INSIGHTS no PDF
+- Sem lista técnica de arquivos/fontes no PDF
+- Cabeçalho preto/vermelho, KPIs vivos, status, Exato IA, próxima etapa e rodapé Exato: OK
+
+ABA AUDITORIA
+-------------
+- Interface inicial carregou em Xvfb: OK
+- Novo layout visual alinhado ao PDF: OK
+- Bloco de insights removido: OK
+- Bloco PRÓXIMA ETAPA presente: OK
+- Banner de STATUS presente: OK
+- Tabela e paginação preservadas: OK
+
+PRESERVAÇÃO FISCAL
+------------------
+Comparação AST V085 x V087:
+- audit_sat_excel_against_xml: INALTERADA
+- test_sef_nfe_webservice: INALTERADA
+- sync_documents_automatically: INALTERADA
+- _run_sync_all: INALTERADA
+- _capture_next_batch: INALTERADA
+- db_upsert_documents: INALTERADA
+- _parse_document_metadata: INALTERADA
+
+TESTES DE STATUS DO PDF
+-----------------------
+- CONFORME: OK
+- ATENÇÃO: OK
+- DIVERGÊNCIA: OK
+
+OBSERVAÇÃO
+----------
+V087 é uma evolução visual baseada na V085 validada. A V085 permanece intacta. Os motores de Auditoria SAT x XML e captura/busca de NF-e não foram alterados.

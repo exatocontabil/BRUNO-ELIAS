@@ -1,0 +1,11 @@
+V108 - NOTAS
+
+Base: V107.
+Objetivos desta versão:
+1. Relatório da Auditoria Fiscal multi-tipo: reconstrução da primeira página executiva com layout Editorial Premium fiel à referência aprovada (Opção 2), usando composição de coordenadas fixas para estabilidade visual.
+2. Manter NF-e e NFC-e em cards independentes, com KPIs consolidados e análise executiva da Exato IA.
+3. Mascote Exato IA: uso de ativos RGBA transparentes, enquadramento seguro e preservação de proporção; quando houver balão de fala no asset, ele permanece visível.
+4. Tela de Auditoria: mascote passa a utilizar assets transparentes e a acompanhar o fundo do painel de IA, evitando retângulo branco/opaco.
+5. Não alterar os motores protegidos de conciliação NF-e/Auditoria nem as funções de PDF fiscal congeladas.
+
+Validação visual: PDF multi-tipo renderizado com pdfium e conferido para clipping/overlap.

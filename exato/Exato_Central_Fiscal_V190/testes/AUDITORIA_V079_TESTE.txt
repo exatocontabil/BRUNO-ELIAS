@@ -1,0 +1,21 @@
+EXATO CENTRAL FISCAL — V079 — TESTE E CONTINUIDADE
+
+Principais correções/consolidações:
+1. Playwright/Edge: corrigida a inicialização do perfil temporário usando launch_persistent_context, removendo o erro da V078 relacionado a --user-data-dir em browser_type.launch().
+2. SAT: mantido o fluxo Login → certificado → Apps.aspx → NFe/NFCe → POST/XHR Buscar, com certificado selecionado no Windows e fallback nativo do diálogo de certificado.
+3. Certificado: o CNPJ/CPF não é exibido no cartão da tela Documentos Fiscais; o certificado salvo continua sendo identificado pelo thumbprint interno.
+4. NF-e: preservados os fluxos independentes indAtor=1 (Emitente/Saída) e indAtor=2 (Destinatário/Entrada).
+5. NFC-e e CT-e preservados.
+6. Auditoria SAT × XML preservada, incluindo normalização de chave e comparação por chave/número/data/valor.
+7. Redesign: refinada a tela Documentos Fiscais e Auditoria segundo a referência da Opção 2 — Dashboard Visual, com cards, indicadores, mini-gráficos e resumo do período.
+
+VALIDAÇÕES LOCAIS:
+- py_compile: OK
+- importação do módulo: OK
+- GUI smoke test: OK (Documentos, Auditoria, Dashboard)
+- verificação estrutural do filtro de certificado: OK
+- presença de launch_persistent_context: OK
+- arquitetura NF-e indAtor 1/2 preservada: OK
+
+PENDÊNCIA EXTERNA:
+- autenticação real no SAT deve ser validada no Windows do usuário, pois depende do certificado instalado e do comportamento real do portal.

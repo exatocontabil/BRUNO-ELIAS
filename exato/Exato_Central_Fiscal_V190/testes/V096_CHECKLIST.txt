@@ -1,0 +1,8 @@
+V096 — CHECKLIST
+
+[OK] Organização XML por Entrada/Saída antes do tipo
+[OK] PDF consolidado continua único por tipo/mês, sem fragmentação por direção
+[OK] DANFE NF-e tradicional — smoke test
+[OK] Abertura/geração de representação na Auditoria preservada
+[OK] Assets oficiais de continuidade incorporados
+[OK] Proteção dos núcleos fiscais validada por hash

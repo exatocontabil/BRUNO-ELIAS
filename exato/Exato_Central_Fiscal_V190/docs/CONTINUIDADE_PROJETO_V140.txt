@@ -1,0 +1,66 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL V140
+
+ESTADO ATUAL
+- V140 é a nova versão trabalhada a partir da V139.
+- V137 continua sendo a referência visual congelada.
+- V140 introduz a primeira camada funcional de Central Compartilhada para duas ou mais máquinas na mesma rede local.
+
+DIRETRIZES ABSOLUTAS
+1. Não quebrar funcionalidades validadas.
+2. Não alterar núcleos fiscais protegidos sem autorização explícita.
+3. Não criar versão sem autorização explícita.
+4. Preservar Exatinho, logos, assets, sidebar, header e identidade visual.
+5. Preservar Arquivo Fiscal Local e exportação posterior sem nova consulta fiscal.
+
+CENTRAL COMPARTILHADA
+Servidor:
+- `exato_central_server.py`
+- porta padrão 8765
+- base fiscal e banco de usuários persistentes do computador servidor.
+
+Cliente:
+- `central_client.py`
+- configuração em `config.json` → `central_sync`
+- sincronização automática a cada ~30 segundos após a entrada na Central.
+- botão manual SINCRONIZAR CENTRAL AGORA.
+
+DADOS COMPARTILHADOS
+- autenticação de usuários;
+- usuários e status;
+- cadastro e alteração de senhas;
+- solicitações de recuperação;
+- atividades;
+- empresas;
+- documentos fiscais;
+- histórico de exportações.
+
+SYNC
+- empresas/documentos/exportações usam `central_updated_at`;
+- cliente usa outbox local;
+- servidor mantém uma linha temporal monotônica por microssegundos;
+- pull paginado usa `since` + `cutoff` para não perder alterações;
+- registros antigos do servidor recebem timestamp inicial no primeiro start.
+
+SEGURANÇA
+- Token de conexão é obrigatório.
+- Operações autenticadas usam token de sessão.
+- O arquivo de conexão deve ser protegido.
+- V140 deve operar em rede local confiável; não expor a porta 8765 à internet.
+
+USUÁRIOS
+- cadastro novo entra ativo imediatamente;
+- não há aprovação administrativa;
+- administrador pode bloquear, reativar e redefinir;
+- recuperação “Esqueci minha senha” permanece administrada pelo sistema;
+- sincronização central resolve a visibilidade de usuários entre máquinas.
+
+PRÓXIMOS PASSOS POSSÍVEIS
+- melhorar indicação visual online/offline da Central;
+- criar instalação/serviço do servidor para inicialização automática do Windows;
+- adicionar recuperação automática por e-mail;
+- evoluir permissões por perfil;
+- estudar resolução de conflitos mais avançada;
+- estudar sincronização segura entre redes externas quando houver necessidade.
+
+IMPORTANTE
+A V140 foi desenhada para ser a base compartilhada, mas a validação prática nas duas máquinas reais do escritório ainda deve ser feita pelo usuário antes de considerar a arquitetura operacionalmente aprovada.

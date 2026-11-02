@@ -1,0 +1,63 @@
+V131 — ARQUIVO FISCAL LOCAL / EXPORTAÇÃO POSTERGADA
+
+BASE
+- V130.
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Permitir que XMLs capturados hoje permaneçam armazenados dentro da Central Fiscal e possam ser exportados posteriormente, sem uma nova consulta à SEF/SC.
+
+ALTERAÇÕES IMPLEMENTADAS
+- Reforçada a transparência do armazenamento persistente local com a nova área “ARQUIVO FISCAL LOCAL” na tela de consulta.
+- A área informa a quantidade de documentos autorizados armazenados localmente e a última captura conhecida.
+- Incluído botão contextual “SALVAR AGORA”, reutilizando o fluxo de exportação já validado.
+- Quando a empresa e o período estão confirmados e existem documentos armazenados naquele período, os controles “SALVAR XMLs + PDFs” e “SALVAR AGORA” ficam habilitados mesmo que a última captura tenha ocorrido em outro momento ou em sessão anterior.
+- A confirmação de período agora informa explicitamente quando já existem documentos locais disponíveis no intervalo selecionado e permite salvá-los sem nova busca.
+- A exportação passa a deixar explícito no resultado/status que está usando o Arquivo Fiscal Local e que não haverá nova consulta fiscal.
+- O contador de disponibilidade para exportação é calculado diretamente do banco SQLite persistente, respeitando o período selecionado.
+- Nenhuma alteração foi feita no motor de captura ou na função protegida `save_documents_organized`; a exportação continua reutilizando o fluxo fiscal existente.
+
+COMPORTAMENTO RESULTANTE
+1. Buscar XML hoje.
+2. Os documentos são armazenados no banco fiscal local persistente.
+3. Fechar o programa.
+4. Abrir novamente e confirmar empresa/período.
+5. A Central reconhece os documentos já armazenados naquele período.
+6. O usuário pode clicar em “SALVAR XMLs + PDFs” ou “SALVAR AGORA”.
+7. A exportação usa os XMLs já armazenados e não executa nova busca na SEF/SC.
+
+ORGANIZAÇÃO DE EXPORTAÇÃO
+- Mantida integralmente a estrutura validada:
+  Empresa → Ano → Mês → Entrada/Saída → tipo documental.
+- PDFs individuais e consolidados permanecem na pasta do respectivo tipo documental.
+- Não é criada a pasta “PDFs Fiscais”.
+
+PRESERVAÇÃO
+- Núcleos fiscais protegidos não foram alterados.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- Tratamento de cStat 657 permanece inalterado.
+- Auditoria permanece intacta.
+- PDF/report engine permanece intacto.
+- Busca Automática Multiempresas da V130 permanece intacta.
+- Busca Global continua registrada como pendência separada para futura correção.
+
+NÚCLEOS PROTEGIDOS
+- Comparação V130 → V131 por SHA-256 sobre AST/source.
+- Resultado: 13/13 idênticos.
+- Arquivo: documentacao/V131_PROTECAO_NUCLEOS_SHA256.txt.
+
+TESTES REALIZADOS
+- `py_compile` do arquivo principal.
+- `compileall` do projeto.
+- `test_v131_local_archive.py`: persistência + exportação posterior a partir do banco local.
+- `test_v131_ui_archive.py`: presença do painel, carregamento de documento persistido após simulação de reinício e habilitação dos controles de exportação.
+- Smoke da interface via Xvfb: abertura da tela de busca e existência dos controles “Arquivo Fiscal Local” e “Salvar agora”.
+- `test_v120_office_center.py`: aprovado como regressão aplicável.
+- Comparação dos 13 núcleos protegidos: 13/13 idênticos.
+- Testes históricos que exigem `APP_VERSION` fixo de V120/V123/V128/V130 foram identificados como testes de versão anterior e não foram tratados como falha da V131.
+- ZIP final extraído e conferido após limpeza.
+
+PENDÊNCIAS / PRÓXIMOS PASSOS
+- Busca Global: ainda precisa de correção para localizar empresas/documentos por nome de forma confiável.
+- Busca Automática Multiempresas: permanece disponível e validada desde V130.
+- Evolução do Exatinho segue em paralelo.

@@ -1,0 +1,53 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL
+
+BASE ATUAL: V134
+
+A V134 foi criada a partir da V133 com foco no Arquivo Fiscal Local 2.0. A regra central permanece: não quebrar funcionalidades validadas, não alterar núcleos protegidos sem autorização explícita e registrar toda evolução em arquivos TXT cumulativos.
+
+CONTEXTO PERMANENTE
+- Exato Central Fiscal é o projeto de continuidade.
+- Exatinho é o personagem masculino da Exato IA.
+- Exato IA permanece como denominação técnica da inteligência.
+- A persistência local dos XMLs é um requisito essencial: um XML capturado deve continuar disponível após reiniciar o programa e pode ser exportado quando o usuário quiser, sem nova consulta fiscal.
+- `SALVAR XMLs` deve sempre permitir escolha de pasta e exportar do Arquivo Fiscal Local, sem nova consulta.
+- `SALVAR XMLs NOVOS` considera apenas documentos ainda não registrados como exportados para a pasta escolhida.
+- O Arquivo Fiscal Local mantém histórico de exportação por documento e destino.
+- A organização fiscal exportada permanece Empresa → Ano → Mês → Entrada/Saída → tipo documental, sem pasta “PDFs Fiscais”.
+- O relatório separa NF-e e NFC-e e seus cards do Exatinho permanecem com textos curtos e sem overflow.
+- Nenhum texto em card deve ultrapassar suas bordas.
+
+V134 — O QUE FOI FEITO
+- Criada tabela `document_exports` para registrar exportações por documento e pasta destino.
+- Documentos Fiscais ganhou coluna Exportação e filtro Exportado/Não exportado.
+- Criado `SALVAR XMLs NOVOS`.
+- Indicador do Arquivo Fiscal Local passou a mostrar quantidade, tamanho aproximado e cobertura de exportação.
+- Pesquisa local ampliada para CNPJ, valor, movimentação e data.
+- Manutenção ganhou restauração segura do Arquivo Fiscal Local, sempre com backup de segurança e verificação de integridade antes da troca.
+- Os 13 núcleos protegidos da V133 permaneceram idênticos por SHA-256/AST.
+
+NÚCLEOS PROTEGIDOS
+1. _audit_build_rows
+2. _audit_compare_pair
+3. _audit_fallback_key
+4. _audit_key
+5. _audit_xml_rows
+6. choose_nfe_actor
+7. mark_nfe_sync_cycle
+8. sync_documents_automatically
+9. test_sef_nfe_webservice
+10. generate_fiscal_representation_pdf
+11. open_document_fiscal_representation
+12. save_documents_organized
+13. generate_documents_pdf
+
+PENDÊNCIAS E PRÓXIMAS IDEIAS
+- Busca Global confiável por empresa/número/chave/tipo/valor.
+- Evolução contínua do Exatinho: autonomia, memória de sessão, atenção, expressões, humor contextual, iniciativa e silêncio inteligente.
+- Centro operacional: pesquisa universal, pendências, histórico e diagnóstico.
+- Cuidado especial com cStat 657; não presumir bloqueio por consumo indevido e não modificar o motor NF-e protegido sem investigação.
+
+REGRAS DE VERSÃO
+- Só criar nova Vxxx mediante autorização expressa.
+- Não corrigir versão antiga silenciosamente.
+- Preservar núcleos protegidos e validar regressão antes de empacotar.
+- Gerar `Vxxx_NOTAS.txt` e continuidade cumulativa a cada versão.

@@ -1,0 +1,24 @@
+V116 CHECKLIST
+
+[OK] Base técnica V115 preservada.
+[OK] APP_VERSION atualizado para V116.
+[OK] Textos do EXATO IA — ENTRADA/SAÍDA reduzidos sem alterar a origem dos dados.
+[OK] Texto do EXATO IA — ANÁLISE DO PERÍODO reduzido.
+[OK] Fallback de Pontos de Atenção evita duplicações idênticas.
+[OK] Paginação das tabelas passou a considerar altura real das linhas.
+[OK] Relatório equivalente ao PDF analisado permanece com 6 páginas.
+[OK] Paginação coerente 1 de 6 ... 6 de 6.
+[OK] EXATO IA — ENTRADA permanece dentro do card.
+[OK] EXATO IA — SAÍDA permanece dentro do card e na última página.
+[OK] Nenhum texto de card ultrapassa visualmente os limites no preview revisado.
+[OK] PDF fiscal individual/representação fiscal não foi alterado.
+[OK] Núcleos fiscais protegidos não foram alterados.
+[OK] Única função protegida alterada: generate_documents_pdf.
+[OK] py_compile de todos os arquivos .py.
+[OK] Regressão NF-e.
+[OK] Regressão Auditoria multi-tipo + PDF.
+[OK] Regressão Exato IA / perguntas contextuais.
+[OK] Teste do motor Exato IA.
+[OK] Smoke test de inicialização/UI sob Xvfb.
+[OK] Preview visual das páginas críticas do relatório.
+[OK] __pycache__, .pyc e temporários de desenvolvimento removidos do pacote final.

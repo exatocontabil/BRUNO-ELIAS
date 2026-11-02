@@ -1,0 +1,57 @@
+V127 — EXATINHO: PAINEL EXPANSÍVEL E ZERO CLIPPING DE TEXTO
+
+BASE
+- V126
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Corrigir o corte de palavras observado no painel lateral do Exatinho.
+- Aumentar o espaço disponível para mensagens e contexto sem reduzir a legibilidade.
+- Manter o workspace preservado quando o painel não estiver aberto.
+- Garantir quebra automática real de mensagens, empresa, atividade recente e status.
+
+EXATINHO — PAINEL
+- A sidebar normal permanece com 214 px.
+- Ao abrir o painel do Exatinho, a sidebar expande temporariamente para 282 px.
+- Ao fechar o painel, a sidebar retorna para 214 px.
+- A expansão é feita sem alterar a área fiscal e sem criar nova janela.
+- O painel utiliza a largura efetiva da sidebar para calcular o wrap dos textos.
+- Saudação/contexto do Exatinho, empresa, atividade recente e demais mensagens passam a se adaptar à largura disponível.
+- Removido truncamento manual do nome da empresa no cartão de contexto.
+- Conteúdo pode quebrar em múltiplas linhas quando necessário, em vez de ser cortado.
+- A solução evita depender de redução agressiva da fonte.
+
+PROBLEMA CORRIGIDO
+- Antes: mensagens como “Há pontos que merecem atenção...” e nomes extensos como “ELYON CASA DA PISCINAS LTDA” podiam ficar cortados no painel compacto.
+- Agora: o painel aberto possui largura suficiente e wrap calculado dinamicamente.
+- Teste visual com mensagem de atenção e nome empresarial longo confirmou o texto integralmente contido no painel.
+
+EXATINHO — PRESERVAÇÃO
+- Mantidos nome oficial Exatinho e motor Exato IA.
+- Mantidas memória curta, abertura, humor, expressões, atenção contextual e painel próprio introduzidos nas versões anteriores.
+- Nenhum evento fiscal protegido foi alterado nesta versão.
+
+PRESERVAÇÃO DOS NÚCLEOS
+- 13/13 núcleos protegidos permaneceram idênticos à V126 por SHA-256 sobre o segmento AST/source das funções protegidas.
+- Nenhuma função fiscal/auditoria/PDF protegida foi modificada.
+
+TESTES REALIZADOS
+- py_compile de exato_central_fiscal.py.
+- compileall do projeto.
+- Teste V122_IA_BEHAVIOR_ENGINE_OK executado sob Xvfb.
+- Smoke da aplicação sob Xvfb.
+- Teste específico de abertura/fechamento do painel do Exatinho:
+  sidebar base = 214 px; sidebar expandida = 282 px; retorno = 214 px.
+- Teste específico com mensagem longa de atenção + empresa longa, confirmando wrap sem clipping.
+- Inspeção visual do painel renderizado.
+- Comparação dos 13 núcleos protegidos entre a V126 original e a V127.
+- ZIP final validado e limpeza de __pycache__/pyc/temporários.
+
+OBSERVAÇÃO SOBRE TESTES HISTÓRICOS
+- O teste testes/test_v104_audit_corrections.py não é aplicável diretamente à V127 porque contém uma asserção fixa APP_VERSION == V104. Ele foi identificado como teste de versão histórica, não como falha da V127.
+
+DIREÇÃO PARA A PRÓXIMA VERSÃO
+- Continuar a autonomia do Exatinho.
+- Integrar melhor resumo da sessão, pendências, histórico e recomendações.
+- Explorar iniciativas contextuais sem excesso de fala.
+- Manter regra: nenhum texto do Exatinho pode ser visualmente truncado.

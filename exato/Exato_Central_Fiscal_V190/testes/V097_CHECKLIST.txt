@@ -1,0 +1,13 @@
+V097 — CHECKLIST
+
+[OK] Entrada/Saída antes do tipo documental para XMLs
+[OK] PDFs consolidados dentro da pasta NF-e/NFC-e/CT-e correspondente
+[OK] Pasta “PDFs Fiscais” não é criada pelo exportador
+[OK] NF-e usa referência fiscal tradicional enviada pelo usuário
+[OK] NFC-e usa referência fiscal tradicional enviada pelo usuário
+[OK] Referências PDF do usuário incorporadas ao pacote
+[OK] Brasão de Santa Catarina incorporado aos assets
+[OK] Compilação
+[OK] Smoke test de renderização NF-e/NFC-e
+[OK] Smoke test de exportação e caminhos
+[OK] Preservação dos 9 núcleos protegidos por SHA-256

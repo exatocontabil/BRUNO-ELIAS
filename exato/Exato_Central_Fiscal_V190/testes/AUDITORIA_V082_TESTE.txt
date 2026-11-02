@@ -1,0 +1,13 @@
+AUDITORIA V082 — TESTE MANUAL
+
+1. Abra o SAT manualmente e faça a consulta oficial do período desejado.
+2. Exporte o Excel oficial do SAT.
+3. Se houver consultas separadas (ex.: emitente e destinatário), selecione os dois arquivos na tela Auditoria.
+4. No Exato Central Fiscal, use IMPORTAR EXCEL DO SAT.
+5. Confira os cards SAT / XMLs / SAT sem XML / XML sem SAT / Diferença.
+6. Confira a lista de divergências de número, data e valor.
+7. Clique em GERAR PDF.
+8. Verifique no PDF os documentos que faltaram em cada lado e as diferenças financeiras.
+9. Durante leitura/comparação, teste CANCELAR AUDITORIA apenas quando desejar interromper a operação.
+
+Observação: nesta versão a Auditoria usa o Excel oficial exportado pelo SAT. Nenhum navegador é aberto pela Auditoria.

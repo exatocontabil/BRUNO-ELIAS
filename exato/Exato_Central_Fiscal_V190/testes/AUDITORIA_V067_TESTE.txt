@@ -1,0 +1,15 @@
+Exato Central Fiscal — V067
+
+Testes locais realizados antes da distribuição:
+- compilação Python do arquivo principal;
+- importação do módulo;
+- criação/atualização das tabelas de banco;
+- teste de merge de banco em instalação anterior;
+- teste da lógica de bootstrap NF-e indAtor=9 sem acesso à SEF;
+- teste da preservação de checkpoints existentes;
+- teste para impedir a chamada imediata do segundo ator após respostas 117/137/110/657;
+- verificação da captura por múltiplos lotes usando respostas sintéticas;
+- integridade do pacote ZIP.
+
+Limitação do teste local:
+A autenticação real no Web Service da SEF/SC exige o certificado digital instalado no Windows do usuário.

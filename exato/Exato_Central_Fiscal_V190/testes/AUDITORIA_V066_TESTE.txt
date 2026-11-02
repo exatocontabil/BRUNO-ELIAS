@@ -1,0 +1,22 @@
+EXATO CENTRAL FISCAL - V066
+
+TESTE PRIORITÁRIO 1 - NF-e
+1. Abrir Documentos Fiscais.
+2. Selecionar a empresa e o período já utilizados nos testes anteriores.
+3. Clicar em ATUALIZAR DOCUMENTOS FISCAIS.
+4. Confirmar que NF-e não permanece em 0 quando existirem NF-e disponíveis.
+5. Confirmar que Emitente e Destinatário são consultados em fluxos separados.
+6. Confirmar que a captura segue automaticamente de lote em lote até o ponto disponível.
+7. Não clicar repetidamente durante uma captura em andamento.
+
+TESTE PRIORITÁRIO 2 - LAYOUT
+1. Abrir Documentos Fiscais.
+2. Confirmar que a tela inicia no topo e que o conteúdo não fica escondido atrás do cabeçalho.
+3. Rolar a área central verticalmente e confirmar acesso ao conteúdo inferior.
+4. Trocar de aba e confirmar que cada aba reabre no topo.
+
+TESTE PRIORITÁRIO 3 - AUDITORIA SAT
+1. Abrir Auditoria.
+2. Executar AUDITAR SAT × XML com o mesmo certificado usado anteriormente.
+3. Registrar a mensagem final e qualquer diagnóstico de sessão.
+4. Não selecionar Excel manualmente.

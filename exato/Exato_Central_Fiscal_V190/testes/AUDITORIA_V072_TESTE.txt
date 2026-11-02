@@ -1,0 +1,14 @@
+AUDITORIA_V072_TESTE
+
+OBJETIVO DO TESTE REAL
+1. Selecionar empresa e período.
+2. Clicar AUDITAR SAT × XML.
+3. O sistema deve autenticar usando o certificado já selecionado.
+4. O fluxo esperado é Login → default.aspx → Apps.aspx → NFe/NFCe - Consulta.
+5. A consulta deve executar automaticamente e exportar os resultados sem abrir navegador visível ou pedir novo certificado.
+6. Comparar SAT × XML.
+
+OBSERVAÇÕES
+- Se o SAT estiver lento, aguardar a autenticação; não interpretar poucos segundos como falha.
+- A V071 preserva a correção da NF-e de entrada; esse ponto deve continuar funcionando na V072.
+- A pasta SAT_AUDITORIA criada pela execução contém AUTENTICACAO_SAT.txt com a cadeia HTTP sem valores de cookies/chaves privadas.

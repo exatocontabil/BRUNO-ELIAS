@@ -1,0 +1,32 @@
+V092 — CHECKLIST
+
+[OK] Compilação / AST
+[OK] ExatoIAEngine integrado como camada independente
+[OK] Funções protegidas idênticas à V085/V091
+[OK] Perguntas sobre status
+[OK] Perguntas sobre motivo do resultado
+[OK] Perguntas sobre análise geral
+[OK] Perguntas sobre valor conciliado
+[OK] Perguntas sobre valor total SAT
+[OK] Comparação de totais SAT x XML
+[OK] Diferença financeira e percentual
+[OK] Quantidade e percentual de conciliação
+[OK] Lista de documentos sem XML
+[OK] Lista de divergências
+[OK] Prioridade de revisão
+[OK] Maior/menor movimentação
+[OK] Maior divergência financeira
+[OK] Média/ticket médio
+[OK] Concentração por data
+[OK] Perguntas por número de nota
+[OK] Perguntas de continuidade usando memória curta
+[OK] Perguntas de tipo/modelo e período
+[OK] Perguntas abertas com resposta contextual
+[OK] Envio pelo botão PERGUNTAR
+[OK] Envio pelo teclado Enter (binding)
+[OK] Resposta visual “Você / Exato IA”
+[OK] Mascote alterado para estado de dica após interação
+[OK] Tratamento de exceção da interação
+[OK] Geração/renderização de PDF após evolução da IA
+[OK] Não alterado o motor SAT x XML
+[OK] Não alterados os fluxos NF-e

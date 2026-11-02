@@ -1,0 +1,32 @@
+V150 — FEEDBACK DA ABA NFS-e, CADASTRO DE EMPRESA E LINGUAGEM SEM PROGRAMAÇÃO
+
+BASE
+- V150 parte da V149 após o primeiro uso real da aba NFS-e: a consulta pelo certificado trouxe 301 documentos do Emissor Nacional (292 NFS-e e 9 eventos de cancelamento).
+
+FEEDBACK ATENDIDO
+1. CNPJ automático ao escolher o certificado (App._nfse_sync_company_from_certificate): usa o CPF/CNPJ do certificado; só preenche CNPJ válido (e-CPF não preenche); troca ao mudar de certificado; respeita o que o usuário digitou para o mesmo certificado, avisando que o certificado é de outra empresa.
+2. Cadastro individual de empresa (App._open_company_dialog): botão "Nova empresa" em Empresas e na aba NFS-e. CNPJ com máscara e validação, nome buscado automaticamente (lookup_company_name_automatic, em segundo plano), aviso de empresa já cadastrada (abre a existente, sem duplicar).
+3. Período De/Até na busca por certificado e no modo usuário/senha. O ADN entrega por ordem de chegada (NSU), não por data: a busca continua guardando tudo o que é novo e o período filtra lista, PDF e exportação (decisão que evita "pular" notas fora do período em buscas futuras).
+4. Datas e CNPJ com barras/pontos automáticos (attach_date_mask / attach_cnpj_mask) em todos os campos de data: Buscar XML, Documentos, Relatórios, Auditoria, Busca Automática e NFS-e. Digitar, apagar e colar funcionam; valores definidos por código também aparecem formatados.
+5. PDF da relação de NFS-e (generate_nfse_list_pdf): cabeçalho com empresa/CNPJ/período/tipo, resumo (prestados, tomados, canceladas não somadas) e tabela; segue o filtro ou a seleção.
+6. Filtro por tipo: Todas, Prestados, Tomados, Canceladas, Autorizadas, mais busca por número/nome/CNPJ; vale para lista, PDF e XMLs salvos. Contadores: Notas no período, Prestados, Tomados, Canceladas.
+7. Terminologia Prestados/Tomados na aba, no PDF e nas pastas de exportação (Empresa/Ano/Mês/Prestados|Tomados/NFS-e). Internamente a nota continua Entrada/Saída (campo usado pelas demais notas, totais e Central). Em Documentos Fiscais a coluna Movimentação continua Entrada/Saída, igual aos outros tipos.
+8. Correção: coluna Prestador/Tomador em branco. O XML real traz só o CNPJ no bloco do prestador da DPS; o nome vem do bloco do emitente (parse_nfse). Se ainda faltar nome, a tela mostra o CNPJ/CPF.
+
+LINGUAGEM DE PROGRAMAÇÃO FORA DA TELA (pedido do usuário)
+- friendly_message + messagebox.showerror/showwarning/showinfo interceptados: nomes de exceção (…Error, Traceback, "NoneType"), [Errno N] e [WinError N] viram frases em português; o texto original vai para o registro de erros.
+- Mensagens do Emissor Nacional sem a sigla ADN e sem códigos; erro inesperado orienta a abrir o registro de erros.
+- Nome do certificado limpo (sem "CN=" e sem ":CNPJ") no topo, na lista de certificados e na aba NFS-e.
+- "NSU inválido" -> "Posição inválida"; "cStat" -> "Código"; "Último cStat" -> "Último código de retorno".
+- Componente do modo usuário/senha: INSTALAR_COMPONENTE_NFSE.bat no lugar de comando de terminal.
+- Ainda técnico, de propósito: painel de diagnóstico da consulta NF-e (função protegida test_sef_nfe_webservice, com ultNSU/cStat) e o arquivo de registro de erros.
+
+PROTEÇÃO
+- 13/13 núcleos fiscais SAME e 31/31 assets SAME em relação à V145.
+
+TESTES
+- test_v150_feedback (máscaras, CNPJ pelo certificado, filtros, período, busca, PDF lido de volta, exportação por filtro, cadastro de empresa, mensagens) e os testes de NFS-e/produtividade da versão. Suíte completa no GitHub.
+
+LIMITES / A CONFERIR NO WINDOWS
+- Os valores das NFS-e (ex.: R$ 0,23, R$ 0,34) precisam ser conferidos contra o portal: o Exato lê o valor do serviço da DPS (vServ) e, na falta, o valor líquido. Peça ao usuário um XML real (uma prestada e uma tomada) para calibrar nomes e valores.
+- Modo usuário/senha continua sem teste contra o portal real.

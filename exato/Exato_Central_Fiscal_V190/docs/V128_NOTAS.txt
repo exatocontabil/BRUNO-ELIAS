@@ -1,0 +1,108 @@
+V128 — EXATINHO PROATIVO + CENTRAL INTELIGENTE
+
+BASE
+- V127
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Evoluir o Exatinho de personagem reativo para personagem mais proativo e contextual.
+- Dar continuidade à sessão de trabalho.
+- Ajudar o usuário a perceber o próximo passo sem executar ações fiscais automaticamente.
+- Melhorar o diagnóstico visual da Central.
+- Manter a experiência profissional e discreta.
+
+EXATINHO — PRESENÇA PROATIVA
+- Criado mecanismo de sugestões contextuais com atraso, cooldown e bloqueio quando o painel do Exatinho está aberto.
+- Após eventos relevantes, o Exatinho pode sugerir o próximo passo sem executar a ação.
+- Exemplos:
+  - busca concluída com documentos novos -> “Encontrei documentos novos. Quer conferir?”
+  - auditoria com divergência/pendência -> “Tem um ponto que merece sua atenção. Quer que eu mostre?”
+  - auditoria conforme -> “A conferência terminou sem divergências.”
+- A sugestão pode direcionar o olhar do Exatinho para o botão/área relevante através do sistema de atenção existente.
+- Nenhum clique automático é realizado pelo Exatinho.
+
+EXATINHO — RETOMADA DE CONTEXTO
+- Ao abrir a Central, o Exatinho consulta o último histórico operacional disponível localmente.
+- Quando existe contexto útil, a segunda fala de abertura pode sugerir continuidade, por exemplo:
+  “Quer continuar de onde paramos? Encontrei X documento(s) na última operação.”
+- A retomada é apenas informativa e não executa nova consulta automaticamente.
+
+EXATINHO — RESUMO DA SESSÃO
+- O painel do Exatinho passou a apresentar contadores da sessão:
+  - buscas XML;
+  - auditorias;
+  - gerações em lote;
+  - ocorrências de atenção.
+- A memória continua sendo curta e restrita ao contexto operacional da sessão.
+
+DASHBOARD — RESUMO DA SESSÃO
+- Adicionada área “RESUMO DA SESSÃO” no Dashboard.
+- Mostra, em uma frase curta, o que já ocorreu na sessão atual.
+
+BUSCA GLOBAL
+- A janela Ctrl+K já existente foi reforçada com atalhos rápidos para:
+  - Pendências;
+  - Documentos;
+  - Histórico.
+- Mantida a pesquisa local por número, chave, empresa e tipo documental.
+- Não foi introduzido mecanismo genérico de IA para interpretação de consultas nesta versão.
+
+SAÚDE DA CENTRAL
+- Adicionada área visual “SAÚDE DA CENTRAL” na Manutenção.
+- Mostra situação operacional resumida de:
+  - NF-e;
+  - NFC-e;
+  - CT-e;
+  - Certificado;
+  - Último retorno cStat disponível localmente.
+- A área não executa novas consultas fiscais; é apenas observabilidade da sessão/estado atual.
+- cStat 657 continua sendo tratado como divergência do órgão autorizador, não como bloqueio por consumo indevido.
+
+PROTEÇÃO FISCAL
+- Nenhuma requisição SOAP da NF-e foi alterada.
+- Nenhum núcleo de Auditoria foi alterado.
+- Nenhum gerador de documento fiscal protegido foi alterado.
+- Nenhum PDF protegido foi alterado nesta versão.
+
+NÚCLEOS PROTEGIDOS
+- 13/13 permaneceram idênticos à V127 por SHA-256 sobre o segmento AST/source das funções protegidas.
+- Funções protegidas:
+  _audit_build_rows
+  _audit_compare_pair
+  _audit_fallback_key
+  _audit_key
+  _audit_xml_rows
+  choose_nfe_actor
+  mark_nfe_sync_cycle
+  sync_documents_automatically
+  test_sef_nfe_webservice
+  generate_fiscal_representation_pdf
+  open_document_fiscal_representation
+  save_documents_organized
+  generate_documents_pdf
+
+TESTES REALIZADOS
+- py_compile.
+- compileall.
+- Smoke da aplicação sob Xvfb.
+- Teste de abertura/fechamento do painel do Exatinho.
+- Teste da nova camada de sugestões proativas.
+- Teste do foco lógico do Exatinho no próximo passo.
+- Teste de retomada de contexto de sessão.
+- Teste do resumo da sessão no painel.
+- Teste da nova área Saúde da Central.
+- Teste Ctrl+K/atalhos rápidos.
+- Regressão do cStat 656/657.
+- Regressão visual do relatório PDF da V123/V118, que permanece sem alteração nesta versão.
+- Comparação SHA-256/AST dos 13 núcleos protegidos.
+- ZIP final validado e limpo.
+
+OBSERVAÇÕES
+- Alguns testes históricos possuem asserções fixas da versão em que foram criados e não são considerados falhas da V128 por si só.
+- A evolução da inteligência do Exatinho permanece separada dos motores fiscais protegidos.
+
+DIREÇÃO FUTURA
+- Evoluir o Motor de Contexto do Exatinho.
+- Tornar as sugestões de próximo passo ainda mais sensíveis ao contexto real.
+- Ampliar o Resumo da Sessão e retomada entre sessões sem transformar o personagem em um chatbot invasivo.
+- Continuar trabalhando autonomia, humor, expressões, silêncio e timing.

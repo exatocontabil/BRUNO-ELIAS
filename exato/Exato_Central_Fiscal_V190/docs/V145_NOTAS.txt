@@ -1,0 +1,59 @@
+V145 — CHAVE DE ACESSO COMPLETA E EVENTOS FORA DO LUGAR DAS NOTAS
+
+BASE
+- V145 parte diretamente da V144, com autorização expressa do usuário.
+
+PROBLEMAS CORRIGIDOS
+1. Chave de acesso com 41 dígitos.
+   A leitura do atributo Id="NFe..."/"CTe..." incluía as três letras e cortava os três últimos dígitos.
+   Efeitos na V144: a Auditoria SAT x XML nunca conferia pela chave (dependia de número + série + data +
+   direção), o XML exportado saía com nome de 41 dígitos e "copiar chave" entregava a chave incompleta.
+   Corrigido em _parse_document_metadata e _extract_access_key_from_xml.
+
+2. Eventos gravados como nota.
+   procEventoNFe/NFCe/CTe eram gravados como "NF-e Autorizado", valor zero e sem data. Isso inflava a
+   contagem de documentos e a nota cancelada nunca era marcada.
+   Agora o evento é gravado como Evento, com identificador próprio (CNPJ|chave|EV|tipo|sequência), e
+   nunca ocupa o lugar da nota — inclusive quando chega antes dela.
+
+3. Nota cancelada.
+   Evento 110111 (cancelamento) ou 110112 (cancelamento por substituição) com cStat 135 ou 155 marca o
+   documento como Cancelado, na captura, no reparo do banco e ao receber eventos pela Central.
+
+4. Inicialização automática do Servidor Central.
+   central_client.py usava sys.executable sem importar sys; o registro no Windows falhava em silêncio.
+
+AJUSTE ÚNICO DO BANCO EXISTENTE (repair_document_index_v145)
+- Roda na inicialização, antes da tela de login, e só quando há registros antigos a corrigir.
+- Cria backup "antes_reparo_v145" antes de alterar qualquer coisa.
+- Recalcula a chave a partir do XML guardado, reclassifica os eventos e aplica os cancelamentos.
+- Histórico de exportação (document_exports) e origem/NSU (document_sources) acompanham o documento.
+- Não altera nenhum XML e não faz consulta fiscal. Uma segunda execução não faz nada.
+
+MUDANÇAS QUE O USUÁRIO VAI PERCEBER
+- A quantidade de documentos pode diminuir: eventos deixam de ser contados.
+- "Novos nesta busca" deixa de somar eventos.
+- Documentos Fiscais e Busca Global não listam eventos; o filtro Situação = Cancelado passa a ter resultado.
+- Relatórios PDF por período passam a enxergar os cancelamentos: nota cancelada sai dos totais autorizados.
+- XML exportado passa a se chamar <44 dígitos>.xml. Reexportar para uma pasta que já tem arquivos da V144
+  cria uma segunda cópia com o nome novo; SALVAR XMLs NOVOS não reexporta o que já foi exportado.
+
+NÃO ALTERADO
+- Os 13 núcleos fiscais protegidos (13/13 SAME por AST) e os 31 assets (31/31 SAME por SHA-256).
+- Nenhuma tela, cor, logo ou comportamento do Exatinho.
+- Motor de captura, cursores de NSU e regras de cStat.
+
+LIMITES DESTA ENTREGA
+- Testada em Linux, sem Tkinter real, sem certificado e sem acesso à SEF/SAT. A interface não foi aberta.
+- Precisa ser validada no Windows do escritório com uma cópia dos dados reais.
+- Na Auditoria, nota cancelada que exista em XML e esteja como cancelada no SAT ainda aparece como
+  "XML sem correspondência" (o motor de auditoria é protegido e não foi tocado).
+
+TESTES REALIZADOS
+- testes/test_v145_chave_e_eventos.py: chave completa; cancelamento depois e antes da nota; carta de correção
+  não cancela; auditoria casa pela chave; relatório por período enxerga cancelamento; reparo de banco no
+  formato da V144; segunda execução do reparo; comando de autostart.
+- O mesmo teste falha no código da V144.
+- 19 testes antigos que rodam sem interface passam igual na V144 e na V145; os demais dependem de Tkinter real.
+- Relatório PDF gerado com nota cancelada.
+- py_compile dos três módulos.

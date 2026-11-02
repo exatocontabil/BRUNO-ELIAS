@@ -1,0 +1,24 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL V142
+
+ESTADO ATUAL
+- V142 é a nova versão trabalhada a partir da V141.
+- V140/V141 continuam como versões anteriores e não foram alteradas.
+- A V141 permaneceu como base funcional e a V142 adiciona apenas a experiência de progresso na exportação local de XMLs.
+
+ALTERAÇÃO V142
+- Na tela Documentos Fiscais, SALVAR XMLs passou a abrir um painel leve de progresso.
+- O painel informa percentual geral, empresa atual e posição da empresa no conjunto.
+- O percentual geral é ponderado pela quantidade de documentos concluídos por empresa e avança ao término de cada empresa, sem interferir na função fiscal protegida save_documents_organized.
+- Exportação continua ocorrendo a partir do Arquivo Fiscal Local, sem nova consulta fiscal.
+- Cancelamento pode ser solicitado; ele interrompe a sequência entre empresas e preserva no Arquivo Fiscal Local os documentos que já foram processados.
+- Documentos processados que completam uma empresa continuam sendo registrados na tabela document_exports, preservando o comportamento que permite reconhecer o que já foi exportado em versões posteriores.
+
+PERSISTÊNCIA
+- Não foi criada uma nova base de dados por versão.
+- DB_PATH continua apontando para a área persistente EXATO_DATA_DIR/%LOCALAPPDATA%\Exato\Central Fiscal\Dados.
+- O histórico de exportação em document_exports permanece a fonte de verdade para Exportado/Não exportado e SALVAR XMLs NOVOS.
+
+PROTEÇÃO
+- Nenhum núcleo fiscal protegido foi alterado.
+- Identidade visual e assets existentes foram preservados.
+- A V142 deve ser validada em Windows real, especialmente o comportamento visual do painel de progresso.

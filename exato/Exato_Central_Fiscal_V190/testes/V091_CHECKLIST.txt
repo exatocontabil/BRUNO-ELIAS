@@ -1,0 +1,17 @@
+V091 — CHECKLIST
+
+[OK] Compilação / AST
+[OK] Funções protegidas idênticas à V085
+[OK] Interface inicial e ícone Exato
+[OK] BUSCAR XML / SALVAR XMLs / Relatório
+[OK] Visualização do período sem misturar arquivos fora do intervalo
+[OK] Aviso de documentos fora do período
+[OK] Salvamento durante busca quando já há documentos estáveis
+[OK] Auditoria com seleção NF-e/NFC-e
+[OK] Motor SAT x XML preservado
+[OK] Exato IA contextual e anti-repetição
+[OK] Perguntas ao Exato IA
+[OK] PDF Auditoria / estados Conforme, Atenção e Divergência
+[OK] PDF consolidado por pasta/tipo e ordenação
+[OK] Dados persistentes / backup
+[OK] ZIP com pasta única por versão

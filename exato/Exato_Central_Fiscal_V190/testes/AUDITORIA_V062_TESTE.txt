@@ -1,0 +1,27 @@
+AUDITORIA V062 — PLANO DE TESTE
+
+Objetivo principal
+- Validar a nova tentativa de autenticação silenciosa no SAT usando o mesmo certificado selecionado no Central Fiscal.
+
+O que mudou tecnicamente
+1. O filtro automático do Edge agora considera CN/O/OU/L do Subject e Issuer quando disponíveis.
+2. A política AutoSelectCertificateForUrls passa a ser instalada temporariamente em HKCU\Software\Policies\Microsoft\Edge\AutoSelectCertificateForUrls.
+3. A entrada temporária é removida ao final da tentativa.
+4. Cada auditoria usa uma instância limpa do Edge, sem reaproveitar o perfil persistente da V061.
+5. A falha de autenticação registra diagnóstico resumido para identificar se o SAT rejeitou o certificado, indicou múltiplos usuários, credenciamento ou permaneceu na tela de login.
+
+Teste solicitado no escritório
+1. Abra a V062 pelo EXECUTAR.bat.
+2. Selecione exatamente o mesmo certificado que normalmente funciona para as consultas fiscais.
+3. Selecione a empresa e o mesmo período usado nos testes anteriores.
+4. Clique em AUDITAR DOCUMENTOS.
+5. Observe principalmente se:
+   - o navegador NÃO aparece na tela;
+   - a auditoria passa da etapa de login;
+   - o SAT chega à consulta;
+   - as exportações de NF-e/NFC-e são baixadas automaticamente;
+   - o resultado SAT × XML é apresentado.
+
+Se falhar
+- Envie o texto exato da mensagem exibida pela V062.
+- Não altere manualmente certificados, políticas do Edge ou o registro do Windows antes de nos enviar o resultado, para preservarmos o diagnóstico.

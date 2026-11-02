@@ -1,0 +1,47 @@
+V138 — GUIA DE INSTALAÇÃO E DISTRIBUIÇÃO
+
+BASE
+- V137 é a base atual.
+- Nenhuma alteração funcional foi feita no código da aplicação nesta versão.
+- A identidade visual da V137 permanece congelada.
+
+OBJETIVO
+- Padronizar a distribuição do Exato Central Fiscal para outros computadores.
+- Fornecer um bloco de notas simples, visível e específico para instalação e primeiro uso.
+- Reduzir erros de instalação causados por execução incorreta, remoção de assets ou perda de dados persistentes.
+
+NOVO ARQUIVO
+- COMO_INSTALAR_EXATO.txt
+
+O tutorial explica:
+- como extrair o ZIP corretamente;
+- como executar INICIAR.bat;
+- pré-requisito Python 3.10+;
+- primeiro acesso do administrador;
+- cadastro de outros usuários;
+- recuperação de senha;
+- atualização para novas versões;
+- localização dos dados persistentes;
+- diferença entre instalar o programa e transportar um ambiente já utilizado;
+- cuidados para não apagar a pasta de dados ou os assets.
+
+README
+- README.txt atualizado para V138 e passou a apontar para o tutorial de instalação.
+
+PRESERVAÇÃO
+- exato_central_fiscal.py permanece funcionalmente igual à V137; a única alteração no código é APP_VERSION de V137 para V138.
+- Não foram alterados os fluxos fiscais, Arquivo Fiscal Local, autenticação ou Exatinho.
+- Assets e referências visuais foram preservados.
+
+PROTEÇÃO
+- Os 13 núcleos fiscais protegidos permanecem inalterados.
+- Não houve alteração em SOAP/NF-e, Auditoria, geração fiscal/PDF ou organização de XML.
+
+VALIDAÇÃO
+- Concluída verificação de identidade do código entre V137 e V138.
+- Concluída verificação de hashes dos assets.
+- Concluída compilação do código.
+- Concluída validação do ZIP e da estrutura de distribuição.
+
+BASE ATUAL
+- V138.

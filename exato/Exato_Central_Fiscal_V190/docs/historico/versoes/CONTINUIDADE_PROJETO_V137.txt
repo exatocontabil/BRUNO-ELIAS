@@ -1,0 +1,55 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL
+
+BASE ATUAL: V137
+
+A V137 foi criada a partir do pacote completo da V135, preservando a referência visual, os assets e o comportamento já validado da Central, e reincorporando o mecanismo de recuperação de senha introduzido na V136.
+
+REGRA ESPECIAL VISUAL
+- A identidade visual validada da V135 é referência congelada para a V137.
+- Não alterar logo, sidebar, header, Exatinho, componentes visuais ou layout sem autorização específica.
+- Assets existentes devem ser preservados por hash entre versões, salvo mudança expressa.
+
+V135 — AUTENTICAÇÃO
+- Administrador principal: Bruno Elias.
+- E-mail: brunoalbano.elias8@gmail.com.
+- Cadastro persistente fora da pasta da versão.
+- Perfis atuais: Administrador e Usuário.
+- Exatinho reconhece o usuário autenticado.
+
+V136 — RECUPERAÇÃO
+- ESQUECI MINHA SENHA.
+- Solicitação persistente.
+- Atendimento/cancelamento pelo administrador.
+- Sem envio automático de e-mail nesta arquitetura local.
+
+V137 — CORREÇÃO
+- V135 voltou a ser a referência visual/empacotamento.
+- Recuperação de senha da V136 mantida.
+- Nenhuma alteração proposital na identidade visual.
+- Rótulos dos .bat corrigidos para a versão atual.
+
+PERSISTÊNCIA
+- Não pedir nova ativação/cadastro ao instalar uma versão nova enquanto o banco persistente existir.
+- Migrações futuras devem ser aditivas.
+
+NÚCLEOS PROTEGIDOS
+1. _audit_build_rows
+2. _audit_compare_pair
+3. _audit_fallback_key
+4. _audit_key
+5. _audit_xml_rows
+6. choose_nfe_actor
+7. mark_nfe_sync_cycle
+8. sync_documents_automatically
+9. test_sef_nfe_webservice
+10. generate_fiscal_representation_pdf
+11. open_document_fiscal_representation
+12. save_documents_organized
+13. generate_documents_pdf
+
+PENDÊNCIAS
+- Autenticação centralizada entre computadores.
+- Recuperação automática por e-mail/OTP após centralização.
+- Permissões avançadas.
+- Busca Global por nome da empresa.
+- Evolução contínua do Exatinho.

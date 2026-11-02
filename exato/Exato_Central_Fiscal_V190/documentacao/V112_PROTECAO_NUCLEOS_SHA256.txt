@@ -1,0 +1,1 @@
+Protecao V112: comparacao por SHA-256 dos 9 nucleos fiscais e das 4 funcoes PDF congeladas contra V111. Resultado: todos idênticos.

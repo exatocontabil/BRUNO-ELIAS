@@ -1,0 +1,17 @@
+V115 — NOTAS
+
+Origem: V114.
+
+Objetivos desta versão:
+1. Evoluir o Exato IA para comportamento contextual/autônomo.
+2. Corrigir o enquadramento e a paginação do Relatório de Documentos Fiscais.
+
+Não foram alterados os motores fiscais protegidos.
+A única função protegida alterada foi generate_documents_pdf, exclusivamente na camada de composição/paginação do relatório, mediante autorização expressa para a correção do PDF.
+
+Resultado do relatório de teste equivalente ao PDF analisado:
+- antes: 7 páginas físicas;
+- V115: 6 páginas físicas;
+- paginação: 1 de 6 ... 6 de 6;
+- EXATO IA — SAÍDA permanece na página 6 junto aos documentos finais;
+- página 7 eliminada.

@@ -1,0 +1,24 @@
+V143 — CHECKLIST DE ENTREGA
+
+[OK] Base derivada diretamente da V142.
+[OK] APP_VERSION atualizado para V143.
+[OK] 13 núcleos fiscais protegidos: 13/13 SAME por AST.
+[OK] Assets oficiais: 31/31 SAME por SHA-256.
+[OK] Separação entre recência da Atualização e resultado da Última busca.
+[OK] Estados Atualizada / Atenção / Desatualizada.
+[OK] Resultado da última busca exibido separadamente.
+[OK] Filtro da tela Empresas ajustado para Desatualizadas.
+[OK] Legenda explicativa adicionada abaixo da tabela.
+[OK] Persistência e exportação de XMLs preservadas.
+[OK] Base persistente continua fora da pasta da versão.
+[OK] Não houve consulta fiscal adicional durante SALVAR XMLs.
+[OK] Compilação completa: OK.
+[OK] Teste de progresso + persistência V143: OK.
+[OK] Teste de cancelamento V143: OK.
+[OK] UI smoke V143: OK.
+[OK] Central Compartilhada V140: OK.
+[OK] Arquivo Fiscal Local V134: OK.
+[OK] Backup V141: OK.
+
+OBSERVAÇÃO
+A V143 não altera o motor fiscal de captura nem o mecanismo de exportação. A separação na tela Empresas consulta apenas o histórico existente em sync_runs para exibir o resultado da última tentativa. O histórico document_exports e o Arquivo Fiscal Local permanecem intactos.

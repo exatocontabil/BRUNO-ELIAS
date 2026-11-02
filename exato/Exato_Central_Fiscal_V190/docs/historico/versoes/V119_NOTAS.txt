@@ -1,0 +1,59 @@
+V119 — NOTAS
+
+Origem: V118.
+
+Objetivo desta versão:
+1. Evoluir o Exato Central Fiscal para uma experiência mais orientada ao trabalho diário do analista (“Modo Escritório”), aproveitando recursos já existentes sem duplicar fluxos fiscais.
+2. Tornar o Dashboard mais operacional, com estado atual da Central, resumo dos tipos fiscais e próxima ação sugerida.
+3. Tornar Documentos Fiscais um módulo de acesso direto na sidebar, com resumo visual de total, NF-e, NFC-e, CT-e, Entrada e Saída.
+4. Manter o conceito de Exato IA contextual, sincronizado com o estado da tela e do processamento, sem alterar o motor fiscal.
+
+Alterações de UX/UI:
+- adicionada a navegação direta “Documentos Fiscais” na sidebar;
+- atalho Ctrl+D para abrir Documentos Fiscais;
+- novo bloco “MODO ESCRITÓRIO” no Dashboard com:
+  • estado atual da Central;
+  • quantidade por tipo fiscal;
+  • próxima ação sugerida;
+- estado do “Modo Escritório” atualizado em tempo real enquanto Busca XML ou Auditoria estiverem em andamento;
+- resumo operacional na tela Documentos Fiscais com:
+  • Total;
+  • NF-e;
+  • NFC-e;
+  • CT-e;
+  • Entrada;
+  • Saída;
+- texto do botão de filtro reduzido para “FILTRAR” para evitar clipping em janelas compactas;
+- subtítulo da tela Documentos Fiscais ajustado para reforçar o caráter operacional do módulo;
+- preservada a separação já validada de NF-e/NFC-e/CT-e no relatório PDF;
+- cards do Exato IA do relatório não foram alterados nesta versão;
+- nenhum conteúdo novo foi colocado fora de cards ou áreas reservadas.
+
+Núcleos protegidos:
+- os 13 núcleos protegidos permaneceram idênticos à V118 por SHA-256;
+- nenhuma função fiscal protegida foi modificada nesta versão;
+- o gerador PDF também permaneceu idêntico, portanto nenhuma alteração de relatório foi necessária nesta etapa.
+
+Itens deliberadamente não alterados:
+- Auditoria SAT × XML e seus critérios de negócio;
+- captura NF-e/NFC-e/CT-e;
+- fluxos NF-e Emitente/Destinatário;
+- geração individual de DANFE/DACTE;
+- salvamento organizado de XML/PDF;
+- geração consolidada de PDFs;
+- animação e motor comportamental do Exato IA;
+- relatório PDF e sua separação documental já validada na V118.
+
+Validações:
+- py_compile / compileall;
+- smoke de interface com Xvfb;
+- abertura do Dashboard e do módulo Documentos Fiscais;
+- confirmação da nova navegação e atalho;
+- confirmação dos cartões do Modo Escritório;
+- confirmação do resumo de documentos;
+- captura visual do Dashboard e Documentos Fiscais para inspeção de enquadramento;
+- comparação SHA-256 dos 13 núcleos protegidos em relação à V118;
+- limpeza de __pycache__, .pyc e temporários antes do ZIP.
+
+Observação:
+Como a V119 não alterou nenhum núcleo fiscal ou gerador de PDF, a validação de regressão nesta etapa foi feita por preservação SHA-256 + smoke de UI/execução. Não foi realizado um novo teste live contra SEF/SC/SAT nesta versão.

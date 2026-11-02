@@ -1,0 +1,46 @@
+V118 — NOTAS
+
+Origem: V117.
+
+Objetivo desta versão:
+1. Separar visualmente NF-e e NFC-e no Relatório de Documentos Fiscais, evitando que os tipos apareçam misturados na mesma tabela.
+2. Manter a composição já validada dos cards EXATO IA — ENTRADA e SAÍDA.
+3. Preservar a paginação compacta e coerente, sem criar páginas desnecessárias no cenário de teste.
+
+Alterações do relatório:
+- tabelas de detalhe passam a ser agrupadas por tipo documental;
+- NF-e, NFC-e e CT-e não são misturados dentro da mesma tabela;
+- cada tipo recebe um cabeçalho neutro próprio, com quantidade e valor do bloco;
+- a numeração de linhas reinicia dentro de cada tipo para deixar a separação explícita;
+- a ordem cronológica é preservada dentro de cada tipo;
+- blocos pequenos de tipos diferentes podem compartilhar a mesma página, mas continuam visualmente separados;
+- o EXATO IA continua aparecendo somente uma vez ao final de cada direção;
+- Entrada com NF-e + CT-e permanece em uma mesma página quando houver espaço suficiente;
+- no cenário de teste, o relatório continua com 6 páginas: capa + 1 Entrada + 3 NF-e de Saída + 1 NFC-e de Saída;
+- os cards EXATO IA não foram redesenhados nesta versão;
+- nenhum texto deve ultrapassar cards ou tabelas.
+
+Núcleos protegidos:
+- os 12 núcleos protegidos não relacionados ao gerador do relatório permanecem idênticos à V117 por SHA-256;
+- apenas generate_documents_pdf foi alterada, por autorização expressa para esta correção do relatório.
+
+Itens deliberadamente não alterados:
+- Auditoria SAT × XML e seus critérios de negócio;
+- captura NF-e/NFC-e/CT-e;
+- fluxos Emitente/Destinatário;
+- geração individual de DANFE/DACTE;
+- salvamento organizado de XML/PDF;
+- animação/comportamento do Exato IA na Central;
+- cards do Exato IA já validados na V117.
+
+Validações:
+- py_compile / compileall;
+- cenário de relatório com NF-e + NFC-e + CT-e;
+- confirmação de 6 páginas;
+- verificação de que NF-e e NFC-e não aparecem na mesma tabela de detalhe;
+- confirmação de separação CT-e quando presente;
+- EXATO IA — ENTRADA e SAÍDA uma vez cada;
+- regressões fiscais e auditoria;
+- Exato IA / QA;
+- comparação SHA-256 dos 12 núcleos protegidos em relação à V117;
+- limpeza de __pycache__, .pyc e temporários antes do ZIP.

@@ -1,0 +1,29 @@
+V084 — Registro de validação técnica
+
+1. Compilação
+   - py_compile: OK.
+
+2. Inicialização
+   - Aplicação inicializada em Xvfb sem exceções no terminal durante teste de fumaça.
+
+3. Auditoria — estabilidade
+   - Resultado sintético com 2 documentos foi finalizado pela interface.
+   - audit_running voltou para False.
+   - tabela recebeu 2 linhas.
+   - Exato IA apresentou estado de atenção para XMLs ausentes.
+
+4. Auditoria — desempenho
+   - Fluxo de arquivo de uma única família consulta apenas a família detectada.
+   - Leitura utiliza metadados persistidos do banco e reserva parsing do XML para campos ausentes.
+
+5. Auditoria — PDF
+   - PDF de teste gerado com sucesso a partir do resultado estruturado da auditoria.
+
+6. NF-e — cStat 657
+   - Teste unitário do sincronizador confirmou que cStat 657 não é tratado como conclusão vazia.
+   - Resultado: ok=False e end_reason=consulta NF-e bloqueada pela SEF/SC (cStat 657).
+
+7. Preservação
+   - V082 não foi alterada.
+   - V083 foi usada como origem da V084.
+   - Fluxos NF-e Emitente/Destinatário permanecem implementados separadamente.

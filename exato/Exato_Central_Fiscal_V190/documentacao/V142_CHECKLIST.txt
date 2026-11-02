@@ -1,0 +1,26 @@
+V142 — CHECKLIST DE ENTREGA
+
+[OK] Base derivada diretamente da V141.
+[OK] APP_VERSION atualizado para V142.
+[OK] 13 núcleos fiscais protegidos: 13/13 SAME por AST.
+[OK] Assets oficiais: 31/31 SAME por SHA-256.
+[OK] SALVAR XMLs na tela Documentos Fiscais com painel visual de progresso.
+[OK] Percentual geral exibido durante exportação.
+[OK] Empresa atual e posição Empresa X de Y exibidas.
+[OK] Quantidade total de documentos exibida.
+[OK] Cancelamento seguro entre empresas.
+[OK] Documentos já processados permanecem salvos.
+[OK] Registro document_exports preservado.
+[OK] SALVAR XMLs NOVOS continua reconhecendo exportações anteriores para a mesma pasta.
+[OK] Base persistente continua fora da pasta da versão.
+[OK] Não houve consulta fiscal adicional durante SALVAR XMLs.
+[OK] Compilação completa: OK.
+[OK] Teste de progresso + persistência V142: OK.
+[OK] Teste de cancelamento V142: OK.
+[OK] UI smoke V142: OK.
+[OK] Central Compartilhada V140: OK.
+[OK] Arquivo Fiscal Local V134: OK.
+[OK] Backup V141: OK.
+
+OBSERVAÇÃO
+O percentual de exportação avança por marcos de empresa, ponderado pela quantidade de documentos. A função protegida save_documents_organized não foi modificada para receber callbacks por documento; essa decisão preserva o comportamento fiscal validado.

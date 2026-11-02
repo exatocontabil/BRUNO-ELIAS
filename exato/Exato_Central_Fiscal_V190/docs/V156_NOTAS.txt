@@ -1,0 +1,15 @@
+V156 — PASTA ORGANIZADA, LOGO NA BARRA, EXATINHO MAIS INTELIGENTE E PILOTO AUTOMÁTICO
+
+PEDIDO DO USUÁRIO
+- Logo da Exato na barra de tarefas (estava o do Python); pasta do programa com muito arquivo solto; Exatinho mais inteligente e independente, com rotina diária sozinha como OPÇÃO.
+
+O QUE FOI FEITO
+1. Pasta organizada: INICIAR.bat, LEIA-ME.txt, VERSAO.txt e as pastas programa (código e imagens), ferramentas e ajuda. Testes, histórico, referências e documentação de desenvolvimento ficam só no repositório e não vão no ZIP (scripts/montar_pacote.py). Sumiram o __pycache__ e o MIGRACAO_V068.txt da pasta (arquivos de trabalho vão para Dados\Trabalho).
+2. Logo da Exato: o programa se identifica ao Windows como "Exato Central Fiscal"; o INICIAR.bat abre sem a janela preta do console (ferramentas\EXECUTAR_COM_DIAGNOSTICO.bat mostra o console para o suporte); ferramentas\CRIAR_ATALHO.bat cria o atalho com o logo da Exato na Área de Trabalho. Se o programa não abrir, aparece uma mensagem em português e o detalhe fica no registro de erros.
+3. Exatinho mais inteligente (tudo no computador, sem IA externa): lembra o assunto ("e em outubro?", "e as tomadas?", "e da outra empresa?", "de novo"), corrige erros de digitação, entende "últimos 3 meses", "semana passada", "trimestre", "ano passado", aceita vários pedidos numa frase, responde maiores clientes e fornecedores, maiores notas, comparação entre períodos e ranking de empresas, explica "como calculei" e sugere o próximo passo em botões.
+4. Piloto automático (OPCIONAL, desligado por padrão): todo dia, a partir do horário escolhido e com o Exato aberto, busca as NFS-e das empresas com certificado, salva os XMLs novos na pasta dos clientes, gera o relatório do mês anterior (uma vez por mês) e mostra o resumo do que fez e do que precisa de você. Abra pelo painel do Exatinho (Piloto automático), pelo botão na conversa ou escreva "piloto automático". Nunca apaga dados nem resolve captcha; nunca pergunta pasta sozinho (só salva se você já escolheu a pasta dos clientes).
+
+LIMITES / A CONFERIR
+- O ícone e o INICIAR.bat sem console não puderam ser testados no Windows daqui: confira se o logo da Exato aparece na barra e se o programa abre normalmente. Se não abrir, use ferramentas\EXECUTAR_COM_DIAGNOSTICO.bat.
+- O piloto só roda com o Exato aberto. Empresas só com usuário e senha ficam de fora do piloto (podem pedir captcha).
+- Nada nos dados do usuário muda (continuam em %LOCALAPPDATA%\Exato\Central Fiscal\Dados).

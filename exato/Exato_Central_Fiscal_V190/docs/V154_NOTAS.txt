@@ -1,0 +1,15 @@
+V154 — CAPTCHA SEM PULAR NOTA, RELATÓRIO MENSAL COMPLETO E PDF DA NOTA CALIBRADO
+
+PEDIDO DO USUÁRIO
+- Captcha: se erro ou demoro, o Exato pula para a próxima nota; tem de insistir na mesma nota até dar certo.
+- O relatório mensal saiu com 1 nota (puxaram 7); layout do PDF; PDF da nota com o XML real.
+
+O QUE FOI FEITO
+1. Captcha: a janela do captcha (a aba do download) fica aberta e vem para a frente; o Exato mostra "Resolva a confirmação de segurança na janela que abriu (nota X de N)" e espera. Errou ou demorou: o portal mostra de novo e o Exato continua esperando. Fechou a janela: ela reabre para a mesma nota. Só Cancelar interrompe. Falhas que não são captcha: tenta de novo a mesma nota algumas vezes antes de contar como falha.
+2. Relatório mensal: agora usa TODAS as notas do período (prestadas e tomadas), sem olhar a nota selecionada nem os filtros. A causa do erro era a seleção/filtro da tela. O aviso diz quantas notas entraram. "PDF da relação" e "Lista em Excel" seguem a seleção/filtro (o texto dos botões diz isso).
+3. Layout do relatório: sem página quase vazia, tabelas da mesma largura e cor, letra maior, empresa/CNPJ repetidos no alto das páginas seguintes, "Totais do período" no fim e "Total do mês" sem quebrar.
+4. PDF da nota (conferido com XML real): nome do município e UF no lugar do código, telefone e e-mail do prestador, regime do Simples Nacional, tributos aproximados, código do serviço 17.23.01 com a atividade, aviso de homologação.
+
+LIMITES / A CONFERIR
+- O captcha em janela separada só foi testado em portal simulado (página de captcha que se atualiza). No portal real, confirme se a janela vem para a frente e se, ao resolver, a nota baixa e o Exato segue.
+- Falta um XML real de NFS-e TOMADA e a explicação dos valores muito baixos vistos na primeira busca.

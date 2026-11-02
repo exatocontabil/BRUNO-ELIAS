@@ -1,0 +1,25 @@
+V121 CHECKLIST
+
+[OK] Base técnica V120 preservada.
+[OK] APP_VERSION atualizado para V121.
+[OK] Exato IA recebeu event bus de sessão curta e memória de eventos.
+[OK] Eventos de navegação, busca XML, processamento, auditoria, pendências e geração fiscal integrados.
+[OK] Reações contextuais usam estados existentes e retornam ao repouso sem chatter contínuo.
+[OK] Frases ociosas podem considerar o último evento relevante da sessão.
+[OK] cStat 657 deixou de ser apresentado ao usuário como bloqueio/consumo indevido.
+[OK] cStat 657 é tratado como rejeição de divergência do órgão autorizador na camada de apresentação.
+[OK] cStat 656 continua associado ao Consumo Indevido e ao intervalo de segurança já validado.
+[OK] Diagnóstico técnico compacto mostra cStat e motivo oficial.
+[OK] Requisição SOAP NF-e protegida não foi alterada.
+[OK] 13/13 núcleos protegidos permanecem idênticos à V120 por SHA-256.
+[OK] py_compile / compileall.
+[OK] Teste dedicado do event bus e cStat 656/657.
+[OK] Regressão NF-e / scheduler.
+[OK] Regressão Auditoria multi-tipo + PDF.
+[OK] Regressão Exato IA / perguntas contextuais.
+[OK] Regressão do relatório PDF.
+[OK] Smoke de inicialização / navegação sob Xvfb.
+[OK] Centro Operacional V120 continua funcional.
+[OK] Motor comportamental do Exato IA continua funcional.
+[OK] Inspeção visual do Dashboard e Busca XML sem overflow introduzido.
+[OK] ZIP final conferido e limpo de __pycache__, .pyc e temporários.

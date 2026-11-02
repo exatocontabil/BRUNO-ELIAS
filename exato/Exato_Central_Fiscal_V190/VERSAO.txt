@@ -1,0 +1,4 @@
+Exato Central Fiscal
+Versão V190
+
+NFS-e por procuração: empresas sem certificado próprio passam a ser buscadas pelo certificado do escritório, quando a procuração eletrônica da Receita Federal vale para a NFS-e. O Exato lembra quais deram certo, explica o motivo quando o Emissor Nacional recusa e não insiste a cada rodada. Nenhuma regra fiscal protegida foi alterada.

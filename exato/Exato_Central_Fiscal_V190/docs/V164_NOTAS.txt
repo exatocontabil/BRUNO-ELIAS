@@ -1,0 +1,18 @@
+V164 — REPOSITÓRIO DE XML NO SERVIDOR
+
+PEDIDO DO USUÁRIO
+- Os XMLs devem virar um repositório consultável daqui a um ano (o Web Service só devolve ~90 dias), disponível para os computadores do escritório. Pasta combinada: \\SERVER\Arquivos Compartilhados\Clientes\Exato Serviços Contábeis Ltda\Exato Central Fiscal; prazo de 1 ano; na primeira vez copiar tudo.
+
+O QUE FOI FEITO
+1. exato_repositorio.py: cópia automática de cada documento do banco (NF-e, NFC-e, CT-e, NFS-e e eventos) para empresa/ano/mês/tipo/[direção]/chave.xml; fila persistente (repositorio_copias); retoma de onde parou; confere SHA-256; nunca sobrescreve (conteúdo diferente = guarda ao lado e conta como "diferente"); caminho longo de rede (\\?\UNC); servidor fora do ar não trava (teste de acesso em linha separada, 6 s).
+2. Cópia diária do banco (só central_fiscal.db, sem contas de usuário) em Backups\AAAA-MM-DD\central_fiscal_<computador>.zip, mantendo 30 dias por computador.
+3. Conferência diária por amostra (200 arquivos): acusa arquivo sumido/alterado; o sumido volta para a fila.
+4. Prazo de guarda configurável (padrão 12 meses): só avisa; "Apagar cópias vencidas..." exige confirmação (padrão Não), mexe só no servidor e não volta para a fila.
+5. Restaurar do repositório: recoloca no banco os XMLs que faltarem.
+6. Tela Repositório (menu): situação, contadores, tabela por empresa/mês com selos, pasta, copiar agora/alterar pasta/abrir pasta, prazo e restaurar. Cópia automática a cada 45 s e após cada busca/importação; toasts só quando há novidade ou problema.
+7. Testes: test_v164_repositorio.py (módulo) e test_v164_repositorio_ui.py (tela).
+
+LIMITES / A CONFERIR NO WINDOWS (sem acesso à rede do escritório aqui)
+- Permissão de gravação na pasta do servidor para todos os usuários (ideal: sem permissão de apagar, a não ser o administrador).
+- Tempo da primeira cópia (histórico grande): roda em segundo plano e continua se o Exato for fechado.
+- O prazo legal costuma ser de 5 anos; o Exato nunca apaga sozinho.

@@ -1,0 +1,42 @@
+V144 — REDESIGN DA TELA EMPRESAS
+
+BASE
+- V144 parte diretamente da V143.
+
+OBJETIVO
+- Aproximar a tela Empresas do rascunho visual aprovado pelo usuário, mantendo a distinção operacional entre recência da atualização e resultado da última busca.
+
+ALTERAÇÕES
+1. Cards de resumo no topo.
+2. Barra de busca e filtro com aparência de dashboard.
+3. Tabela customizada com seleção visual de linha e badges semânticos.
+4. Coluna Atualização com verde/âmbar/vermelho.
+5. Coluna Última busca com estados visuais próprios.
+6. Legendas correspondentes abaixo da tabela.
+7. Ações reorganizadas no rodapé.
+8. Logo Exato completo na barra lateral para maior fidelidade ao rascunho.
+9. Layout responsivo para telas compactas, com rolagem interna da tabela.
+10. Correção do filtro por status, convertendo rótulos plurais da interface para os estados internos singulares.
+
+PERSISTÊNCIA
+- Nenhuma tabela ou banco novo foi criado.
+- document_exports, Arquivo Fiscal Local e histórico de exportação permanecem preservados.
+
+PROTEÇÃO
+- 13/13 núcleos fiscais protegidos SAME.
+- 31/31 assets SAME.
+- Nenhum núcleo SOAP NF-e, auditoria, PDF ou organização fiscal foi alterado.
+
+TESTES REALIZADOS
+- py_compile / compileall.
+- UI da tela Empresas em Xvfb.
+- resumo dos quatro estados.
+- seleção visual de empresa.
+- placeholder da busca.
+- filtro de status.
+- persistência de exportação local.
+- cancelamento seguro da exportação.
+- backup automático.
+- autostart do servidor.
+- sincronização Central Compartilhada.
+- comparação estrutural dos 13 núcleos.

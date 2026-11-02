@@ -1,0 +1,53 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL
+
+BASE ATUAL: V138
+
+V138 foi criada a partir da V137 e introduz apenas melhorias de distribuição/documentação:
+- arquivo COMO_INSTALAR_EXATO.txt no diretório raiz;
+- README.txt atualizado para apontar para o tutorial;
+- documentação de continuidade da V138.
+
+Não houve alteração funcional no código da aplicação. A única alteração de código é a constante APP_VERSION, atualizada de V137 para V138.
+
+REFERÊNCIA VISUAL
+- V137 continua sendo a referência visual congelada.
+- Não alterar logo, sidebar, header, Exatinho ou demais componentes visuais sem autorização específica.
+
+AUTENTICAÇÃO
+- Administrador principal: Bruno Elias.
+- E-mail: brunoalbano.elias8@gmail.com.
+- Usuários e credenciais permanecem em dados persistentes fora da pasta da versão.
+- Não exigir nova ativação apenas por atualização de versão enquanto os dados persistentes estiverem preservados.
+
+RECUPERAÇÃO
+- ESQUECI MINHA SENHA permanece disponível.
+- Fluxo atual é administrado localmente.
+- Recuperação automática por e-mail/OTP ainda é evolução futura.
+
+INSTALAÇÃO
+- Toda versão distribuída deve conter um tutorial de instalação em arquivo .txt na raiz.
+- O tutorial deve explicar extração do ZIP, execução pelo INICIAR.bat, primeiro acesso, cadastro, recuperação de senha, atualização e cuidados com os dados.
+- Não afirmar que a transferência completa de ambiente já existe: essa ferramenta ainda é futura.
+
+NÚCLEOS PROTEGIDOS
+1. _audit_build_rows
+2. _audit_compare_pair
+3. _audit_fallback_key
+4. _audit_key
+5. _audit_xml_rows
+6. choose_nfe_actor
+7. mark_nfe_sync_cycle
+8. sync_documents_automatically
+9. test_sef_nfe_webservice
+10. generate_fiscal_representation_pdf
+11. open_document_fiscal_representation
+12. save_documents_organized
+13. generate_documents_pdf
+
+PENDÊNCIAS / EVOLUÇÕES FUTURAS
+- Autenticação centralizada entre computadores.
+- Recuperação automática por e-mail/OTP após centralização.
+- Ferramenta de transferência/restauração de ambiente.
+- Permissões avançadas.
+- Busca Global por nome da empresa.
+- Evolução contínua do Exatinho.

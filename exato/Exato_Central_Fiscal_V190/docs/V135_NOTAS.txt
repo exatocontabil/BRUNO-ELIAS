@@ -1,0 +1,71 @@
+V135 — ACESSO, USUÁRIOS E IDENTIDADE
+
+BASE
+- V134.
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Colocar uma camada de autenticação de usuário antes da abertura do Exato Central Fiscal.
+- Criar um administrador principal para controlar os demais acessos.
+- Preparar a arquitetura para futura autenticação centralizada sem alterar o motor fiscal protegido.
+
+ADMINISTRADOR INICIAL
+- Nome: Bruno Elias.
+- E-mail: brunoalbano.elias8@gmail.com.
+- Perfil: Administrador.
+- Situação inicial: Ativo.
+- Senha: NÃO é fornecida ao sistema no desenvolvimento. No primeiro acesso, o próprio programa solicita a criação da senha.
+
+ALTERAÇÕES
+- Criadas as tabelas locais `users` e `activity_log` dentro do mesmo SQLite persistente do Exato Central Fiscal.
+- Senhas armazenadas somente como hash PBKDF2-SHA256 com salt aleatório e 220.000 iterações; nenhuma senha em texto puro é persistida.
+- Criada tela de login antes da abertura da Central.
+- E-mail do administrador inicial aparece pré-preenchido no primeiro acesso.
+- Criado fluxo `ATIVAR MINHA CONTA` para definir a primeira senha do administrador.
+- Criado fluxo `SOLICITAR CADASTRO` para colaboradores informarem nome, e-mail e senha.
+- Cadastro de colaborador nasce com situação `Aguardando aprovação`.
+- Criados perfis `Administrador` e `Usuário`.
+- Criada área `Usuários e Acessos` para administrador.
+- Administrador pode aprovar/ativar, bloquear e redefinir senha.
+- Último administrador ativo não pode ser bloqueado.
+- Administrador não pode bloquear a própria conta na sessão atual.
+- Criado histórico local de atividades para login, falha de login, solicitação de cadastro, alteração de status, redefinição e criação da senha inicial.
+- Cabeçalho passou a mostrar o usuário autenticado e o perfil.
+- Criado comando `Sair` para encerrar a sessão e retornar à tela de login.
+- Exatinho passou a personalizar a saudação de abertura com o primeiro nome do usuário autenticado.
+
+ARQUITETURA
+- A autenticação fica isolada em funções próprias (`db_auth_*`) e em tabelas separadas do documento fiscal.
+- O Arquivo Fiscal Local, captura, auditoria e geração fiscal continuam no mesmo SQLite e seguem protegidos.
+- A V135 é uma autenticação local ao ambiente de dados atual. Usuários criados em um computador não são automaticamente replicados para outro computador. A estrutura foi deliberadamente separada para permitir futura troca do armazenamento por um serviço centralizado.
+
+PRESERVAÇÃO
+- Nenhum dos 13 núcleos protegidos foi alterado.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- Auditoria permaneceu intacta.
+- Geração de DANFE/DACTE e PDF permaneceu intacta.
+- `save_documents_organized` permaneceu idêntica à V134.
+- `generate_documents_pdf` permaneceu idêntica à V134.
+
+VALIDAÇÃO DE PROTEÇÃO
+- Comparação V134 → V135 por SHA-256 sobre AST/source dos 13 núcleos.
+- Resultado: 13/13 idênticos.
+
+TESTES REALIZADOS
+- `python -m py_compile exato_central_fiscal.py`.
+- `python -m compileall -q .`.
+- Teste de autenticação: administrador inicial, criação de senha, login, cadastro pendente, aprovação, login do colaborador, bloqueio, proteção contra auto-bloqueio do administrador.
+- Teste de UI sob Xvfb: tela de login, cabeçalho do usuário, área de Usuários, cadastro pendente e aprovação.
+- Regressão do Arquivo Fiscal Local: persistência, backup/restauração e filtros.
+- Regressão da UI de Documentos Fiscais.
+- Regressão de `SALVAR XMLs NOVOS`.
+- Regressão do comportamento do Exatinho.
+- Comparação SHA-256/AST dos 13 núcleos protegidos.
+
+PENDÊNCIAS
+- Autenticação centralizada entre computadores do escritório ainda não foi implementada nesta versão.
+- Busca Global confiável por empresa/número/chave/tipo/valor continua registrada para próxima etapa.
+- Evolução futura de permissões por funcionalidade continua em planejamento.
+
+BASE ATUAL
+- V135.

@@ -1,0 +1,40 @@
+EXATO CENTRAL FISCAL — V085
+REGISTRO DE VALIDAÇÃO TÉCNICA
+
+1. COMPILAÇÃO
+- py_compile: OK.
+
+2. STARTUP
+- Aplicação inicializada em Xvfb e encerrou corretamente após teste de fumaça: OK.
+
+3. NF-e — SCHEDULER
+- Primeiro uso sem histórico: ator escolhido = indAtor 2 (Destinatário/Entrada): OK.
+- Após marcar cStat 117: cooldown de 12 horas persistido: OK.
+- Próximo ator calculado = indAtor 1 (Emitente/Saída): OK.
+- Durante cooldown: nenhuma nova consulta é autorizada pelo scheduler: OK.
+- Controle separado por CNPJ em nfe_sync_control: OK.
+
+4. NF-e — PAYLOAD
+- indAtor=1 enviado corretamente no SOAP: OK.
+- indAtor=2 enviado corretamente no SOAP: OK.
+- ultNuNSU mantido no payload: OK.
+
+5. AUDITORIA — MOTOR
+- Cenário conforme: 1 SAT × 1 XML correspondente: OK.
+- Cenário XML não localizado: OK.
+- Tabela audit_rows gerada: OK.
+- Estados da IA preservados: OK.
+
+6. AUDITORIA — INTERFACE
+- audit_meta_labels['periodo'] permanece Frame (contêiner): OK.
+- novo audit_period_label é Label: OK.
+- atualização do período no Label: OK.
+- teste específico que antes provocava TclError passou sem exceção: OK.
+
+7. PRESERVAÇÃO
+- V082 não alterada.
+- V084 utilizada como origem da V085.
+- Arquivos de configuração e banco da base não sofreram alterações durante a preparação do pacote final.
+
+8. LIMITAÇÃO DO TESTE
+- A captura NF-e não pode ser considerada finalmente validada sem execução real contra a SEF/SC com certificado digital e CNPJ reais.

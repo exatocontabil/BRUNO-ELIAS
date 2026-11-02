@@ -1,0 +1,15 @@
+V162 — CERTIFICADO ÚNICO NA TELA BUSCAR XML
+
+PEDIDO DO USUÁRIO
+- Print: o topo mostrava "Cert.: JONATHA FERNANDES MACHADO" (correto), mas o cartão "Certificado digital" da tela Buscar XML mostrava "A G ATIVIDADES ESTETICAS LTDA" — confuso, tratado como erro.
+
+CAUSA
+- A tela Buscar XML é montada uma vez; o nome do certificado do cartão era gravado nessa hora e nunca mais atualizado. O topo e as buscas já usavam o certificado atual (self.selected), então só o texto do cartão ficava velho.
+
+O QUE FOI FEITO
+1. O cartão guarda o texto em sync_cert_name_label e é atualizado por _sync_update_cert_card sempre que o certificado muda (_show_certificate_header_state), ao abrir a tela e no caso de certificado vencido.
+2. O cartão usa o mesmo nome do topo (_nfse_cert_name: sem o CNPJ depois dos dois pontos).
+3. Teste novo: test_v162_certificado_unico.py (troca de certificado depois da tela montada).
+
+A CONFERIR
+- No Windows: escolher um certificado, abrir Buscar XML, voltar, escolher outro; topo e cartão devem acompanhar.

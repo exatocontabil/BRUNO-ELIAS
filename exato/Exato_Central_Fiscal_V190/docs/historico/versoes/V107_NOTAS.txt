@@ -1,0 +1,6 @@
+V107 — NOTAS
+
+Base: V106.
+Correções principais: relatório de Auditoria multi-tipo, classificação de sem correspondência, filtro por situação, transparência/enquadramento do mascote e primeira página Editorial Premium aprovada.
+
+Regra de preservação: não alterar os 9 núcleos fiscais protegidos nem as 4 funções de PDF congeladas; a comparação SHA-256 V106→V107 confirmou preservação integral.

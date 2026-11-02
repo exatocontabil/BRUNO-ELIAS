@@ -1,0 +1,68 @@
+V123 — EXATINHO 4.0 + INTERAÇÃO DIRETA + ORGANIZAÇÃO DO PROJETO
+
+Base: V122
+
+Foco autorizado:
+- dar identidade nominal ao personagem: Exatinho;
+- permitir clique direto no personagem e abrir uma interação própria;
+- apresentação inicial curta do Exatinho;
+- painel contextual com Status da Central, O que aconteceu? e Ver pendências;
+- usar contexto real da sessão/event bus para conteúdo da interação;
+- preservar comportamento procedural, atenção, memória curta e estados já validados;
+- reduzir densidade da navegação lateral para manter o mascote visível em telas menores;
+- painel de interação sobreposto, sem consumir espaço permanente do workspace;
+- organizar a raiz do projeto em pastas lógicas, deixando apenas arquivos essenciais na raiz;
+- manter histórico/versionamento em docs/historico;
+- guardar previews em preview e código legado em archive/codigo-historico;
+
+EXATINHO:
+- nome oficial do personagem: Exatinho;
+- Exato IA continua sendo o nome técnico da inteligência;
+- o personagem segue masculino, profissional, amigável, discreto e levemente carismático;
+- clique abre painel com apresentação e ações contextuais;
+- primeira interação: “Oi! Eu sou o Exatinho. Estou aqui para acompanhar a Central com você.”;
+- status contextual usa tela atual, estado da sessão, documentos recentes e último evento significativo;
+- “O que aconteceu?” resume o último evento significativo sem expor nomes técnicos brutos;
+- “Ver pendências” leva diretamente à tela de Pendências;
+- painel fecha automaticamente após período curto e pode ser fechado manualmente;
+- clique não substitui handlers fiscais nem altera operações;
+- Exatinho mantém a animação procedural e a atenção contextual já existentes;
+
+INTERAÇÃO / UX:
+- footer do sidebar foi ajustado para o Exatinho permanecer visível em telas compactas;
+- navegação lateral recebeu redução controlada de espaçamento para preservar densidade sem mudar a hierarquia;
+- painel de interação foi implementado como overlay no sidebar para não empurrar conteúdo do workspace;
+- preview visual gerado em preview/exatinho_v123_interaction.png;
+
+ORGANIZAÇÃO DO PROJETO:
+- arquivos de histórico Vxxx_NOTAS/Vxxx_CHECKLIST foram movidos para docs/historico/versoes;
+- hashes de proteção foram movidos para docs/historico/protecao;
+- imagens de demonstração e screenshots atuais foram movidas para preview;
+- scripts históricos foram movidos para scripts/historico;
+- fontes antigas e backups foram movidos para archive/codigo-historico;
+- raiz preserva somente EXECUTAR.bat, INICIAR.bat, VERSAO.txt, exato_central_fiscal.py e diretórios principais;
+
+REGRA PERMANENTE DE CONTINUIDADE:
+- gerar em cada nova versão um Vxxx_NOTAS.txt cumulativo, utilizável como alimentação de prompt em nova conversa;
+- manter CONTINUIDADE_PROJETO.txt atualizado;
+- documentar decisões, alterações, testes, núcleos protegidos, pendências e requisitos para a próxima versão;
+
+PRESERVAÇÃO:
+- 13/13 núcleos protegidos permanecem idênticos à V122 por comparação reprodutível de SHA-256 sobre segmentos AST;
+- nenhum motor de captura NF-e/NFC-e/CT-e, Auditoria ou geração fiscal/PDF protegido foi alterado;
+- tratamento cStat 657 da V122 foi preservado; esta versão não altera a requisição fiscal;
+
+VALIDAÇÃO EXECUTADA:
+- py_compile / compileall;
+- teste de interação direta do Exatinho;
+- teste de contexto/status/último evento;
+- regressão NF-e;
+- regressão Auditoria multi-tipo + PDF;
+- regressão Exato IA / QA;
+- teste event bus / cStat / diagnóstico local;
+- teste do Centro Operacional;
+- smoke da UI sob Xvfb;
+- teste visual do painel do Exatinho;
+- comparação SHA-256 de 13/13 núcleos protegidos;
+- organização da estrutura do projeto;
+- remoção de __pycache__, .pyc e temporários antes do ZIP;

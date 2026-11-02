@@ -1,0 +1,59 @@
+V134 — ARQUIVO FISCAL LOCAL 2.0
+
+BASE
+- V133.
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Aproveitar a persistência dos XMLs dentro da Central para permitir exportações posteriores, histórico de exportação e gerenciamento mais seguro do Arquivo Fiscal Local.
+
+ALTERAÇÕES
+- Criada a tabela local `document_exports`, separada do motor de captura, para registrar quando um documento foi exportado e para qual pasta raiz.
+- A lista de Documentos Fiscais passou a mostrar a situação `Exportado` / `Não exportado`.
+- Adicionado filtro de `Exportação` em Documentos Fiscais.
+- Adicionado botão `SALVAR XMLs NOVOS`, que pode usar os documentos selecionados ou, sem seleção, o conjunto atualmente filtrado.
+- `SALVAR XMLs NOVOS` considera a pasta escolhida no momento da exportação; já exportados para aquela pasta não são exportados novamente.
+- Mantido `SALVAR XMLs` para exportar explicitamente os documentos selecionados, sempre permitindo escolher a pasta.
+- Adicionado indicador do Arquivo Fiscal Local com quantidade de documentos, tamanho aproximado do XML armazenado, quantidade já exportada e ainda não exportada.
+- A pesquisa local de documentos foi ampliada para aceitar, além dos campos já existentes, CNPJ, valor, movimentação e data.
+- O registro de exportação é atualizado somente depois de uma exportação integral da seleção/empresa concluída sem erros.
+- Adicionado `RESTAURAR ARQUIVO FISCAL` em Manutenção e Segurança. A restauração opera somente sobre `central_fiscal.db`, faz backup de segurança antes da substituição, verifica `PRAGMA integrity_check` e reinicia a aplicação para carregar o banco restaurado.
+- O backup existente da Central passa a carregar naturalmente o histórico `document_exports` porque o SQLite é preservado integralmente.
+
+PRESERVAÇÃO
+- Nenhum dos 13 núcleos protegidos foi alterado.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- Auditoria permaneceu intacta.
+- Geração de DANFE/DACTE e PDF permaneceu intacta.
+- `save_documents_organized` permaneceu idêntica à V133.
+- `generate_documents_pdf` permaneceu idêntica à V133.
+
+VALIDAÇÃO DE PROTEÇÃO
+- Comparação V133 → V134 por SHA-256 sobre AST/source dos 13 núcleos.
+- Resultado: 13/13 idênticos.
+
+TESTES REALIZADOS
+- `py_compile`.
+- `compileall`.
+- Teste de persistência e recuperação.
+- Teste de status Exportado/Não exportado.
+- Teste de filtro por exportação.
+- Teste de `SALVAR XMLs NOVOS` no nível de persistência/destino.
+- Teste de busca por número, CNPJ, valor, movimentação e data.
+- Teste de backup.
+- Teste de restauração com verificação de integridade.
+- Teste visual de Documentos Fiscais e Manutenção sob Xvfb.
+- Regressões direcionadas do Arquivo Fiscal Local, Busca Automática e Exatinho.
+- Comparação SHA-256/AST dos 13 núcleos.
+- Inspeção do ZIP final e limpeza de arquivos temporários.
+
+OBSERVAÇÕES
+- `Exportado` indica que existe registro de exportação para pelo menos uma pasta. O filtro de `SALVAR XMLs NOVOS` é específico da pasta escolhida no momento da operação.
+- O histórico de exportação não remove nem altera o XML original persistido.
+
+PENDÊNCIAS
+- Correção da Busca Global por nome da empresa continua registrada para uma próxima etapa específica.
+- O diagnóstico do cStat 657 continua separado e não foi alterado nesta versão.
+
+BASE ATUAL
+- V134.

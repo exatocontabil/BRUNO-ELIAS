@@ -1,0 +1,80 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL
+
+BASE ATUAL: V136
+
+A V136 foi criada a partir da V135 com autorização expressa do usuário. O foco desta versão é adicionar recuperação de senha sem alterar os núcleos fiscais protegidos. A V135 introduziu autenticação, usuários, perfis e histórico; a V136 acrescenta o fluxo “Esqueci minha senha”.
+
+CONTEXTO PERMANENTE
+- Exato Central Fiscal é o projeto de continuidade.
+- Exatinho é o personagem masculino da Exato IA.
+- Exato IA permanece como denominação técnica da inteligência.
+- A persistência local dos XMLs é requisito essencial: um XML capturado deve continuar disponível após reiniciar e pode ser exportado quando o usuário quiser, sem nova consulta fiscal.
+- `SALVAR XMLs` sempre permite escolha de pasta e exporta do Arquivo Fiscal Local, sem nova consulta.
+- `SALVAR XMLs NOVOS` considera apenas documentos ainda não registrados como exportados para a pasta escolhida.
+- Organização fiscal: Empresa → Ano → Mês → Entrada/Saída → tipo documental; sem pasta `PDFs Fiscais`.
+- Relatório separa NF-e e NFC-e; cards do Exatinho devem permanecer sem overflow.
+- Nenhum texto em card deve ultrapassar suas bordas.
+
+V135 — AUTENTICAÇÃO
+- Administrador principal: Bruno Elias.
+- E-mail administrativo: brunoalbano.elias8@gmail.com.
+- Primeiro acesso do administrador cria a senha dentro do programa.
+- Tela de login obrigatória antes do workspace quando o programa é aberto normalmente.
+- Cadastro de colaborador: nome, e-mail e senha.
+- Novo colaborador entra como `Aguardando aprovação`.
+- Perfis atuais: `Administrador` e `Usuário`.
+- Gestão de usuários: aprovar/ativar, bloquear, redefinir senha e consultar atividades.
+- Não bloquear o próprio administrador na sessão atual.
+- Não bloquear o último administrador ativo.
+- Senhas: PBKDF2-SHA256 + salt; nunca texto puro.
+- Histórico local: login, falha de login, cadastro solicitado, status alterado, senha inicial/redefinida e logout.
+- Cabeçalho identifica usuário e perfil.
+- Exatinho personaliza a saudação usando o primeiro nome do usuário autenticado.
+
+V136 — RECUPERAÇÃO DE SENHA
+- A tela de login possui `ESQUECI MINHA SENHA`.
+- O usuário informa o e-mail cadastrado e registra uma solicitação.
+- O sistema não informa ao solicitante se o e-mail está cadastrado.
+- Solicitações são persistidas em `password_reset_requests`.
+- Solicitações duplicadas pendentes para o mesmo usuário são evitadas.
+- Administrador vê o contador `SENHAS PENDENTES` e o botão `SOLICITAÇÕES DE SENHA (N)`.
+- O administrador pode selecionar a solicitação e redefinir a senha pelo fluxo existente.
+- Solicitação atendida passa para `Atendida` e é registrada no histórico.
+- Administrador também pode cancelar uma solicitação pendente.
+- Nesta etapa não existe envio automático por e-mail; a recuperação é administrada pelo escritório.
+
+PERSISTÊNCIA ENTRE VERSÕES
+- Os dados da Central, inclusive usuários, ficam no banco persistente definido por `APP_DATA_DIR`, fora da pasta da versão.
+- Atualizar V135 para V136, V137 etc. não deve exigir novo cadastro ou ativação dos usuários existentes.
+- Nunca criar rotina de atualização que substitua o banco persistente por um banco vazio sem preservação.
+- O banco deve ser migrado aditivamente quando novas tabelas/colunas de autenticação forem necessárias.
+
+NÚCLEOS PROTEGIDOS
+1. _audit_build_rows
+2. _audit_compare_pair
+3. _audit_fallback_key
+4. _audit_key
+5. _audit_xml_rows
+6. choose_nfe_actor
+7. mark_nfe_sync_cycle
+8. sync_documents_automatically
+9. test_sef_nfe_webservice
+10. generate_fiscal_representation_pdf
+11. open_document_fiscal_representation
+12. save_documents_organized
+13. generate_documents_pdf
+
+REGRAS DE VERSÃO
+- Só criar nova Vxxx mediante autorização expressa.
+- Não corrigir versão antiga silenciosamente.
+- Preservar núcleos protegidos e validar regressão antes de empacotar.
+- Gerar `Vxxx_NOTAS.txt`, continuidade cumulativa e checklist técnico a cada versão.
+- Nunca enviar senha do usuário para o chat; o sistema deve coletar a senha no próprio programa.
+
+PENDÊNCIAS REGISTRADAS
+- Autenticação centralizada entre computadores.
+- Recuperação automática por e-mail/OTP após a autenticação centralizada.
+- Evolução de permissões por funcionalidade.
+- Busca Global por nome da empresa.
+- Continuidade da evolução do Exatinho: autonomia, memória, atenção, microexpressões, humor contextual, iniciativa e silêncio inteligente.
+- Cuidado permanente com cStat 657: tratar como divergência do órgão autorizador, sem afirmar bloqueio por consumo indevido.

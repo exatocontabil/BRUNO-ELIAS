@@ -1,0 +1,16 @@
+V160 — CORREÇÃO DO "RASTRO" AO ROLAR
+
+PEDIDO DO USUÁRIO
+- Print da Auditoria (V159): ao rolar, cartões ficavam com faixas repetidas (pedaços antigos da tela).
+
+CAUSA PROVÁVEL (não reproduzível no Linux; o Windows deixa o rastro quando o redesenho atrasa)
+- A roda e a animação de rolagem disparavam eventos em sequência e o Tk só desenha quando fica sem eventos pendentes; em telas com muitos cartões e imagens o desenho ficava para trás e sobrava imagem antiga.
+
+O QUE FOI FEITO (exato_ui.WheelRouter)
+1. Cada passo de rolagem (página e tabelas) é desenhado na hora (update_idletasks) antes do próximo.
+2. Animação adaptativa: mede o custo do desenho; se for alto (>45 ms), a página passa a pular direto ao destino, sem animação, e volta ao suave quando o desenho ficar leve.
+3. Passo da animação a cada 16 ms (antes 12 ms).
+4. Teste: test_v160_rolagem.py inclui o caso de desenho lento.
+
+LIMITES / A CONFERIR
+- Confirmar no Windows (Auditoria, Início, NFS-e). Se o rastro continuar, mande novo print e informe se aparece com a roda, com o touchpad ou ao arrastar a barra; o próximo passo seria reduzir a quantidade de cartões desenhados por tela.

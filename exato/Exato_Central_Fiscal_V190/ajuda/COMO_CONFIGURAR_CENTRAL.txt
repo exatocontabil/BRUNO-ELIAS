@@ -1,0 +1,73 @@
+EXATO CENTRAL FISCAL — CENTRAL COMPARTILHADA
+Versão: V145
+
+OBJETIVO
+Permitir que dois ou mais computadores do escritório trabalhem com usuários e dados compartilhados através de uma Central pela rede local.
+
+1. ESCOLHA O SERVIDOR
+
+Escolha um computador que permanecerá ligado quando o escritório precisar usar a Central.
+No Exato: Login → CONFIGURAR CENTRAL COMPARTILHADA → Este computador é o Servidor Central.
+
+A V143 usa a base persistente deste computador como fonte central. Dados fiscais já existentes são preparados para a primeira sincronização.
+
+2. ENVIE O ARQUIVO DE CONEXÃO
+
+Depois de ativar o servidor, localize na área de dados do Exato o arquivo:
+EXATO_CENTRAL_CONEXAO.txt
+
+Copie esse arquivo para cada computador cliente.
+O arquivo contém endereço(s) da Central e um token de acesso. Trate-o como uma credencial e não o publique.
+
+3. CONFIGURE CADA CLIENTE
+
+Em cada computador adicional:
+Login → CONFIGURAR CENTRAL COMPARTILHADA → Conectar a um Servidor Central existente → IMPORTAR ARQUIVO DE CONEXÃO → TESTAR E CONECTAR.
+
+4. PRIMEIRO USUÁRIO NO CLIENTE
+
+Quando o cliente é conectado pela primeira vez, usuários locais com senha já configurada podem ser importados para a Central.
+Senhas não são enviadas em texto puro.
+
+5. O QUE FICA COMPARTILHADO
+
+- usuários e status;
+- login e sessão;
+- solicitações de recuperação de senha;
+- atividades do sistema;
+- empresas;
+- documentos fiscais armazenados no Arquivo Fiscal Local;
+- histórico de exportações.
+
+6. COMO A SINCRONIZAÇÃO FUNCIONA
+
+- O cliente mantém sua base local para uso da aplicação.
+- Alterações locais entram em uma fila segura de envio (outbox).
+- O cliente envia as alterações para o Servidor Central quando conectado.
+- O cliente consulta e aplica as alterações novas da Central por cursor de atualização.
+- A Central usa timestamps únicos para não perder atualizações na paginação.
+- Registros fiscais já existentes no servidor recebem uma posição inicial de sincronização quando a Central é iniciada.
+
+7. SE UMA MÁQUINA FICAR OFFLINE
+
+A sincronização fica pendente até o servidor voltar a estar disponível.
+Na V143, o login central do cliente depende da Central estar acessível no momento da autenticação.
+
+8. SEGURANÇA E REDE
+
+A Central da V143 usa HTTP na rede local com token de acesso e sessão de usuário.
+Não exponha a porta 8765 diretamente à internet.
+Use uma rede privada/confiável e proteja o arquivo de conexão.
+
+9. RECOMENDAÇÃO DE OPERAÇÃO
+
+Para o escritório, defina um computador principal para atuar como Servidor Central e evite trocar o servidor constantemente.
+Se o servidor mudar de computador, faça uma estratégia de migração/backup antes de trocar a base.
+
+============================================================
+EXATO CENTRAL FISCAL
+Exato Soluções Contábeis
+============================================================
+
+
+V143 — Ao ativar o Servidor Central no Windows, o Exato registra automaticamente a inicialização do servidor para o usuário atual. O status dessa configuração aparece em Manutenção → Central Compartilhada.

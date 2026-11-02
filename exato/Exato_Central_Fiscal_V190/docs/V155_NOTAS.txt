@@ -1,0 +1,14 @@
+V155 — EXATINHO CONVERSANDO (PERGUNTAS, RESUMO DO DIA E TAREFAS)
+
+PEDIDO DO USUÁRIO
+- Deixar o Exato IA mais interativo. Aprovadas as ideias 1, 2 e 3: chat em qualquer tela, resumo do dia com botões e comandos que fazem a ação.
+
+O QUE FOI FEITO
+1. Conversa em qualquer tela: Ctrl+J (ou "Conversar com o Exatinho" no painel dele). Pergunte em português: "Quanto a CREATIVE HUB prestou em setembro?", "Quantas notas tem a empresa este mês?", "Quais notas canceladas eu já exportei?", "Que empresas estão sem busca?", "Algum certificado vencendo?", "O que falta exportar?". A resposta traz a conta e as notas por trás, com botões (gerar relatório, abrir NFS-e, ver canceladas exportadas...). Entende meses, "mês passado", "este mês", datas e o nome ou CNPJ da empresa; sem citar empresa, usa a ativa; se houver nomes parecidos, pergunta qual.
+2. Resumo do dia: ao abrir a conversa e uma vez por dia no início (balão do Exatinho + aviso). Lista: notas já exportadas que foram canceladas, certificados vencidos ou perto de vencer, empresas sem busca há 7 dias ou mais, buscas que deixaram XMLs sem baixar e notas ainda não salvas na pasta dos clientes. Cada ponto tem o botão para resolver.
+3. Comandos que fazem a tarefa, sempre com confirmação ("Posso começar?"): "busque e salve tudo da CREATIVE HUB", "busque as NFS-e de todas as empresas", "gere o relatório de setembro" (sem período = mês anterior), "abra Documentos". A busca usa o certificado da empresa ou a senha salva do portal; sem nenhum dos dois, avisa e abre a aba NFS-e. O relatório sai na pasta dos clientes (Relatorios_NFS-e) sem perguntar.
+Tudo roda no computador: nenhum dado fiscal sai daqui e não há IA externa.
+
+LIMITES / A CONFERIR
+- O entendimento é por palavras-chave em português (não é IA aberta): frases muito diferentes podem não ser entendidas; nesse caso o Exatinho mostra exemplos. Mande as frases que não funcionaram para eu ampliar.
+- Perguntas sobre NF-e/NFC-e/CT-e: por enquanto quantidades e valores (por empresa e período), não há análise individual de nota.

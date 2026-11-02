@@ -1,0 +1,22 @@
+V119 — CHECKLIST DE VALIDAÇÃO
+
+Status: APROVADA
+
+[OK] APP_VERSION = V119
+[OK] py_compile / compileall
+[OK] Sidebar com acesso direto a Documentos Fiscais
+[OK] Atalho Ctrl+D para Documentos Fiscais
+[OK] Dashboard com bloco MODO ESCRITÓRIO
+[OK] Estado do MODO ESCRITÓRIO atualizado em tempo real
+[OK] Resumo por NF-e / NFC-e / CT-e no Dashboard
+[OK] Tela Documentos Fiscais com resumo Total / NF-e / NFC-e / CT-e / Entrada / Saída
+[OK] Botão de filtro sem clipping em janela 1200x760
+[OK] Smoke de UI sob Xvfb
+[OK] Dashboard e Documentos Fiscais renderizados para inspeção visual
+[OK] 13/13 núcleos protegidos idênticos à V118 por SHA-256
+[OK] generate_documents_pdf preservada
+[OK] Separação NF-e/NFC-e/CT-e do relatório preservada
+[OK] __pycache__ / .pyc / temporários removidos antes do ZIP
+
+Observação:
+Nenhum núcleo fiscal, Auditoria SAT × XML, captura NF-e/NFC-e/CT-e, geração fiscal ou gerador PDF foi alterado na V119.

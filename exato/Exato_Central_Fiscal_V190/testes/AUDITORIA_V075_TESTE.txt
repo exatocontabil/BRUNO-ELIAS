@@ -1,0 +1,9 @@
+V076 — TESTE DA AUDITORIA SAT × XML
+
+Prioridades do teste real:
+1. Clicar AUDITAR SAT × XML.
+2. Verificar se o fluxo invisível chega a Apps.aspx e depois a NFe/NFCe - Consulta.
+3. Verificar as quatro consultas: NF-e Emitente, NF-e Destinatário, NFC-e Emitente e NFC-e Destinatário.
+4. Verificar se os Excels SAT são obtidos automaticamente, sem seleção manual.
+5. Verificar se a comparação SAT × XML é concluída.
+6. Verificar se a NF-e de entrada continua sendo capturada na atualização fiscal.

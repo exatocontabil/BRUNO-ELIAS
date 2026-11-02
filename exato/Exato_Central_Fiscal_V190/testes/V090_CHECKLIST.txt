@@ -1,0 +1,32 @@
+V090 — CHECKLIST DE VALIDAÇÃO
+
+[OK] Compilação
+[OK] Importação do módulo
+[OK] Inicialização da interface
+[OK] Identidade Exato na janela (iconbitmap/iconphoto configurados)
+[OK] Header sem logo duplicado
+[OK] Organizar XML ausente da navegação principal
+[OK] BUSCAR XML no fluxo de captura
+[OK] Aviso de documentos fora do período selecionado
+[OK] Auditoria com seleção NF-e/NFC-e
+[OK] Detecção/validação de tipo documental do Excel
+[OK] Histórico com tipo documental
+[OK] PDF de auditoria sem overflow nos cenários Conforme/Atenção/Divergência
+[OK] PDF consolidado separado por pasta/tipo
+[OK] Ordenação do PDF consolidado por emissão; desempate por nº da nota
+[OK] Backup/persistência preservados
+[OK] Funções protegidas idênticas às da V085
+
+TESTES EXECUTADOS
+- Smoke test da interface em ambiente gráfico virtual 1440x900.
+- Verificação do botão BUSCAR XML e ausência de Organizar XML na navegação.
+- Smoke test da Auditoria com seleção NF-e e NFC-e.
+- Parser do Excel SAT real de teste: 65 linhas, família NFC-e detectada.
+- Teste sintético de documentos fora do período: meses anterior e posterior identificados sem alterar o período.
+- Exportação sintética de XML + PDF consolidado por pasta/tipo.
+- Ordenação confirmada: emissão crescente e, na mesma data, numeração crescente.
+- PDFs da Auditoria testados em três estados; todos abriram corretamente e passaram pelo preflight.
+- Comparação por hash AST das funções protegidas V085 → V090: todas idênticas.
+
+OBSERVAÇÃO
+A captura real contra a SEF/SC depende de ambiente, certificado e disponibilidade do serviço e não é declarada como teste live nesta validação.

@@ -1,0 +1,41 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL V144
+
+ESTADO ATUAL
+- V144 é a nova versão trabalhada a partir da V143, mediante autorização expressa.
+- V143 e versões anteriores continuam intactas.
+- O foco da V144 é exclusivamente o upgrade visual e de usabilidade da tela Empresas, preservando a lógica de atualização e busca já validada.
+
+TELA EMPRESAS — NOVO LAYOUT
+- Título e subtítulo alinhados ao rascunho visual aprovado.
+- Cards superiores mostram: Empresas exibidas, Atualizada, Em atenção e Desatualizadas.
+- Campo de busca com placeholder “Pesquisar por nome ou CNPJ...”.
+- Filtro por Todas / Atualizadas / Atenção / Desatualizadas.
+- Tabela visual com colunas Empresa, CNPJ, Documentos, Última atualização, Atualização e Última busca.
+- Estados de Atualização aparecem em badges semânticos: verde, âmbar e vermelho.
+- Resultado da Última busca aparece em badges próprios, com cores distintas para conclusão, observação, aguardando, não realizada, erro, andamento e cancelamento.
+- Legendas abaixo da tabela usam as mesmas cores dos badges.
+- As ações permanecem: IMPORTAR EMPRESAS (EXCEL), BUSCA AUTOMÁTICA, ATUALIZAR e ABRIR EMPRESA.
+- Seleção de empresa foi migrada do Treeview antigo para uma seleção visual de linha, preservando a ação ABRIR EMPRESA.
+
+COMPATIBILIDADE / RESPONSIVIDADE
+- Em telas compactas, a tabela mantém área de rolagem interna para evitar que a tela cresça além do espaço disponível.
+- A legenda de Última busca é compactada em telas menores; em telas amplas, os estados adicionais também ficam visíveis.
+- O layout não depende de nova estrutura de banco.
+
+CORREÇÃO FUNCIONAL ADICIONAL
+- O filtro visual “Atualizadas”/“Desatualizadas” agora é convertido corretamente para os estados internos singulares “Atualizada”/“Desatualizada”.
+- Isso corrige uma inconsistência existente na V143 sem tocar o motor fiscal.
+
+PERSISTÊNCIA
+- Nenhuma base nova por versão.
+- Arquivo Fiscal Local permanece persistente.
+- document_exports continua sendo a fonte de verdade para reconhecer documentos já exportados.
+- Central Compartilhada, backup e autostart permanecem preservados.
+
+PROTEÇÃO
+- Os 13 núcleos fiscais protegidos permanecem idênticos à V143 por AST/SHA-256.
+- 31/31 assets oficiais permanecem idênticos à V143 por SHA-256.
+- Exatinho e identidade visual foram preservados; o logo completo foi usado no cabeçalho da barra lateral para aproximar a referência visual.
+
+PRÓXIMA PENDÊNCIA
+- Otimização de fluidez na troca das abas laterais: cache/renderização do Exatinho e deslocamento de cargas pesadas para fora do caminho do clique.

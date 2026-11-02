@@ -1,0 +1,45 @@
+V121 — EXATO IA 2.0 + DIAGNÓSTICO TÉCNICO
+
+Base: V120
+
+Foco autorizado:
+- Exato IA evoluído para comportamento orientado a eventos reais da Central;
+- memória curta da sessão com histórico dos eventos relevantes;
+- percepção de contexto operacional: navegação, busca XML, lotes, auditoria, pendências e geração de representações fiscais;
+- estados contextuais com reação curta e retorno natural ao repouso;
+- frases mais silenciosas e contextuais, evitando conversa contínua;
+- diagnóstico técnico compacto para os retornos do Web Service;
+- correção da interpretação apresentada ao usuário para cStat 657.
+
+CSTAT / NF-e:
+- cStat 656 = Rejeição: Consumo Indevido;
+- cStat 657 = Rejeição: Código do Órgão diverge do órgão autorizador;
+- cStat 657 não deve ser exibido como bloqueio automático de 1 hora;
+- o fluxo SOAP/protegido da consulta NF-e não foi alterado nesta versão;
+- a correção foi isolada na camada de apresentação/orquestração para preservar o funcionamento validado.
+
+EXATO IA:
+- event bus interno em memória de sessão;
+- eventos de navegação, início de sincronização, lotes, sucesso/erro de sincronização,
+  início/fim de auditoria, pendências e geração em lote de representações;
+- cooldown de eventos para evitar chatter;
+- memória curta usada para frases ociosas contextuais;
+- cStat 657 gera estado de atenção, sem criar falso estado de bloqueio.
+
+PRESERVAÇÃO:
+- 13/13 núcleos protegidos comparados contra V120 e permanecem idênticos por SHA-256;
+- nenhum gerador fiscal ou motor de auditoria/PDF protegido foi alterado.
+
+VALIDAÇÃO EXECUTADA:
+- py_compile / compileall;
+- teste dedicado de eventos e cStat;
+- regressão NF-e / scheduler;
+- regressão Auditoria multi-tipo + PDF;
+- regressão Exato IA / QA;
+- regressão do relatório PDF;
+- smoke de inicialização e navegação sob Xvfb;
+- teste do Centro Operacional V120;
+- teste do motor comportamental do Exato IA;
+- inspeção visual do Dashboard e tela de Busca XML;
+- verificação SHA-256 dos 13 núcleos protegidos;
+- validação final do ZIP sem __pycache__, .pyc ou arquivos temporários.

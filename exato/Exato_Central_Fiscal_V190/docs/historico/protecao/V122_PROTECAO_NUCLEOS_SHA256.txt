@@ -1,0 +1,20 @@
+V122 — PROTEÇÃO DOS 13 NÚCLEOS
+
+Comparação de SHA-256 contra V121.
+Todos os 13 núcleos protegidos permaneceram idênticos.
+
+1. _audit_build_rows
+2. _audit_compare_pair
+3. _audit_fallback_key
+4. _audit_key
+5. _audit_xml_rows
+6. choose_nfe_actor
+7. mark_nfe_sync_cycle
+8. sync_documents_automatically
+9. test_sef_nfe_webservice
+10. generate_fiscal_representation_pdf
+11. open_document_fiscal_representation
+12. save_documents_organized
+13. generate_documents_pdf
+
+Nenhuma dessas funções foi modificada na V122.

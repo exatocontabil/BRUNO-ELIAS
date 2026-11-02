@@ -1,0 +1,77 @@
+V136 — RECUPERAÇÃO DE SENHA E CONTINUIDADE DO ACESSO
+
+BASE
+- V135.
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Criar um fluxo claro de “Esqueci minha senha” para colaboradores.
+- Evitar que o usuário fique sem caminho de recuperação quando esquecer a senha.
+- Manter a recuperação compatível com a autenticação local atual, sem depender de serviço de e-mail ainda não implementado.
+- Preparar a arquitetura para futura recuperação centralizada por e-mail/OTP quando a autenticação entre computadores for implementada.
+
+ALTERAÇÕES
+- Criada a tabela local `password_reset_requests` no mesmo banco persistente da autenticação.
+- Criado o botão `ESQUECI MINHA SENHA` na tela de login.
+- Criado formulário para informar o e-mail e registrar uma solicitação de recuperação.
+- O fluxo não revela ao solicitante se o e-mail existe ou não na base.
+- Usuários com acesso ativo podem gerar uma solicitação pendente; pedidos duplicados enquanto já houver uma solicitação pendente são evitados.
+- Administrador passou a visualizar o contador `SENHAS PENDENTES` em `Usuários e Acessos`.
+- Criado botão `SOLICITAÇÕES DE SENHA (N)` para o administrador visualizar as solicitações pendentes.
+- Administrador pode selecionar uma solicitação e usar o fluxo existente de redefinição de senha para atender o pedido.
+- Ao atender uma solicitação, ela é marcada como `Atendida` e registrada no histórico de atividades.
+- Administrador também pode `Cancelar` uma solicitação de recuperação.
+- O histórico registra a solicitação, sua atualização e a redefinição efetivamente realizada.
+- O banco continua fora da pasta da versão, no diretório persistente do usuário; portanto, a atualização para V136 não exige novo cadastro/ativação do usuário já existente.
+
+FLUXO DO USUÁRIO
+1. Usuário abre o programa e escolhe `ESQUECI MINHA SENHA`.
+2. Informa o e-mail cadastrado.
+3. A solicitação é registrada para análise do administrador.
+4. O usuário procura o administrador do Exato Central Fiscal para concluir a redefinição.
+5. O administrador redefine a senha pela área `Solicitações de senha` / `Usuários e Acessos`.
+6. O usuário utiliza a nova senha normalmente.
+
+DECISÃO ARQUITETURAL
+- Nesta etapa não foi criado envio automático por e-mail, porque a V136 continua usando autenticação local ao ambiente atual.
+- O mecanismo é deliberadamente administrado pelo escritório, evitando criar uma falsa sensação de recuperação remota que ainda não existe.
+- Quando a autenticação centralizada entre computadores for implementada, o mesmo modelo poderá receber código de recuperação por e-mail, link de redefinição ou OTP sem alterar a lógica fiscal protegida.
+
+SEGURANÇA
+- Senhas continuam armazenadas somente como PBKDF2-SHA256 + salt.
+- O fluxo de recuperação não grava senha em texto puro.
+- A existência do e-mail não é revelada na solicitação de recuperação.
+- O administrador continua sendo o responsável pela redefinição nesta arquitetura local.
+
+PRESERVAÇÃO
+- Nenhum dos 13 núcleos protegidos foi alterado.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- Auditoria permaneceu intacta.
+- Geração de DANFE/DACTE e PDF permaneceu intacta.
+- Arquivo Fiscal Local, SALVAR XMLs e SALVAR XMLs NOVOS permaneceram funcionais.
+- Exatinho e o comportamento existente foram preservados.
+
+VALIDAÇÃO
+- `python -m py_compile exato_central_fiscal.py`.
+- `python -m compileall -q .`.
+- Teste do núcleo de recuperação de senha.
+- Teste da UI de recuperação sob Xvfb.
+- Regressão da autenticação da V135.
+- Regressão do Arquivo Fiscal Local.
+- Regressão da UI de Documentos Fiscais.
+- Regressão de SALVAR XMLs NOVOS.
+- Regressão do motor/comportamento do Exatinho.
+- Comparação SHA-256/AST dos 13 núcleos protegidos.
+
+RESULTADO
+- Recuperação de senha implementada sem tocar nos núcleos fiscais protegidos.
+- Proteção dos 13 núcleos: 13/13 idênticos entre V135 e V136.
+
+PENDÊNCIAS
+- Autenticação centralizada entre computadores.
+- Recuperação automática por e-mail/OTP após a centralização.
+- Evolução de permissões por funcionalidade.
+- Busca Global confiável por nome da empresa.
+
+BASE ATUAL
+- V136.

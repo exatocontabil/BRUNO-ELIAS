@@ -1,0 +1,8 @@
+V163 — CNPJ CONFIRMADO SÓ UMA VEZ
+
+PEDIDO DO USUÁRIO
+- Na tela Buscar XML aparecia "CNPJ confirmado" duas vezes (botão cinza e aviso verde); deixar só um.
+
+O QUE FOI FEITO
+- Com o CNPJ confirmado, o botão cinza "CNPJ CONFIRMADO" é escondido (_set_cnpj_confirmed) e fica só o aviso verde; ao mudar o CNPJ o botão "Confirmar CNPJ" volta no mesmo lugar.
+- Teste: test_v163_certificado_unico.py (inclui o caso do botão).

@@ -1,0 +1,8 @@
+V080 — validação
+1. Confirmar certificado previamente selecionado.
+2. Executar Auditoria SAT × XML.
+3. Verificar chegada a Apps.aspx.
+4. Verificar consulta e exportação.
+5. Verificar quatro combinações: NF-e/Emitente, NF-e/Destinatário, NFC-e/Emitente, NFC-e/Destinatário.
+6. Em falha, analisar CERTIFICADO_SAT_IDENTIDADE.json, AUTH_ATTEMPT_*.json e CONSULTAS_SAT.json.
+7. Confirmar captura NF-e/NFC-e e layout.

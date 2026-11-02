@@ -1,0 +1,27 @@
+V144 — CHECKLIST DE ENTREGA
+
+[OK] Base derivada diretamente da V143.
+[OK] APP_VERSION atualizado para V144.
+[OK] Novo layout da tela Empresas baseado no rascunho visual aprovado.
+[OK] Cards de resumo: exibidas / atualizada / atenção / desatualizadas.
+[OK] Busca com placeholder e filtro.
+[OK] Tabela visual com badges semânticos.
+[OK] Separação entre Atualização e Última busca preservada.
+[OK] Seleção visual de empresa e ABRIR EMPRESA preservados.
+[OK] Legenda de Atualização preservada e alinhada às cores dos badges.
+[OK] Legenda de Última busca responsiva.
+[OK] Filtro de status corrigido para os estados internos.
+[OK] Arquivo Fiscal Local preservado.
+[OK] Histórico document_exports preservado.
+[OK] Progresso/cancelamento da exportação preservados.
+[OK] Central Compartilhada preservada.
+[OK] Backup/autostart preservados.
+[OK] Compilação completa.
+[OK] UI smoke da tela Empresas.
+[OK] Persistência de exportação.
+[OK] Cancelamento de exportação.
+[OK] Backup automático.
+[OK] Autostart.
+[OK] Sincronização Central Compartilhada.
+[OK] 13/13 núcleos fiscais protegidos SAME por AST.
+[OK] 31/31 assets oficiais SAME por SHA-256.

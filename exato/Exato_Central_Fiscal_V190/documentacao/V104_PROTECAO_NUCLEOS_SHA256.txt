@@ -1,0 +1,19 @@
+V104 — PROTEÇÃO DE NÚCLEOS
+Comparação: V103 → V104
+
+_audit_build_rows: OK — idêntico
+_audit_compare_pair: OK — idêntico
+_audit_fallback_key: OK — idêntico
+_audit_key: OK — idêntico
+_audit_xml_rows: OK — idêntico
+choose_nfe_actor: OK — idêntico
+mark_nfe_sync_cycle: OK — idêntico
+sync_documents_automatically: OK — idêntico
+test_sef_nfe_webservice: OK — idêntico
+
+generate_fiscal_representation_pdf: OK — idêntico
+open_document_fiscal_representation: OK — idêntico
+save_documents_organized: OK — idêntico
+generate_documents_pdf: OK — idêntico
+
+RESULTADO: 9/9 núcleos fiscais e 4/4 funções de PDF preservados por SHA-256.

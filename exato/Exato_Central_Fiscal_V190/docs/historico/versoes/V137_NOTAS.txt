@@ -1,0 +1,51 @@
+V137 — RECOMPOSIÇÃO VISUAL DA V135 + RECUPERAÇÃO DE SENHA PRESERVADA
+
+BASE
+- V135 como referência visual/funcional congelada.
+- Recursos de recuperação de senha da V136 reincorporados de forma isolada.
+- Versão criada mediante autorização expressa do usuário.
+
+MOTIVO
+- O usuário identificou diferença visual relevante ao utilizar a V136, relatando perda/diferença de elementos de identidade do Central, incluindo Exatinho e logos.
+- Embora a comparação estática dos assets da V135/V136 mostrasse os mesmos recursos, foi adotada uma estratégia conservadora: reconstruir a V137 a partir do pacote completo da V135 e somente incorporar a funcionalidade de recuperação de senha.
+
+PRESERVAÇÃO VISUAL
+- Todos os assets da V135 foram mantidos sem substituição.
+- Logo Exato, logo mark, Exatinho, sprites, poses e recursos gráficos permanecem os mesmos da V135.
+- Estrutura de pastas visual/auxiliar da V135 foi preservada.
+- O código principal foi baseado na V135 para evitar regressão visual acidental; os recursos de recuperação de senha da V136 foram mantidos.
+- Nenhuma alteração foi feita propositalmente no layout principal, sidebar, header, Exatinho, identidade ou renderização de telas existentes.
+
+RECUPERAÇÃO DE SENHA
+- Mantido o botão ESQUECI MINHA SENHA.
+- Mantida a tabela password_reset_requests no banco persistente.
+- Mantido o fluxo de solicitação sem revelar existência do e-mail.
+- Mantido atendimento/cancelamento pelo administrador.
+- Mantida a integração com histórico de atividades.
+- Mantida a possibilidade de futura evolução para recuperação por e-mail/OTP.
+
+ATUALIZAÇÃO ENTRE VERSÕES
+- O banco de autenticação continua persistente fora da pasta da versão.
+- Atualização V135/V136/V137 não deve exigir novo cadastro ou ativação da conta já existente.
+
+CORREÇÃO DE EMPACOTAMENTO
+- V137 atualiza os rótulos dos arquivos .bat para V137 (os anteriores continham o texto legado V123).
+- O pacote final mantém a estrutura completa da V135, inclusive assets, documentação histórica, testes, scripts, archive e third_party.
+
+PROTEÇÃO
+- Nenhum dos 13 núcleos fiscais protegidos foi alterado.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- Auditoria, geração fiscal/PDF e Arquivo Fiscal Local permaneceram preservados.
+
+VALIDAÇÃO PREVISTA/REALIZADA
+- py_compile.
+- compileall.
+- comparação dos 13 núcleos protegidos por SHA-256/AST contra V135.
+- conferência dos assets V135 no pacote V137 por hash.
+- teste de autenticação.
+- teste de recuperação de senha.
+- teste da UI de recuperação sob Xvfb.
+- teste da presença dos componentes visuais do Exatinho/logo no código e assets.
+
+BASE ATUAL
+- V137.

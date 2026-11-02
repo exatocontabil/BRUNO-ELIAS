@@ -1,0 +1,13 @@
+V101 — CHECKLIST DE VALIDAÇÃO
+
+[OK] Diagnóstico da captura NF-e de Saída incorporado ao orquestrador
+[OK] Cooldown de 12h aplicado somente após cStat=117
+[OK] Cooldowns legados de outros cStat não bloqueiam o próximo ator
+[OK] Fluxos Emitente/Destinatário continuam com cursores independentes
+[OK] Quando o primeiro ator conclui sem cStat=117, o ator oposto pode ser consultado na mesma busca
+[OK] Se houver cStat=117, o próximo ator permanece aguardando a janela de segurança
+[OK] Cartões da tela mantêm a separação Entrada/Saída já validada
+[OK] Organização XML + PDF + consolidado não foi alterada nesta versão
+[OK] Núcleos protegidos não tiveram corpo de função alterado
+[OK] Compilação
+[OK] Regressão V100/V099/V098/V095/Exato IA

@@ -1,0 +1,30 @@
+CONTRATO DO PROJETO - EXATO CENTRAL FISCAL V061
+
+PRINCÍPIO
+Transformar o Central Fiscal em um produto fiscal profissional, didático e visualmente consistente, sem quebrar funcionalidades que já foram validadas.
+
+FUNCIONALIDADES HOMOLOGADAS
+- NF-e: consulta, filtro pelo período selecionado e salvamento.
+- NFC-e: consulta, filtro pelo período selecionado e salvamento.
+- CT-e: consulta, filtro pelo período selecionado e salvamento.
+
+REGRAS DE PRESERVAÇÃO
+- Não alterar mecanismos fiscais validados sem necessidade técnica clara.
+- Não remover funções existentes sem solicitação.
+- Não expor linguagem técnica interna na interface principal quando ela não for necessária ao usuário.
+- Manter a identidade visual da Exato Soluções Contábeis.
+- Toda evolução deve ser testada localmente antes da geração do pacote.
+
+NOVO FLUXO DE INTERFACE
+CNPJ da Empresa -> Confirmar CNPJ -> Empresa identificada -> Período dos documentos -> Continuar -> Atualizar documentos -> Salvar / Relatório.
+
+PDF
+O relatório passa a priorizar uma apresentação gerencial com Dashboard Fiscal, destaque para valores e detalhamento dos documentos. Quantidades não devem dominar os indicadores financeiros.
+
+
+AUDITORIA SAT x XML - V061
+- A auditoria deve ser acessível diretamente da tela de Documentos Fiscais.
+- A interface final não deve exigir seleção manual do Excel exportado pelo SAT.
+- A Central deve tentar obter automaticamente os dados oficiais do SAT e somente solicitar interação humana quando o próprio SAT exigir CAPTCHA/Cloudflare ou seleção de certificado que não pôde ser automatizada.
+- A comparação deve mostrar divergências nos dois sentidos e a diferença financeira.
+- O período utilizado na auditoria deve ser exatamente o período confirmado na tela de Documentos Fiscais.

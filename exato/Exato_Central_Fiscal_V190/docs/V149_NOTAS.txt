@@ -1,0 +1,28 @@
+V149 — NFS-e (EMISSOR NACIONAL)
+
+BASE
+- V149 parte da V148. Pedido do usuário: buscar NFS-e, hoje centralizadas no Emissor Nacional, por certificado digital ou por usuário e senha.
+- Decisões do usuário: certificado de cada cliente; login CPF/CNPJ + senha direto no portal; senha não é guardada; NFS-e guardadas no mesmo Arquivo Fiscal Local.
+
+O QUE FOI FEITO
+1. exato_nfse.py (novo, sem dependência de tela/banco): leitura do XML da NFS-e nacional (parse_nfse), eventos (parse_nfse_event; cancelam 101101 e 105102), resposta do ADN (parse_adn_response; lote JSON, ArquivoXml gzip+base64, erros 401/403/429/5xx amigáveis), busca por NSU em lotes (fetch_all_new, pausa de 0,5 s entre lotes, cancelável), transporte com certificado do Windows (PowerShell, TLS mútuo, A1 e A3) e leitura de XML/ZIP baixados (read_nfse_files).
+2. exato_nfse_portal.py (novo): acesso por usuário e senha com navegador (Playwright/Edge). Endereços e seletores do portal reunidos em PORTAL para calibrar. Detecta captcha e espera o usuário; paginação; baixa o XML de cada nota; filtra por período e empresa; diagnóstico (imagem + HTML sem senha) em Logs/nfse_portal quando um passo falha. A senha nunca é gravada ou registrada.
+3. Arquivo Fiscal Local: família 'nfse' (doc_type NFS-e). db_upsert_nfse_items, db_store_nfse_events, db_apply_nfse_cancellations, db_nfse_stats, save_nfse_documents (Empresa/Ano/Mês/Entrada|Saída/NFS-e/chave.xml) e save_documents_any (NF-e/NFC-e/CT-e continuam no exportador protegido).
+   _parse_document_metadata ganhou o ramo 'nfse'. A chave da NFS-e tem 50 dígitos (as demais, 44).
+4. Barreira de segurança: db_load_documents_as_payload deixa de devolver NFS-e por padrão (include_nfse=True ou family='nfse' para pedir). Relatórios, auditoria SAT x XML, busca de NF-e e exportações antigas não recebem NFS-e.
+5. Interface: aba "NFS-e" (Ctrl+0) com forma de acesso, empresa (lista ou CNPJ com validação), certificado/ambiente de testes, período e senha (modo portal), ações (Buscar, Cancelar, Importar XMLs/ZIP, Salvar XMLs, Ver em Documentos), situação com contadores e tabela das últimas notas com selos e tela vazia orientada. Documentos Fiscais ganhou o filtro "NFS-e" e a contagem NFS-e; "Ver/gerar representação" explica que o DANFSe ainda não é gerado.
+6. Histórico, toasts e Exatinho reaproveitam sync_runs e _ia_emit_event: a busca de NFS-e aparece no Histórico e gera avisos.
+
+LIMITES CONHECIDOS (HONESTOS)
+- Os sites do governo (gov.br, adn.nfse.gov.br, nfse.gov.br) são bloqueados no ambiente de desenvolvimento. Não foi possível ler o manual oficial nem chamar o ADN ou o portal reais. A API do ADN (GET {base}/contribuintes/DFe/{ultNSU}, até 50 documentos por lote, TLS mútuo) foi montada a partir de fontes públicas secundárias; o leiaute do XML da NFS-e e os eventos foram montados de memória do padrão nacional. Tudo foi testado com respostas e XMLs simulados.
+- Parâmetro cnpjConsulta: enviado na consulta; se o ADN rejeitar, ajustar em adn_fetch_batch.
+- O modo usuário/senha foi testado contra um portal SIMULADO (login, páginas, paginação, download). O desenho real do portal (campos, captcha, links, filtro de datas) precisa ser confirmado na primeira execução no Windows.
+- O ADN entrega por NSU, não por data: a busca por certificado traz tudo o que é novo desde a última vez; o período serve para filtrar a visualização e a exportação.
+- DANFSe (PDF) não é gerado.
+- Os totais do Início (valor autorizado, entradas, saídas, contagem de documentos) passam a incluir as NFS-e guardadas.
+
+PROTEÇÃO
+- 13/13 núcleos fiscais SAME e 31/31 assets SAME em relação à V145. save_documents_organized e os demais núcleos não foram alterados; NFS-e usam exportador próprio.
+
+TESTES
+- test_v149_nfse_core (XML, ADN, NSU, erros, importação), test_v149_nfse_storage (banco, cancelamento, barreira, exportação), test_v149_nfse_ui (aba, ADN simulado, 403, importação, exportação, modo portal simulado, senha não guardada), test_v149_nfse_portal (navegador real contra portal simulado; pulado se não houver Playwright/Chromium).

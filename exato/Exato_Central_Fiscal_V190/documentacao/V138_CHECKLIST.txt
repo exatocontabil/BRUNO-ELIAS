@@ -1,0 +1,17 @@
+V138 — CHECKLIST
+
+[OK] Base V137 preservada.
+[OK] Código funcional preservado; apenas APP_VERSION atualizado para V138.
+[OK] Exatinho preservado.
+[OK] Logos/identidade visual preservados.
+[OK] Autenticação preservada.
+[OK] Recuperação de senha preservada.
+[OK] Arquivo COMO_INSTALAR_EXATO.txt incluído na raiz.
+[OK] README.txt atualizado para V138.
+[OK] VERSAO.txt atualizado para V138.
+[OK] INICIAR.bat atualizado para V138.
+[OK] EXECUTAR.bat atualizado para V138.
+[OK] Dados persistentes documentados.
+[OK] Diferença entre instalação nova e transferência de ambiente documentada.
+[OK] 13 núcleos fiscais protegidos conferidos.
+[OK] Estrutura do ZIP validada.

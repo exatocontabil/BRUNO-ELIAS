@@ -1,0 +1,60 @@
+V132 — SALVAR XMLs NA TELA DOCUMENTOS FISCAIS
+
+BASE
+- V131.
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Adicionar na tela “Documentos Fiscais” uma ação explícita “SALVAR XMLs” para exportar os XMLs já armazenados no Arquivo Fiscal Local, sem executar nova consulta fiscal.
+
+ALTERAÇÕES IMPLEMENTADAS
+- Novo botão “SALVAR XMLs” na barra de ações de Documentos Fiscais, junto às demais ações operacionais.
+- O botão fica habilitado somente quando há pelo menos um documento selecionado.
+- O exportador usa exclusivamente as linhas selecionadas na tabela atual.
+- Os filtros atuais da tela já determinam quais documentos estão disponíveis para seleção; o botão não dispara nova busca.
+- Documentos selecionados de empresas diferentes são agrupados por CNPJ e exportados para a respectiva pasta de cada empresa.
+- A pasta raiz de clientes configurada na Busca Automática é reutilizada quando existente.
+- Se não houver uma pasta raiz válida configurada, o sistema solicita uma pasta e grava essa configuração para uso posterior.
+- O fluxo reutiliza a função fiscal protegida `save_documents_organized`, sem alterá-la, com `generate_companion_pdf=False`, portanto esta ação salva somente XMLs.
+- Incluída a mesma ação no menu de contexto dos documentos como “Salvar XMLs selecionados”.
+- O status da Central e o Exatinho registram a exportação como operação local, reforçando que nenhuma nova consulta fiscal é executada.
+
+COMPORTAMENTO RESULTANTE
+1. Buscar XMLs normalmente.
+2. Os XMLs permanecem armazenados no Arquivo Fiscal Local.
+3. Abrir Documentos Fiscais posteriormente.
+4. Aplicar os filtros desejados.
+5. Selecionar um ou mais documentos.
+6. Clicar em “SALVAR XMLs”.
+7. A Central exporta os XMLs selecionados para a estrutura de clientes já configurada, sem nova consulta à SEF/SC.
+
+PRESERVAÇÃO
+- Nenhum núcleo fiscal protegido foi alterado.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- Auditoria permanece intacta.
+- Geração de representação fiscal permanece intacta.
+- `save_documents_organized` permanece idêntica à V131.
+- PDF/report engine permanece intacto.
+- Busca Automática Multiempresas permanece intacta.
+- Busca Global continua registrada como pendência separada.
+
+NÚCLEOS PROTEGIDOS
+- Comparação V131 → V132 por SHA-256 sobre AST/source.
+- Resultado: 13/13 idênticos.
+- Arquivo: documentacao/V132_PROTECAO_NUCLEOS_SHA256.txt.
+
+TESTES REALIZADOS
+- `py_compile`.
+- `compileall`.
+- Teste específico V132 da ação “SALVAR XMLs” com XML persistido no banco local e exportação posterior sem nova consulta.
+- Teste de habilitação/desabilitação do botão conforme seleção.
+- Teste do fluxo de exportação usando a pasta raiz configurada.
+- Teste de exportação via função fiscal existente com PDF complementar desativado.
+- Regressão do Arquivo Fiscal Local V131.
+- Regressão da confirmação da Busca Automática adaptada para V132.
+- Comparação dos 13 núcleos protegidos.
+
+PENDÊNCIAS / PRÓXIMOS PASSOS
+- Busca Global: corrigir pesquisas por nome da empresa, CNPJ, número, série, chave, tipo e valor de forma confiável.
+- Avaliar posteriormente seleção sem marcação para exportar todos os documentos filtrados, se isso fizer sentido operacionalmente.
+- Evolução contínua do Exatinho.

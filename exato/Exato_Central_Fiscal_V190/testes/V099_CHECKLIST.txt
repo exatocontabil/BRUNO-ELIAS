@@ -1,0 +1,16 @@
+V099 — CHECKLIST DE ENTREGA
+
+[OK] py_compile
+[OK] Relatório executivo
+[OK] Relatório detalhado separado por Entrada/Saída
+[OK] Natureza da Operação no detalhamento
+[OK] Total da operação separado do subtotal da página
+[OK] Exato IA uma vez por direção
+[OK] Paginação balanceada
+[OK] Gráfico com Sem 5 (29 a 31)
+[OK] XML + PDF na mesma pasta documental
+[OK] Sem pasta “PDFs Fiscais”
+[OK] DANFE NF-e/NFC-e continua gerando
+[OK] Auditoria UI/regressão
+[OK] Exato IA V092
+[OK] Proteção 9/9 núcleos NF-e/Auditoria

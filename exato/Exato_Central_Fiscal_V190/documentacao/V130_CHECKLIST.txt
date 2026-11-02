@@ -1,0 +1,21 @@
+V130 — CHECKLIST
+
+[OK] Nova etapa CONFIRMAR CONFIGURAÇÃO.
+[OK] Início bloqueado antes da confirmação.
+[OK] Validação de certificado.
+[OK] Validação de período.
+[OK] Validação de empresas cadastradas.
+[OK] Validação de pasta raiz quando salvamento automático estiver ativo.
+[OK] Campos bloqueados após confirmação.
+[OK] INICIAR BUSCA AUTOMÁTICA habilitado somente após confirmação.
+[OK] Barra de ações visível em tela 1366x768.
+[OK] APP_VERSION = V130.
+[OK] py_compile.
+[OK] compileall.
+[OK] Teste específico da confirmação.
+[OK] Teste da fila multiempresa sequencial sem SEFAZ real.
+[OK] 13/13 núcleos protegidos idênticos à V129.
+[OK] ZIP final a ser validado após limpeza.
+
+OBSERVAÇÃO:
+O teste histórico que exige APP_VERSION == V120 não é aplicável à V130.

@@ -1,0 +1,59 @@
+V140 — CENTRAL COMPARTILHADA ENTRE COMPUTADORES
+
+BASE
+- V140 parte da V139.
+- O objetivo desta versão é permitir que duas ou mais máquinas do escritório utilizem uma única Central Fiscal compartilhada, preservando o Arquivo Fiscal Local e os núcleos fiscais protegidos.
+
+ARQUITETURA
+- `exato_central_server.py`: servidor HTTP local em `0.0.0.0:8765`, usando a base persistente do computador servidor.
+- `central_client.py`: cliente de conexão, autenticação remota e sincronização de dados.
+- A base fiscal local continua existindo em cada máquina como armazenamento/cache durável.
+- O computador servidor funciona como fonte central para usuários, empresas, documentos e exportações.
+- A sincronização utiliza fila de saída (outbox) e cursor incremental de alterações.
+- Timestamps centrais possuem precisão de microssegundos e são gerados de forma monotônica para evitar lacunas na paginação.
+
+AUTENTICAÇÃO
+- Em modo Cliente, login, cadastro, alteração de senha, status, recuperação de senha, usuários e atividades são encaminhados à Central.
+- O cadastro continua ativo imediatamente; não existe aprovação administrativa.
+- O primeiro cliente pode importar usuários locais que já possuem senha configurada. Apenas hash/salt/iterações são enviados; senha em texto puro não é transferida.
+- Importação de usuário existente no servidor é atualizável para preservar uma senha configurada no computador de origem.
+
+DOCUMENTOS / ARQUIVO FISCAL LOCAL
+- Alterações em empresas, documentos e histórico de exportações entram na fila de sincronização.
+- Documentos já existentes no servidor recebem `central_updated_at` na primeira inicialização da Central, permitindo que clientes façam o primeiro pull mesmo quando os registros são antigos.
+- O cliente primeiro envia seus registros pendentes e depois busca alterações da Central.
+- O XML original é preservado durante merges quando já existe uma cópia local.
+
+ROBUSTEZ
+- O servidor utiliza ThreadingHTTPServer.
+- Tokens de conexão protegem a Central; sessões de usuário protegem operações autenticadas.
+- O arquivo EXATO_CENTRAL_CONEXAO.txt contém URL/token e deve ser tratado como credencial.
+- A V140 é destinada a rede local confiável e não deve ter a porta 8765 exposta diretamente à internet.
+- Correção adicional: fila outbox não permanece presa quando um registro já não existe localmente.
+
+INTERFACE
+- Login recebeu acesso à configuração da Central Compartilhada.
+- Manutenção possui CONFIGURAR CENTRAL COMPARTILHADA e SINCRONIZAR CENTRAL AGORA.
+- Identidade visual, logos e Exatinho foram preservados.
+- Foi corrigido o enquadramento vertical da tela de login após a inclusão dos controles de autenticação.
+
+TESTES
+- `python -m compileall -q .` passou.
+- `test_v139_auth.py` passou contra a base V140.
+- `test_v139_login_cycle_ui.py` passou.
+- `test_v139_ui.py` passou e confirmou APP_VERSION V140.
+- `test_v140_central_sync.py` passou simulando dois ambientes separados e dois processos conectados por HTTP local, incluindo: login remoto, cadastro imediato, sincronização cliente→servidor, pull servidor→cliente, recuperação de senha e visibilidade para o administrador.
+- `test_v140_visual_smoke.py` passou com captura real da Central e presença do Exatinho/logo.
+- `test_v140_login_visual.py` passou com todos os controles de login visíveis.
+- Comparação AST V139→V140: 13/13 núcleos protegidos SAME.
+- Comparação visual: 31/31 assets SAME.
+
+LIMITAÇÕES CONSCIENTES
+- A arquitetura V140 é LAN-first. Ela não cria um serviço de nuvem nem sincronização entre redes externas.
+- Se o servidor estiver desligado, o cliente não consegue autenticar remotamente até que a Central esteja disponível novamente.
+- A V140 não cria um serviço do Windows; a Central pode ser iniciada em segundo plano quando a aplicação configurada como servidor é aberta.
+
+REGRA DE CONTINUIDADE
+- Não alterar os 13 núcleos fiscais protegidos sem autorização explícita.
+- Não alterar Exatinho/logos/identidade visual sem autorização explícita.
+- Tratar V140 como evolução arquitetural; qualquer nova etapa deve começar preservando a sincronização já validada.

@@ -1,0 +1,75 @@
+V125 — EXATINHO: PRESENÇA + MEMÓRIA DE SESSÃO + ATENÇÃO CONTEXTUAL
+
+BASE
+- V124
+- Versão criada mediante autorização expressa.
+
+OBJETIVO
+- Fazer o Exatinho parecer mais presente dentro da Central, indo além de animações e frases isoladas.
+- Aproveitar o event bus e a memória curta da V121/V122 para criar continuidade de comportamento.
+- Tornar a interação do clique mais útil sem transformar o personagem em um chatbot invasivo.
+
+EXATINHO
+- Nome oficial: Exatinho.
+- “Exato IA” continua sendo a denominação técnica da inteligência.
+- Mantidos personagem masculino, profissional, amigável, discreto e levemente carismático.
+- Painel de interação recebeu contexto de sessão mais rico.
+- Cabeçalho do painel agora identifica “Inteligência da Central”.
+- Saudação inicial ficou mais curta e funcional.
+
+PRESENÇA
+- Criada camada de “Presença Exatinho” para microreações autônomas durante períodos de baixa atividade.
+- Microreações possíveis: curiosidade, pequena mudança de postura, desvio de olhar e humor raro.
+- Reações não exigem fala e não interrompem o usuário.
+- A janela de presença respeita atividade recente, eventos relevantes, painel aberto e bolhas em andamento.
+- O sistema usa cooldown e variação temporal para evitar comportamento previsível.
+
+MEMÓRIA / CONTEXTO DA SESSÃO
+- Criado resumo de sessão consumido pelo painel do Exatinho.
+- O painel passa a considerar tela atual, fase operacional, empresa, quantidade de documentos e status recente.
+- Adicionada pequena “Atividade recente” com até três eventos fiscais/operações relevantes da sessão.
+- A linha do tempo usa eventos já existentes e não toca nos motores fiscais.
+
+ATENÇÃO CONTEXTUAL
+- O Exatinho mantém a atenção ligada ao contexto atual e aos eventos significativos existentes.
+- A presença autônoma é separada das mensagens contextuais de sucesso, erro, auditoria e processamento.
+- Não foram adicionados ciclos de fala agressivos.
+
+INTERAÇÃO
+- Clique no Exatinho continua abrindo painel contextual.
+- O painel agora apresenta identidade, status de sessão e atividade recente antes das ações.
+- Ações mantidas: Status da Central, O que aconteceu?, Ver pendências.
+
+HUMOR / PERSONALIDADE
+- Mantida a política de humor leve, inspiracional e contextual.
+- Presença autônoma pode produzir uma frase muito rara apenas em inatividade prolongada.
+- Evitada repetição imediata e sobreposição com eventos importantes.
+
+PRESERVAÇÃO
+- Nenhum dos 13 núcleos protegidos foi alterado.
+- `generate_documents_pdf` permaneceu idêntica nesta versão.
+- Fluxo NF-e protegido permaneceu idêntico; nenhum ajuste foi feito na requisição SOAP.
+- cStat 657 continua tratado separadamente de cStat 656.
+
+TESTES
+- py_compile.
+- compileall.
+- Smoke da interface sob Xvfb.
+- Clique real no painel do Exatinho.
+- Renderização do painel com contexto de sessão.
+- Teste da Presença Exatinho com inatividade simulada.
+- QA de event bus e memória de sessão.
+- Smoke/QA estrutural da aplicação e da camada do Exatinho.
+- Regressão estrutural por preservação dos 13 núcleos protegidos; os fluxos fiscais não foram reexecutados contra serviços SEFAZ nesta etapa.
+- QA do Exato IA.
+- Comparação SHA-256/AST dos 13 núcleos protegidos.
+- Verificação do ZIP final e limpeza de `__pycache__`/`.pyc`.
+
+RESULTADO DA PROTEÇÃO
+- 13/13 núcleos protegidos idênticos à V124 por SHA-256/AST.
+
+DIREÇÃO FUTURA
+- Evoluir a Presença Exatinho para níveis graduais de atenção.
+- Melhorar ainda mais a leitura da sessão e contexto operacional.
+- Criar, em versão futura, pesquisa universal, pendências e centro de notificações mais integrados ao Exatinho.
+- Manter documentação cumulativa de continuidade.

@@ -1,0 +1,17 @@
+V159 — ROLAGEM E FLUIDEZ
+
+PEDIDO DO USUÁRIO
+- Revisão geral para deixar o programa o mais "liso" possível, inclusive a barra de rolagem, que às vezes dava problemas em algumas telas.
+
+O QUE FOI FEITO (exato_ui.WheelRouter)
+1. A roda e o touchpad rolam o que está sob o ponteiro: tabela/lista/texto/área rolante interna primeiro; a página só segue depois (com pausa curta no fim da tabela para não "pular").
+2. Touchpad: passos pequenos são somados (antes não rolavam nada no Windows).
+3. Página com rolagem animada curta, que termina sozinha e nunca passa do fim; trocar de tela volta ao topo e cancela a animação.
+4. Janelas de diálogo não rolam a página de trás; listas de escolha não trocam o valor ao rolar a página por cima.
+5. A roda funciona desde o primeiro movimento (antes só depois de o ponteiro "entrar" na página).
+6. Redimensionar a janela: o layout é refeito uma vez por rodada (sem tremedeira).
+7. A linha destacada sob o mouse acompanha a tabela ao rolar.
+8. Teste novo: test_v159_rolagem.py (touchpad, tabela, fim da tabela, combobox, diálogo, troca de tela).
+
+LIMITES / A CONFERIR
+- Testado só com eventos simulados no Linux. No Windows confira a velocidade (ajustável: 96 px por clique da roda; 3 linhas por clique em tabelas) e o touchpad.

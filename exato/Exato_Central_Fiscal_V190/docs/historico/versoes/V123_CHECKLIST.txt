@@ -1,0 +1,25 @@
+V123 CHECKLIST
+
+[OK] Base V122 preservada.
+[OK] APP_VERSION = V123.
+[OK] Personagem renomeado/apresentado como Exatinho.
+[OK] Clique direto no mascote abre interação contextual.
+[OK] Primeira interação apresenta o Exatinho.
+[OK] Status da Central disponível no painel.
+[OK] Último evento significativo disponível no painel.
+[OK] Atalho Ver pendências disponível no painel.
+[OK] Painel overlay não altera o workspace.
+[OK] Sidebar compactado para manter o mascote visível.
+[OK] Organização da raiz do projeto realizada.
+[OK] Histórico e proteção movidos para pastas dedicadas.
+[OK] Preview visual gerado.
+[OK] 13/13 núcleos protegidos idênticos à V122 por SHA-256 AST.
+[OK] cStat 657 não foi alterado nesta versão.
+[OK] Regressão NF-e.
+[OK] Regressão Auditoria multi-tipo + PDF.
+[OK] Regressão Exato IA.
+[OK] Teste Event Bus / cStat.
+[OK] Teste Centro Operacional.
+[OK] Smoke UI.
+[OK] Teste interação Exatinho.
+[OK] ZIP final limpo.

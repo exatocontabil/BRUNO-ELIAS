@@ -1,0 +1,10 @@
+V110 CHECKLIST — PALETA GLOBAL / MENOS É MAIS
+
+[OK] Paleta base: grafite, branco, cinza, vermelho Exato.
+[OK] Azul e roxo removidos como cores decorativas.
+[OK] Verde/âmbar/vermelho reservados a estados semânticos.
+[OK] NF-e/NFC-e/CT-e usam ícones/texto e não cores próprias.
+[OK] Mascote Exato IA deve usar assets transparentes e enquadramento integral.
+[OK] Fluxo NF-e Entrada/Saída V101 preservado.
+[OK] XML + PDF individual/consolidado preservado.
+[OK] Auditoria protegida.

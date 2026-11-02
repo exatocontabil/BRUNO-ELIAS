@@ -1,0 +1,160 @@
+EXATO CENTRAL FISCAL — COMO INSTALAR E COMEÇAR
+Versão: V145
+
+============================================================
+1. INSTALAÇÃO EM UM COMPUTADOR NOVO
+============================================================
+
+1) Receba o arquivo .ZIP completo do Exato Central Fiscal.
+2) Salve o ZIP em uma pasta do computador.
+3) Clique com o botão direito no ZIP e escolha "Extrair tudo...".
+4) Extraia a pasta inteira para um local de sua preferência.
+5) NÃO execute o programa de dentro do ZIP e não remova arquivos da pasta extraída.
+6) Abra a pasta da versão e execute INICIAR.bat.
+
+O programa verifica se o computador possui Python 3.12 ou superior.
+
+IMPORTANTE:
+- Não execute o arquivo .py diretamente.
+- Não apague a pasta assets, pois ela contém logos, identidade visual e Exatinho.
+- Mantenha a estrutura completa da versão.
+
+============================================================
+2. PRIMEIRO ACESSO DO ADMINISTRADOR
+============================================================
+
+Administrador principal:
+Bruno Elias
+brunoalbano.elias8@gmail.com
+
+Na primeira utilização desta instalação, quando a conta ainda não tiver senha:
+1) informe o e-mail;
+2) clique em ATIVAR MINHA CONTA;
+3) crie sua senha;
+4) entre normalmente.
+
+Em atualizações da mesma área de dados, não é necessário ativar a conta novamente.
+
+============================================================
+3. CADASTRO DE OUTROS USUÁRIOS
+============================================================
+
+1) Na tela de login, clique em SOLICITAR CADASTRO.
+2) Informe nome, e-mail, senha e confirmação.
+3) Finalize o cadastro.
+4) A conta fica ATIVA imediatamente e o usuário pode entrar.
+
+Não existe etapa de aprovação administrativa.
+
+============================================================
+4. ESQUECI MINHA SENHA
+============================================================
+
+1) Clique em ESQUECI MINHA SENHA.
+2) Informe o e-mail.
+3) Solicite a redefinição.
+4) O administrador pode consultar as solicitações na área de Usuários e Acessos.
+
+============================================================
+5. ATUALIZAÇÃO PARA UMA NOVA VERSÃO
+============================================================
+
+1) Baixe o novo ZIP.
+2) Extraia em uma pasta própria.
+3) Execute o INICIAR.bat da nova versão.
+
+Os dados persistentes ficam fora da pasta da versão. Usuários, senhas protegidas, Arquivo Fiscal Local, configurações e backups devem permanecer preservados.
+
+============================================================
+6. CENTRAL COMPARTILHADA — DOIS OU MAIS COMPUTADORES
+============================================================
+
+A V143 pode trabalhar com uma única Central pela rede local.
+
+COMPUTADOR 1 — SERVIDOR CENTRAL
+1) Abra o Exato.
+2) Na tela de login, clique em CONFIGURAR CENTRAL COMPARTILHADA.
+3) Escolha "Este computador é o Servidor Central".
+4) Ative o servidor e confirme a configuração.
+5) O sistema gera EXATO_CENTRAL_CONEXAO.txt na área de dados do Exato.
+
+COMPUTADORES 2, 3, ... — CLIENTES
+1) Instale a mesma versão do Exato normalmente.
+2) Na tela de login, clique em CONFIGURAR CENTRAL COMPARTILHADA.
+3) Escolha "Conectar a um Servidor Central existente".
+4) Use IMPORTAR ARQUIVO DE CONEXÃO e selecione EXATO_CENTRAL_CONEXAO.txt.
+5) Clique em TESTAR E CONECTAR.
+6) Faça o login com um usuário da Central ou cadastre um novo usuário.
+
+A partir daí, usuários, empresas, documentos e exportações podem ser compartilhados através da Central.
+
+CONDIÇÕES:
+- As máquinas devem estar na mesma rede local.
+- A porta 8765 deve estar acessível no servidor.
+- Se o Windows Firewall solicitar permissão, permita em rede privada.
+- O computador servidor precisa estar ligado para receber e distribuir novas alterações.
+- O token do arquivo de conexão deve ser tratado como senha.
+
+============================================================
+7. DADOS PERSISTENTES
+============================================================
+
+No Windows:
+%LOCALAPPDATA%\Exato\Central Fiscal\Dados
+
+Arquivos importantes:
+- central_fiscal.db → Arquivo Fiscal Local e dados fiscais;
+- usuarios.db → usuários, credenciais protegidas, histórico e recuperação de senha;
+- config.json → configurações locais e Central Compartilhada;
+- EXATO_CENTRAL_CONEXAO.txt → conexão/token para clientes, quando este computador é servidor.
+
+Não apague ou substitua essa pasta sem orientação.
+
+============================================================
+8. SE O COMPUTADOR CLIENTE NÃO CONSEGUIR CONECTAR
+============================================================
+
+Verifique:
+- servidor ligado;
+- Exato iniciado/configurado no servidor;
+- computadores na mesma rede local;
+- token correto;
+- endereço do servidor correto;
+- firewall permitindo a porta 8765 na rede privada.
+
+Use MANUTENÇÃO → TESTAR/CONFIGURAR CENTRAL e SINCRONIZAR CENTRAL AGORA quando disponíveis.
+
+============================================================
+9. REGRA IMPORTANTE
+============================================================
+
+O ZIP é um pacote completo.
+Não remova arquivos "que parecem desnecessários".
+Não altere manualmente a área de dados persistentes.
+Não publique o arquivo EXATO_CENTRAL_CONEXAO.txt na internet.
+
+============================================================
+EXATO CENTRAL FISCAL
+Exato Soluções Contábeis
+============================================================
+============================================================
+10. SERVIDOR EXATO — INICIALIZAÇÃO AUTOMÁTICA NO WINDOWS
+============================================================
+
+Quando este computador estiver configurado como Servidor Central, a V143 registra o servidor para iniciar automaticamente no Windows para o usuário atual.
+
+A entrada é criada automaticamente ao ativar o Servidor Central. Se a V143 for aberta em um computador que já estava configurado como servidor na V143, o registro também será atualizado.
+
+Clientes não recebem essa inicialização automática.
+
+============================================================
+11. BACKUP AUTOMÁTICO
+============================================================
+
+O Servidor Central realiza backup automático diário.
+O backup fica em:
+%LOCALAPPDATA%\Exato\Central Fiscal\Dados\Backups
+
+A rotina preserva os backups manuais e os backups criados antes de atualizações.
+
+============================================================

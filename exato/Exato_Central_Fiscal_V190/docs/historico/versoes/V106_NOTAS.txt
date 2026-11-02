@@ -1,0 +1,8 @@
+V106
+
+- Redesign da capa do PDF da Auditoria multi-tipo com logo Exato oficial e resumo executivo mais limpo.
+- Auditoria multi-tipo agora considera XMLs sem correspondência no SAT como ATENÇÃO e divergências reais como DIVERGÊNCIA.
+- Diferença financeira consolidada considera o gap entre total SAT e total XML por tipo.
+- Exato IA multi-tipo passou a descrever explicitamente SAT x XML e documentos fora do conjunto.
+- PDF individual por tipo ganhou seção explícita para XMLs sem correspondência no SAT.
+- Preservadas as funções protegidas de NF-e, Auditoria e salvamento/geração de PDFs já validadas.

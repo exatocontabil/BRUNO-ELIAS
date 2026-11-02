@@ -1,0 +1,26 @@
+V148 — PRODUTIVIDADE E ENGENHARIA
+
+BASE
+- V148 parte diretamente da V147 (consolidação da V146).
+
+PRODUTIVIDADE
+1. Atalhos Ctrl+1..9 para trocar de tela e F1 / botão "?" com a lista de atalhos. As dicas do menu de ícones mostram o atalho de cada tela.
+2. Avisos que somem sozinhos (toasts) no canto superior direito para: busca concluída ou com erro, XMLs salvos, busca automática, representações geradas e auditoria. São disparados pelos mesmos eventos internos que alimentam o Exatinho (_ia_emit_event), então não há novas chamadas espalhadas pelo código.
+
+ENGENHARIA
+3. Registro de erros: setup_logging / log_exception / install_error_hooks gravam em Dados\Logs\exato.log (rotativo, 1 MB x 5). Registra o início (versão, Python, tela, escala do Tk), erros de clique da interface (App.report_callback_exception), erros em threads e erros não tratados. A interface mostra um aviso amigável (no máximo 1 a cada 20 s) em vez de falhar em silêncio. Botão "Abrir registro de erros" em Manutenção.
+4. Testes automáticos: GitHub Actions (.github/workflows/tests.yml) roda a suíte atual (testes/SUITE_ATUAL.txt via testes/run_suite.py) em Python 3.12 com xvfb a cada envio. Novo teste test_versao_consistente.py garante a regra de versão (número em todos os arquivos e documentação da versão presente).
+5. Testes antigos de versão: test_v144_companies_ui passou a aceitar qualquer número de versão.
+
+DESEMPENHO (medido com 40 empresas, 6.000 documentos e 120 operações)
+6. Histórico: 730 ms -> 50 ms (nomes de empresa em uma única consulta, db_company_names, no lugar de uma consulta e uma verificação do banco por linha).
+7. Documentos Fiscais: 500 ms -> 310 ms (_format_user_date com fromisoformat no lugar de strptime).
+8. Troca de abas: uma única tarefa de rolagem por navegação (eram duas, cada uma recalculando o layout).
+9. Ainda mais lentos: Empresas (~220 ms, tabela própria com muitos widgets) e Documentos (~300 ms por 5.000 linhas). Ficam como próximo passo se o uso real mostrar necessidade.
+
+NÃO FEITO DE PROPÓSITO
+- Tema escuro: as cores estão espalhadas como literais em centenas de lugares; fazer agora arrisca telas ilegíveis. Requer primeiro centralizar todas as cores.
+- Divisão do arquivo principal em módulos: planejada para depois de o visual estabilizar no Windows, sempre com a comparação dos núcleos protegidos.
+
+PROTEÇÃO
+- 13/13 núcleos fiscais SAME e 31/31 assets SAME em relação à V145.

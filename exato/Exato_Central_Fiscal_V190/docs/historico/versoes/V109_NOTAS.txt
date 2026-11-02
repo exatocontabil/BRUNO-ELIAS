@@ -1,0 +1,9 @@
+V109 - NOTAS
+
+Base: V108.
+Objetivos desta versão:
+1. Remodelação global da linguagem de cores do Exato Central Fiscal: menos cores decorativas, paleta homogênea, com grafite/branco/cinza e vermelho Exato como base.
+2. Azul/roxo deixam de ser cores de identidade; cores semânticas ficam reservadas a sucesso, atenção e divergência.
+3. Relatório/Auditoria recebem superfícies mais neutras e acentos consistentes com a identidade Exato.
+4. Mantida a preservação dos núcleos protegidos e do fluxo de PDFs fiscais validados.
+5. Mascote Exato IA mantém assets RGBA transparentes e enquadramento seguro.

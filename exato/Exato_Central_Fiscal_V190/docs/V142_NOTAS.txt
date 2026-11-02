@@ -1,0 +1,19 @@
+V142 — PROGRESSO NA EXPORTAÇÃO DE XMLs
+
+OBJETIVO
+Dar visibilidade durante SALVAR XMLs na tela Documentos Fiscais, principalmente quando várias empresas estão selecionadas.
+
+COMPORTAMENTO
+- Mostra “EXPORTANDO XMLs”.
+- Mostra Empresa X de Y.
+- Mostra nome da empresa atual.
+- Mostra percentual geral.
+- Mostra quantidade de documentos concluídos/total.
+- Mantém a aplicação principal visível ao fundo.
+- CANCELAR solicita parada segura após a empresa que estiver em processamento.
+
+PERSISTÊNCIA
+O indicador visual não altera o mecanismo de exportação. O registro do que já foi exportado continua usando document_exports e o destino normalizado; por isso uma nova versão continua reconhecendo os XMLs já exportados para aquela pasta.
+
+LIMITAÇÃO CONSCIENTE
+A função fiscal protegida save_documents_organized não foi alterada para adicionar callbacks de progresso por documento. Portanto, dentro de uma empresa o percentual permanece no último marco concluído e avança de forma ponderada quando aquela empresa termina. Essa abordagem evita modificar um núcleo protegido apenas por causa de UX.

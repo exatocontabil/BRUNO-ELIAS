@@ -1,0 +1,21 @@
+V134 — CHECKLIST FINAL
+
+[OK] V134 criada a partir da V133 com autorização expressa.
+[OK] Banco local: tabela document_exports criada de forma compatível com bases existentes.
+[OK] Documentos Fiscais: coluna Exportação.
+[OK] Documentos Fiscais: filtro Exportado/Não exportado.
+[OK] SALVAR XMLs NOVOS.
+[OK] Indicador do Arquivo Fiscal Local.
+[OK] Busca local ampliada por número/CNPJ/valor/movimentação/data.
+[OK] Backup/restauração do Arquivo Fiscal Local com verificação de integridade.
+[OK] Proteção 13/13 núcleos por SHA-256/AST.
+[OK] py_compile.
+[OK] compileall.
+[OK] Testes do Arquivo Fiscal Local.
+[OK] Testes de UI Documentos Fiscais sob Xvfb.
+[OK] Teste do Exatinho/motor comportamental.
+[OK] ZIP final extraído e inspecionado.
+
+OBSERVAÇÃO
+- Testes históricos que fixam APP_VERSION de versões antigas não são critérios de falha para V134.
+- Núcleos fiscais protegidos não foram alterados.

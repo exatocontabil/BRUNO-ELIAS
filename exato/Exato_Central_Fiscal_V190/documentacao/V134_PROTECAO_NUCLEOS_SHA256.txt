@@ -1,0 +1,20 @@
+V134 — PROTEÇÃO DOS 13 NÚCLEOS
+
+Comparação V133 → V134 por SHA-256 sobre AST/source:
+
+_audit_build_rows SAME
+_audit_compare_pair SAME
+_audit_fallback_key SAME
+_audit_key SAME
+_audit_xml_rows SAME
+choose_nfe_actor SAME
+mark_nfe_sync_cycle SAME
+sync_documents_automatically SAME
+test_sef_nfe_webservice SAME
+generate_fiscal_representation_pdf SAME
+open_document_fiscal_representation SAME
+save_documents_organized SAME
+generate_documents_pdf SAME
+
+RESULTADO: 13/13 idênticos.
+Data: 2026-09-25T20:37:18

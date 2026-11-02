@@ -1,0 +1,18 @@
+V157 — VISUAL NOVO (EXATO DESIGN) E TEMA CLARO/ESCURO
+
+PEDIDO DO USUÁRIO
+- Layout ainda "não tão moderno": trabalhar bastante para deixar muito moderno. Escolhas: estilo claro e limpo com menu escuro refinado; botão para trocar entre tema claro e escuro; começar pelo visual novo + telas principais.
+
+O QUE FOI FEITO
+1. Sistema de design novo (exato_ui.py): cartões de cantos arredondados com sombra suave, botões e campos arredondados com estados (mouse, foco, desativado), ícones de traço próprios, etiquetas e avatar suavizados.
+2. Menu lateral: ícones modernos, faixa vermelha no item ativo, mesmo comportamento no menu compacto (só ícones).
+3. Topo: busca em pílula, botão de tema, ajuda, sair e avatar com as iniciais do usuário; data em português.
+4. Início: cartões de indicador com ícone colorido, valores grandes e gráfico de barras com os últimos 6 meses (Entradas em azul, Saídas em vermelho).
+5. Todas as telas ganham os cartões, botões, campos, tabelas e avisos novos (Documentos, NFS-e, Empresas, Histórico, Relatórios, Auditoria, Pendências, Certificado, Usuários, Manutenção, Buscar XML), inclusive a janela de login.
+6. Tema escuro: botão no topo (lua/sol). O Exato lembra a escolha e reabre a tela principal sem pedir a senha de novo. PDFs, relatórios e planilhas continuam sempre com as cores normais.
+7. Tabelas: linhas mais altas e destaque suave da linha sob o mouse. Telas vazias e avisos redesenhados.
+
+LIMITES / A CONFERIR
+- Visual conferido em capturas no Linux (fonte de exemplo diferente da do Windows). No Windows a fonte é a Segoe UI: confira espaçamentos e se algum texto ficou apertado.
+- Janelas pequenas de diálogo usam o mesmo estilo, mas não foram revisadas uma a uma. Mande print do que ficar estranho.
+- Algumas telas internas (Auditoria, Manutenção) mantêm a estrutura de antes com o estilo novo por cima.

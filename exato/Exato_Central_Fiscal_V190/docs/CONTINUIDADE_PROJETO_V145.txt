@@ -1,0 +1,37 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL V145
+
+ESTADO ATUAL
+- V145 é a versão trabalhada a partir da V144, com autorização expressa.
+- A partir da V145 o projeto passou a ser conduzido no Claude (antes: ChatGPT).
+- V145 corrige dados, não telas: chave de acesso com 44 dígitos, eventos separados das notas, notas
+  canceladas marcadas, autostart do servidor. Detalhes em docs/V145_NOTAS.txt.
+
+REGRAS QUE CONTINUAM VALENDO
+- Não quebrar funções validadas.
+- Não alterar os 13 núcleos fiscais protegidos sem autorização explícita.
+- Só criar nova Vxxx com autorização expressa.
+- Dados persistentes ficam em %LOCALAPPDATA%\Exato\Central Fiscal\Dados; nunca criar banco novo por versão.
+- Cada versão entrega NOTAS, CONTINUIDADE, CHECKLIST e comparação dos núcleos protegidos.
+
+MODELO DE DADOS A PARTIR DA V145
+- Documento: doc_id = CNPJ|chave(44). status = Autorizado ou Cancelado.
+- Evento: doc_id = CNPJ|chave(44)|EV|tpEvento|nSeqEvento. status = Evento, doc_type = Evento, sem data.
+- Índice único (cnpj, access_key) vale só para documentos (status <> 'Evento').
+- Cancelamento: tpEvento 110111/110112 com cStat 135/155.
+- data_state.json → v145_index_repair registra o ajuste único do banco.
+
+PENDÊNCIAS CONHECIDAS (por prioridade sugerida)
+1. Acesso automático ao SAT: o código existe (curl/Schannel, Edge, PowerShell) mas nenhuma tela chama
+   sat_fetch_excel_automatic. A Auditoria depende do Excel importado manualmente.
+2. Resultado da busca: o resultado da NF-e sempre traz "deferred_actor", então a busca nunca é gravada como
+   "Concluído"; a coluna Última busca da tela Empresas mostra "Aguardando" mesmo quando tudo correu bem.
+3. Auditoria: tratar nota cancelada dos dois lados (exige autorização, motor protegido).
+4. Exato IA: _natural_number_key não existe (pergunta "maior diferença" falha).
+5. Central: /auth/import_users aceita perfil vindo do cliente apenas com o token de conexão.
+6. EXECUTAR.bat aceita Python 3.10+, mas o código usa recurso de f-string do Python 3.12+.
+7. Fluidez na troca de abas (pendência herdada da V144).
+
+DESIGN
+- O usuário pediu um upgrade de design/layout. V137 era a referência visual congelada; qualquer mudança
+  visual depende de o usuário aprovar a nova direção antes de codificar.
+- Toda a interface está em uma classe App de ~6.400 linhas dentro de exato_central_fiscal.py, em Tkinter.

@@ -1,0 +1,12 @@
+V094 — CHECKLIST
+[OK] py_compile
+[OK] Teste legado Exato IA
+[OK] Busca Global em Documentos
+[OK] Ações DANFE / DANFE NFC-e / DACTE
+[OK] Abrir XML e copiar chave
+[OK] Consolidado por tipo/ano/mês
+[OK] Configuração de PDF automático
+[OK] Estado Aguardando próxima janela
+[OK] Smoke PDF NF-e / NFC-e / CT-e
+[OK] UI init + navegação
+[OK] Habilitação do PDF automático após CNPJ confirmado

@@ -1,0 +1,8 @@
+V110 — Remodelação visual global
+
+1. Unificação de paleta em todo o Central: grafite, branco, cinza e vermelho Exato.
+2. Verde, âmbar e vermelho usados somente como estados semânticos.
+3. Azul/roxo retirados como cores decorativas de tipos documentais e ações.
+4. Relatórios/Auditoria seguem a mesma linguagem visual do Central.
+5. Mascote Exato IA com fundo transparente, proporção preservada, contain e margem de segurança.
+6. Fluxos fiscais protegidos (NF-e Entrada/Saída, Auditoria, XML+PDF/DANFE) mantidos.

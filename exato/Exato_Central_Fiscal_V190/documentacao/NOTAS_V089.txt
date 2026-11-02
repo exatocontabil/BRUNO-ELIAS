@@ -1,0 +1,11 @@
+Checklist V089
+- [x] Persistência de dados fora da pasta da versão
+- [x] Backup automático/manual
+- [x] Diagnóstico do sistema
+- [x] Detecção local de versões
+- [x] Dashboard com resumo inteligente e atividades
+- [x] Pendências ampliadas
+- [x] Empacotamento por pasta
+- [x] PDF refinado sem Fonte/Insights e com ordem numérica
+- [x] Mascote transparente
+- [x] Núcleos NF-e e Auditoria protegidos

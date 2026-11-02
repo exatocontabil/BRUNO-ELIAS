@@ -1,0 +1,17 @@
+V114 CHECKLIST
+
+[OK] Exato IA usa renderização procedural contínua do próprio personagem, sem troca de PNGs como mecanismo principal de animação.
+[OK] Corpo possui respiração, balanço e micro-rotação em tempo real.
+[OK] Olhar acompanha continuamente o cursor com suavidade.
+[OK] Quando o cursor fica parado, a IA assume microcomportamentos autônomos de olhar.
+[OK] Piscadas naturais são geradas em tempo real.
+[OK] Estados contextuais do mascote e frases espontâneas foram preservados.
+[OK] IA continua pequena no rodapé da sidebar e não cobre o workspace.
+[OK] 13/13 núcleos fiscais/auditoria + PDF protegidos por SHA-256 contra V113.
+[OK] Regressão NF-e scheduler.
+[OK] Regressão Auditoria multi-tipo + PDF.
+[OK] Regressão Exato IA / perguntas contextuais.
+[OK] Smoke UI V114 + acompanhamento do cursor.
+[OK] py_compile do código principal.
+[OK] Runtime Xvfb validou mudança visual entre estados de movimento/olhar.
+[OK] Mascote em PDF permanece intocado.

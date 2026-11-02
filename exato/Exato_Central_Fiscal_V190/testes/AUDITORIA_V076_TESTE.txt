@@ -1,0 +1,6 @@
+V076 — Auditoria SAT × XML
+
+- Tentativa direta: certificado Windows + Login → default.aspx → Apps.aspx.
+- Fallback: Edge headless com AutoSelectCertificateForUrls + default.aspx.
+- Sessão: cookies estruturados preservados.
+- Consulta: Apps → NFe/NFCe → POST ConsultaOnlineCC.aspx.

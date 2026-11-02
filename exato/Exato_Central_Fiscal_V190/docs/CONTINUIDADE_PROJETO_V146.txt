@@ -1,0 +1,34 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL V146
+
+ESTADO ATUAL
+- V146 é a V145 com novo tema visual em todas as abas (docs/V146_NOTAS.txt). Nenhuma regra fiscal ou de dados foi alterada.
+- O projeto é conduzido no Claude. Código no GitHub: brunoalbanoelias8-sketch/BRUNO-ELIAS, pasta exato/.
+
+REGRAS QUE CONTINUAM VALENDO
+- Não quebrar funções validadas.
+- Não alterar os 13 núcleos fiscais protegidos sem autorização explícita.
+- Só criar nova Vxxx com autorização expressa.
+- Dados persistentes ficam em %LOCALAPPDATA%\Exato\Central Fiscal\Dados; nunca criar banco novo por versão.
+- Cada versão entrega NOTAS, CONTINUIDADE, CHECKLIST e comparação dos núcleos protegidos.
+
+TEMA VISUAL (V146)
+- Cores em constantes no topo de exato_central_fiscal.py: BG, SIDEBAR_BG, HEADER_BG, RED, RED_DARK, RED_SOFT, BORDER, MUTED, TEXT.
+- Estilos ttk em App._configure_styles. Topo em _build_header, menu em _build_body/_make_nav/_set_active_nav.
+- Ambiente de teste de interface: Python 3.12 + python3-tk + pillow + reportlab, com xvfb-run. EXATO_DATA_DIR aponta para uma pasta temporária.
+
+PADRÃO RESPONSIVO (V146)
+- Constantes: PAGE_MIN_WIDTH, RAIL_BELOW_WIDTH, RAIL_WIDTH. Menu: App._sidebar_apply_density. Página: App._sync_workspace_layout.
+- Para qualquer linha nova de botões use make_flow(frame) depois de criar os botões com pack (reverse=True, align='right' para grupos à direita).
+- O painel do Exatinho é flutuante (App._exatinho_place_panel); nunca redimensione o menu para abri-lo.
+- Teste de tamanhos: SIZE=1366x650 / 1100x600 / 1000x560 no ambiente xvfb (ver testes/test_v146_theme_ui.py).
+
+IDEIAS AINDA NÃO FEITAS
+- Avisos que somem sozinhos (toasts), tema escuro, atalhos Ctrl+1..9.
+- Selos em pílula nas demais tabelas só são possíveis com tabela própria (como em Empresas); no Treeview usamos símbolos e cores de linha.
+
+PENDÊNCIAS (herdadas da V145 + visual)
+1. Revisar no Windows fontes, DPI e telas pequenas.
+2. Botões: a capitalização é ajustada em tempo de execução (_sentence_case_button_text); ao editar textos novos, já escreva em capitalização normal.
+3. Telas internas (Auditoria, Manutenção, Buscar XML) já usam o tema; falta apenas etiquetas coloridas de situação onde hoje há texto simples.
+4. Resolvidas na V146: Exato IA (_natural_number_key), Central /auth/import_users, Python 3.12 nos .bat.
+5. Ainda abertas (precisam de autorização ou de teste no Windows): resultado "Concluído" da Busca Automática (deferred_actor, núcleos protegidos), acesso automático ao SAT, auditoria de nota cancelada, fluidez na troca de abas.

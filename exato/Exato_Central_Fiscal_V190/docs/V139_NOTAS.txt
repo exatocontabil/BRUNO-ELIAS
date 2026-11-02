@@ -1,0 +1,48 @@
+V139 — AUTENTICAÇÃO PERSISTENTE E CADASTRO IMEDIATO
+
+BASE
+- V138 foi a base imediata autorizada.
+- V137 permanece como referência visual congelada.
+
+OBJETIVOS
+1. Remover a aprovação administrativa de novos usuários.
+2. Corrigir/reforçar a persistência do login do administrador e dos usuários.
+3. Isolar credenciais da base fiscal para evitar interferência com restauração/manutenção do banco fiscal.
+
+MUDANÇAS DE USUÁRIOS
+- Novos cadastros entram com status ATIVO imediatamente.
+- Removida a situação "Aguardando aprovação" do cadastro normal.
+- Removido botão APROVAR da administração de usuários.
+- Administrador continua podendo BLOQUEAR, ATIVAR e REDEFINIR SENHA.
+- Usuários legados que estavam pendentes são promovidos automaticamente para ATIVO na migração.
+
+PERSISTÊNCIA / LOGIN
+- Criado banco dedicado: %LOCALAPPDATA%\Exato\Central Fiscal\Dados\usuarios.db
+- A camada de autenticação usa exclusivamente esse banco dedicado.
+- Na primeira inicialização da V139, contas existentes em central_fiscal.db (V135-V138) são migradas de forma idempotente para usuarios.db.
+- A migração não sobrescreve contas já existentes no banco dedicado.
+- A senha existente é preservada porque o hash/salt são migrados diretamente.
+- O login foi testado em múltiplos processos consecutivos com a mesma área de dados.
+
+BACKUP
+- create_data_backup() passa a incluir central_fiscal.db e usuarios.db.
+- O banco de usuários é copiado por SQLite backup, evitando perda de WAL.
+- A restauração do Arquivo Fiscal continua restaurando somente central_fiscal.db; usuários permanecem separados.
+
+ESQUECI MINHA SENHA
+- Mantido o mecanismo de solicitação local para atendimento pelo administrador.
+- As solicitações ficam no usuarios.db.
+
+PRESERVAÇÃO
+- Não foram alterados os fluxos fiscais protegidos.
+- Exatinho e identidade visual foram preservados.
+
+VALIDAÇÃO EXECUTADA
+- compilação Python sem erros;
+- migração V138 -> V139 de conta existente;
+- login após migração;
+- novo cadastro ativo e login imediato;
+- múltiplos ciclos de processo com a mesma senha;
+- backup contém central_fiscal.db e usuarios.db;
+- comparação AST/hash dos 13 núcleos fiscais protegidos;
+- hashes dos assets preservados.

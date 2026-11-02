@@ -1,0 +1,36 @@
+V098 — CHECKLIST FINAL
+
+1. Compilação
+   OK — python -m py_compile
+
+2. Documentos fiscais
+   OK — geração de DANFE NF-e
+   OK — geração de DANFE NFC-e
+   OK — representação baseada no XML original
+
+3. Relatório
+   OK — página 1 executiva com layout aprovado
+   OK — páginas de Entrada separadas das páginas de Saída
+   OK — sem tabela “Todos” nas páginas detalhadas
+   OK — coluna Natureza da Operação
+   OK — análise Exato IA específica por direção
+   OK — ranking de Naturezas da Operação por direção
+   OK — sem página vazia para uma direção sem documentos
+   OK — teste com 49 documentos: 1 página executiva + 1 página de Entrada + 4 páginas de Saída
+
+4. Organização
+   OK — Empresa → Ano → Mês → Entrada/Saída → tipo documental
+   OK — XML e PDF individual na mesma pasta
+   OK — sem pasta “PDFs Fiscais”
+   OK — sem pasta de tipo documental fora de Entrada/Saída
+   OK — PDF existente íntegro é reutilizado
+
+5. Regressão
+   OK — Exato IA V092
+   OK — Auditoria V095 abertura/UI
+   OK — 9 núcleos protegidos V097→V098 idênticos por SHA-256
+
+6. Empacotamento
+   OK — uma única pasta raiz
+   OK — sem __pycache__
+   OK — sem .pyc

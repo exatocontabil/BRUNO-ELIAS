@@ -1,0 +1,14 @@
+V107 — CHECKLIST
+
+[OK] py_compile
+[OK] V107_AUDIT_REPORT_OK
+[OK] V107_PROTECTED_CORES_OK
+[OK] V107_FILTER_AND_MASCOT_OK
+[OK] V107_UI_SMOKE_OK
+[OK] V101_NFE_SAIDA_SCHEDULER_OK
+[OK] V100_EXPORT_AND_DIRECTION_COUNTS_OK
+[OK] V103_MULTI_PDF_OK
+[OK] PDF multi-tipo com pypdf local
+[OK] Preview visual da primeira página Editorial Premium
+[OK] ZIP com uma única pasta raiz
+[OK] sem __pycache__ / .pyc no pacote

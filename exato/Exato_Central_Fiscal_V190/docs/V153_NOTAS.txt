@@ -1,0 +1,20 @@
+V153 — PORTAL POR USUÁRIO E SENHA: DOWNLOAD DOS XMLs
+
+PEDIDO DO USUÁRIO
+- A busca por usuário e senha continuou dando erro (os XMLs não baixavam).
+
+DIAGNÓSTICO (enviado pelo usuário)
+- Login e lista de notas funcionam. O download do XML recebia HTTP 403 (acesso negado), tanto na V151 (pedido solto) quanto na V152 (de dentro da página); o plano B da V152 também falhava.
+
+O QUE FOI FEITO
+1. Novo jeito de baixar (download_xml): primeiro abre o link numa aba nova, como uma pessoa, com a lista como origem; depois clica de verdade em "Download XML" da linha; por último o pedido de dentro da página. Funciona também quando o arquivo chega como anexo.
+2. Se todos os downloads falharem sem janela, o Exato repete a etapa com o navegador visível, reaproveitando o acesso (sem digitar a senha de novo).
+3. Menu Mais > "Mostrar o navegador na busca por usuário e senha" para forçar a janela visível.
+4. Diagnóstico melhor: para o primeiro XML que falhar, guarda o que cada tentativa recebeu (status, cabeçalhos, início da resposta), o navegador e o modo (com ou sem janela), em Dados\Logs\nfse_portal. Nunca inclui a senha.
+5. Mensagem clara quando nenhum XML baixa: orienta marcar "Mostrar o navegador" e, se persistir, enviar a pasta de diagnóstico.
+Nada mais foi alterado: relatório mensal, senha salva, "Buscar e salvar tudo" e demais itens da V152 seguem iguais.
+
+LIMITES / A CONFERIR
+- Não dá para testar no portal real daqui (só em portal simulado). Se ainda falhar, enviar a pasta Dados\Logs\nfse_portal (agora com mais detalhes).
+- Se o portal barrar de propósito qualquer automação, o caminho é o certificado digital (Consulta oficial, sem navegador).
+- O Exato não resolve captcha automaticamente nem disfarça que é automação.

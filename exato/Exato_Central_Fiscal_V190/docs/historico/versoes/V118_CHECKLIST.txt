@@ -1,0 +1,21 @@
+V118 — CHECKLIST DE VALIDAÇÃO
+
+Status: APROVADA
+
+[OK] APP_VERSION = V118
+[OK] py_compile / compileall
+[OK] Relatório com separação de NF-e, NFC-e e CT-e por blocos
+[OK] 6 páginas no cenário de teste
+[OK] Paginação física 1 de 6 ... 6 de 6
+[OK] EXATO IA — ENTRADA e SAÍDA preservados e sem overflow
+[OK] NF-e e NFC-e não compartilham a mesma tabela de detalhe
+[OK] CT-e separado de NF-e quando presente
+[OK] Regressão NF-e
+[OK] Auditoria multi-tipo + PDF
+[OK] Exato IA QA
+[OK] Smoke de interface sob Xvfb
+[OK] Motor comportamental do Exato IA
+[OK] Comparação SHA-256: 12/13 núcleos protegidos idênticos à V117; somente generate_documents_pdf alterada
+
+Observação:
+A validação visual final utilizou cenário equivalente ao relatório analisado, com 8 NF-e + 2 CT-e de entrada e 54 NF-e + 7 NFC-e de saída.

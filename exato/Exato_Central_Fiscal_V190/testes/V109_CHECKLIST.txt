@@ -1,0 +1,13 @@
+V109 CHECKLIST
+
+[OK] Paleta global homogênea
+[OK] Tipos NF-e/NFC-e/CT-e sem cores decorativas próprias
+[OK] Estados semânticos mantidos: sucesso, atenção, divergência
+[OK] Auditoria com superfícies neutras e acento Exato
+[OK] Mascote transparente e estados com balão enquadrados
+[OK] 9+ núcleos protegidos preservados por hash
+[OK] Fluxo NF-e Entrada/Saída preservado
+[OK] Salvamento XML + PDF preservado
+[OK] py_compile
+[OK] UI smoke
+[OK] Auditoria multi-tipo PDF

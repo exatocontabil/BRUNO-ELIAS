@@ -1,0 +1,22 @@
+V167 — NOME CORRETO DAS EMPRESAS + FILTRO NO REPOSITÓRIO
+
+PEDIDO DO USUÁRIO
+1. Na pasta do repositório (servidor) havia empresa salva com nome errado: "59069269000177 - SHPS TECNOLOGIA E SERVICOS LTDA" (a empresa é a Benvale; SHPS é fornecedor). Verificar o código para sempre salvar com o nome correto.
+2. Filtro na tela Repositório para ver só o que ainda não foi para o servidor (combinado antes).
+
+CAUSA
+- Em _parse_document_metadata (NF-e/NFC-e/CT-e), quando o CNPJ consultado não é emitente nem destinatário da nota (ex.: aparece só como transportadora, retirada/entrega ou autorizado a baixar o XML), o campo "empresa" cai para o nome do emitente/destinatário, isto é, o do fornecedor. _pick_authoritative_company_name usava esse campo como se fosse o nome da empresa e gravava no cadastro. O repositório copiou com o nome do cadastro naquele momento e nunca mais mudou a pasta, mesmo depois de o cadastro ser corrigido (a tela já mostrava Benvale).
+
+O QUE FOI FEITO
+1. Nome só de nota em que a empresa é parte (emitente/destinatário; emitente/tomador no CT-e; prestador/tomador/intermediário na NFS-e), e só se a parte tiver nome; nunca o do fornecedor. db_company_verified_name corrige o cadastro a partir dos próprios XMLs.
+2. Repositório: a pasta acompanha o nome verificado: renomeia (e une, se houver duas) sem perder arquivos; caminhos gravados no banco acompanham; sem nome verificado a pasta existente não é mexida (evita vai-e-volta entre computadores). Nomes até 60 letras.
+3. Tela Repositório: filtros situação / empresa (nome ou CNPJ) / mês, contador "N de M linhas", botão Limpar filtros, clique em "Na fila" filtra pelo que falta, escolha lembrada.
+4. Testes: test_v167_nome_empresa.py (fornecedor nunca vira nome; transportadora; CT-e; correção pelo XML; renomear/unir pasta; não verificado não mexe; caminhos do banco) e filtros em test_v167_repositorio_ui.py.
+
+REVISÃO FEITA NESTA VERSÃO (regra do usuário)
+- Leitura do log e do print; causa raiz encontrada no código (não só o sintoma); simulação de roda em todas as telas (0 erros); captura da tela Repositório em 1366x650 (claro e escuro) — o contador dos filtros foi movido para uma linha própria por ficar cortado; suíte completa.
+
+A CONFERIR NO WINDOWS
+- Na primeira rodada da V167 a pasta "SHPS TECNOLOGIA..." deve virar "59069269000177 - Benvale Ltda" sozinha (precisa haver notas da Benvale em que ela é emitente/destinatária). Pastas truncadas em 40 letras também serão renomeadas (agora até 60).
+- Se alguma pasta continuar com nome errado, mande o nome e o CNPJ.
+- As pastas de "Salvar XMLs" dos clientes já criadas com nome errado continuam como estão.

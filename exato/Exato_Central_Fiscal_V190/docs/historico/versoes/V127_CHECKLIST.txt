@@ -1,0 +1,20 @@
+V127 — CHECKLIST
+
+[OK] Base autorizada: V126
+[OK] Versão atualizada para V127
+[OK] Sidebar normal 214 px
+[OK] Sidebar expandida para 282 px durante o painel do Exatinho
+[OK] Restauração da sidebar para 214 px ao fechar o painel
+[OK] Wrap dinâmico conforme largura efetiva
+[OK] Mensagem longa de contexto sem clipping
+[OK] Nome empresarial longo sem truncamento
+[OK] Atividade recente sem clipping
+[OK] Painel mantém ações acessíveis
+[OK] Exatinho permanece visível e clicável
+[OK] py_compile
+[OK] compileall
+[OK] V122_IA_BEHAVIOR_ENGINE_OK sob Xvfb
+[OK] Smoke da aplicação sob Xvfb
+[OK] Comparação dos 13 núcleos protegidos
+[OK] ZIP final limpo e extraível
+[OBS] Teste test_v104_audit_corrections.py é histórico e exige V104; não aplicável à V127

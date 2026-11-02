@@ -1,0 +1,90 @@
+V126 — EXATINHO: PRESENÇA MAIS VISÍVEL, SAUDAÇÃO DE ABERTURA E HUMOR TESTÁVEL
+
+BASE
+- V125
+- Versão criada mediante autorização expressa do usuário.
+
+OBJETIVO
+- Fazer o Exatinho ter iniciativa perceptível sem ficar invasivo.
+- Dar ao início do programa uma recepção mais humana.
+- Tornar o humor leve mais fácil de perceber em uso real.
+- Melhorar presença visual do personagem e legibilidade das falas.
+- Preservar integralmente os núcleos fiscais e o relatório PDF já validados.
+
+EXATINHO — IDENTIDADE
+- Nome oficial: Exatinho.
+- “Exato IA” continua sendo a denominação técnica da inteligência.
+- Personagem masculino, profissional, amigável, discreto e levemente carismático.
+
+ABERTURA DO PROGRAMA
+- Criada saudação automática de abertura após a inicialização da interface.
+- Primeira fala preferencial: “Olá! Que bom ver você de volta.”
+- Segunda fala contextual curta, após breve intervalo e sem interação do usuário:
+  - “Bora buscar alguns XML?” em Certificado/Buscar XML/Dashboard;
+  - “Quer conferir alguns documentos?” em Documentos;
+  - “Vamos conferir o que merece atenção?” em Auditoria;
+  - “Por onde começamos?” em outras telas.
+- As mensagens são curtas e não bloqueiam a interface.
+- Ao clicar no Exatinho antes da segunda fala, os jobs de abertura são cancelados para evitar conversa fora de contexto.
+
+PRESENÇA VISUAL
+- Tamanho de exibição do Exatinho aumentado de 60 px para 68 px.
+- Mantida área reservada sem invadir o workspace.
+- Balão de fala passou para fonte 9 e maior área útil, com wrap reduzido para evitar clipping em sidebar compacta.
+- Validação visual confirmou que a soma das áreas do personagem e do balão permanece dentro do dock.
+
+HUMOR E INICIATIVA
+- Janela de falas espontâneas reduzida para que o comportamento seja perceptível em testes reais, sem torná-lo frequente demais.
+- Em períodos prolongados de inatividade, existe probabilidade controlada de uma fala de humor contextual.
+- Banco ampliado com frases leves, por exemplo:
+  “Acho que essa consulta resolveu pensar bastante.”
+  “Hoje os documentos resolveram colaborar. 😄”
+  “Se precisar de companhia, eu continuo por aqui.”
+- Mantido controle de repetição por histórico das últimas seis frases.
+- Humor continua bloqueado durante eventos relevantes/bolhas em andamento.
+- Humor é separado das mensagens críticas de auditoria, erro ou processamento.
+
+HUMOR TESTÁVEL
+- Criado método interno _exatinho_demo_humor para validação visual/manual.
+- Adicionado botão de manutenção “TESTAR HUMOR DO EXATINHO”.
+- Esse modo é apenas diagnóstico/QA e não altera dados fiscais ou o comportamento normal do usuário.
+
+PAINEL
+- Fonte da saudação do painel aumentada para 10.
+- Ações do painel receberam textos mais naturais:
+  “Como está a Central?”
+  “O que aconteceu?”
+  “Tem algo para eu lembrar?”
+- O painel continua contextual e temporário.
+
+PROTEÇÃO
+- 13/13 núcleos protegidos permaneceram idênticos à V125 por SHA-256/AST.
+- Nenhuma requisição SOAP NF-e foi alterada.
+- Nenhum motor de Auditoria foi alterado.
+- generate_documents_pdf permaneceu idêntica à V125.
+- O tratamento protegido de cStat 657 não foi alterado nesta versão.
+
+TESTES REALIZADOS
+- py_compile.
+- compileall.
+- Smoke da aplicação sob Xvfb.
+- Saudação automática inicial validada.
+- Segunda fala contextual “Bora buscar alguns XML?” validada.
+- Clique no Exatinho cancela a segunda fala pendente.
+- Teste manual do humor via método de diagnóstico validado.
+- Estado HUMOR validado.
+- Fonte do balão e tamanho de display validados.
+- Verificação geométrica: dock 190 px; personagem 68 px; balão 118 px; soma 186 px; sidebar 214 px.
+- Painel contextual validado dentro da sidebar.
+- Verificação SHA-256/AST dos 13 núcleos protegidos.
+- ZIP final validado e limpeza de __pycache__/pyc/temporários.
+- Fluxos fiscais não foram chamados contra SEFAZ real nesta etapa; a validação desta versão foi isolada na camada do Exatinho/UX para minimizar risco aos núcleos protegidos.
+
+ARTEFATO VISUAL
+- preview/exatinho_v126_abertura.png mostra a saudação de abertura no ambiente da Central.
+
+DIREÇÃO PARA A PRÓXIMA VERSÃO
+- Continuar aumentando a autonomia do Exatinho sem excesso de fala.
+- Evoluir o sistema de atenção e a memória de sessão.
+- Explorar mais expressões contextuais e momentos raros.
+- Integrar melhor pendências, histórico e estado geral da Central ao comportamento do Exatinho.

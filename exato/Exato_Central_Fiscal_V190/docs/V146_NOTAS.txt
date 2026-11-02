@@ -1,0 +1,61 @@
+V146 — NOVO TEMA VISUAL (TODAS AS ABAS)
+
+BASE
+- V146 parte diretamente da V145, a pedido do usuário, após aprovação da direção visual.
+
+ALTERAÇÕES (SOMENTE INTERFACE)
+1. Paleta central renovada (BG, SIDEBAR_BG, HEADER_BG, RED, RED_DARK, RED_SOFT, BORDER). Todas as abas herdam as novas cores.
+2. Topo claro de 56 px com trilha "Exato Central Fiscal / <tela>", versão, estado da Central, data/hora, usuário com avatar e Sair.
+   Os rótulos header_identity, header_context, header_central, header_sync, header_date e header_time foram mantidos.
+3. Barra lateral: largura 232, logo oficial sem a caixa cinza (transparência aplicada em tempo de execução; o arquivo em assets/ não foi alterado), efeito hover, item ativo em vermelho.
+4. Barra de status clara com borda superior.
+5. Estilos ttk: Treeview com linhas mais altas e cabeçalho claro, botões Primary/Secondary/Blue, campos, combobox e barra de rolagem fina.
+6. Tela Certificado: busca (nome ou CPF/CNPJ), filtros Todos / A3 token / Vencendo, contagem exibida, "Vence em N dia(s)" em âmbar para certificados com 60 dias ou menos, duplo clique para continuar e rodapé com o certificado selecionado.
+   A lógica (refresh_certificates, _on_select, confirm_selection, restauração por thumbprint) não mudou.
+7. Títulos de página padronizados em 20 pt.
+8. Botões escritos em MAIÚSCULAS passam a usar capitalização normal (ex.: "Salvar XMLs novos"), preservando XML, NF-e, NFC-e, CT-e, CNPJ, SAT, PDF, DANFE e Excel. A conversão é feita em tempo de execução (_ModernButton), sem alterar a lógica dos botões.
+9. Cabeçalhos de tabela alinhados com o conteúdo de cada coluna (_ModernTreeview).
+10. Documentos Fiscais: linha de ações com botões compactos (CompactPrimary/CompactSecondary), sem cortar textos em telas de 1366 px; texto de ajuda quebra em duas linhas.
+11. Buscar XML: o título da página passou a ser "Buscar XML", igual ao menu.
+12. Exato IA: criada _natural_number_key (ordenação natural dos números das notas), que faltava e fazia a pergunta "maior diferença" falhar.
+13. Segurança da Central: /api/v140/auth/import_users não aceita mais perfil nem situação vindos do cliente. Contas novas entram como usuário comum e ativas; só o administrador principal (e-mail de bootstrap) mantém o perfil de administrador. Teste test_v146_central_import_role.py reproduz a falha na V145 e passa na V146.
+14. EXECUTAR.bat e COMO_INSTALAR_EXATO.txt agora exigem Python 3.12 ou superior (o código usa f-string que só compila a partir do 3.12).
+15. Correção: a barra de status passou a ser criada antes do corpo, evitando que ela fosse espremida em janelas baixas.
+
+PROTEÇÃO
+- 13/13 núcleos fiscais protegidos SAME (AST/SHA-256) em relação à V145.
+- 31/31 assets SAME.
+- Persistência, Central Compartilhada, backup e autostart não foram tocados.
+
+TESTES
+- py_compile.
+- testes/test_v146_theme_ui.py: abre as 11 telas, confere o título do topo e testa busca/filtros/seleção de certificado (Xvfb, Python 3.12).
+- test_v144_companies_ui (com a versão ajustada), test_v140_central_sync e test_v141_backup_health continuam OK.
+- Testes antigos que checam a versão (V143, V144) e o cadastro com aprovação (V135/V137) já falhavam antes da V146, por mudarem a regra no projeto.
+
+LAYOUT RESPONSIVO (NOTEBOOKS)
+16. Exatinho: o painel passou a ser um cartão flutuante ao lado do menu. O menu lateral não muda mais de largura e os itens não ficam cobertos. O quadro do mascote no rodapé foi aumentado para não cortar a figura nem o balão.
+17. Áreas de página: o conteúdo sempre começa no topo e ocupa a altura visível (o Canvas do Tk centralizava páginas curtas, criando um vazio no alto).
+18. Menu lateral adaptável: largura da janela < 1260 px usa menu compacto só com ícones; altura baixa esconde os títulos dos grupos e aproxima os itens; altura muito baixa esconde o Exatinho do rodapé.
+19. Largura mínima de página (1080 px) com rolagem horizontal de segurança: se a janela for mais estreita, a página rola em vez de cortar.
+20. Linhas de botões que quebram de linha automaticamente (make_flow): Buscar XML (os botões "Buscar XML" e "Busca automática" podiam ficar escondidos), Documentos Fiscais, Auditoria e Manutenção.
+
+21. Menu de ícones com o mascote do Exatinho no rodapé (clique abre o painel) e dicas de ferramenta ao passar o mouse sobre cada ícone.
+22. Busca rápida no topo ("Buscar... Ctrl+K"), que abre a Busca global; vira só o ícone em janelas estreitas.
+23. Aviso de validade do certificado no topo: âmbar com 30 dias ou menos e vermelho com 7 dias ou menos.
+
+PAINEL "HOJE", SELOS E TELAS VAZIAS
+24. Início: painel "Hoje" com o que precisa de atenção, em ordem de prioridade (certificado vencendo ou ausente, empresas desatualizadas ou em atenção, pendências e última busca), cada item com um botão que leva à tela certa. A regra está em build_today_items (função pura, testada).
+25. Documentos Fiscais: situação com selo em texto (● Autorizado, ✕ Cancelado, ◌ Evento), linha de cancelados destacada e exportação com ✓ / ○. Histórico: ✓ Concluído, ⚠ com observações, ⊘ Cancelado, ↻ Em andamento, linhas de atenção/cancelamento com fundo suave; coluna Observação saiu da grade (continua no painel de detalhes) e a coluna Tipo ficou oculta, para não cortar textos.
+26. Telas vazias com orientação (Documentos, Histórico e Certificados): mensagem, explicação e botão de ação (por exemplo "Buscar XML").
+28. Contador de pendências no menu: bolinha âmbar com o número ao lado de "Pendências" (e sobre o ícone no menu compacto; "9+" acima de 9). Atualiza ao iniciar, a cada navegação, a cada minuto e ao abrir a tela de Pendências, usando o mesmo cálculo da tela (_pending_summary). Clicar na bolinha abre Pendências.
+27. Menu: o contador de Pendências não se perde mais ao alternar entre menu completo e menu de ícones.
+Obs.: o Treeview do Tk não desenha selos coloridos por célula; os selos coloridos em formato de pílula existem na tela Empresas (tabela própria).
+
+NÃO ALTERADO DE PROPÓSITO
+- Resultado da Busca Automática ("Aguardando" mesmo quando tudo correu bem): a causa está na interpretação de deferred_actor, ligada aos núcleos fiscais protegidos (choose_nfe_actor, mark_nfe_sync_cycle, sync_documents_automatically). Precisa de autorização e de teste com a SEFAZ real.
+- Acesso automático ao SAT e auditoria de nota cancelada: dependem de teste no Windows com certificado / motor protegido.
+
+LIMITES
+- Testes feitos em Linux com fontes substitutas. A conferência final de aparência, em especial fontes e DPI, deve ser feita no Windows.
+- O Tkinter não tem cantos arredondados nem sombras reais; o visual usa bordas finas e cores.

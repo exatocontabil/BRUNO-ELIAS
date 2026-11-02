@@ -1,0 +1,24 @@
+V140 — CHECKLIST DE VALIDAÇÃO
+
+[OK] APP_VERSION = V140.
+[OK] Compilação completa (`python -m compileall -q .`).
+[OK] Login local/relogin preservado.
+[OK] Novo usuário ativo imediatamente.
+[OK] Central Compartilhada: configuração de servidor.
+[OK] Central Compartilhada: configuração de cliente.
+[OK] Arquivo de conexão + token.
+[OK] Login remoto por sessão.
+[OK] Usuário criado em cliente aparece no servidor.
+[OK] Documento criado no cliente aparece no servidor após sync.
+[OK] Documento pré-existente no servidor aparece no cliente após primeiro pull.
+[OK] Recuperação de senha iniciada no cliente aparece no administrador do servidor.
+[OK] Backup continua incluindo banco de usuários.
+[OK] Assets visuais 31/31 SAME em relação à base V139.
+[OK] Exatinho/logo presentes no smoke visual.
+[OK] Tela de login com os novos controles sem clipping.
+[OK] 13/13 núcleos fiscais protegidos SAME por comparação AST.
+
+VALIDAÇÃO REAL PENDENTE
+- Testar em duas máquinas físicas do escritório na mesma rede local.
+- Confirmar firewall/porta 8765.
+- Confirmar que a equipe consegue usar usuários e documentos compartilhados.

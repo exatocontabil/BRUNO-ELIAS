@@ -1,0 +1,8 @@
+V088 — TESTE DE LAYOUT DO PDF
+
+Objetivos:
+1) ordenar notas por número crescente apenas na apresentação do PDF;
+2) uniformizar largura/altura dos 4 KPIs;
+3) uniformizar largura/altura dos 3 painéis: mascote, Exato IA e próxima etapa.
+
+Sem alterações no motor de Auditoria SAT × XML ou na busca/captura de NF-e.

@@ -1,0 +1,18 @@
+EXATO CENTRAL FISCAL — V102 CHECKLIST
+
+[OK] APP_VERSION = V102
+[OK] Compilação py_compile
+[OK] Testes V094–V101 executados
+[OK] V102_FOUNDATION_OK
+[OK] V102_UI_SMOKE_OK
+[OK] DB indexes adicionais verificados
+[OK] Ctrl+K / Ctrl+B / Ctrl+Shift+A registrados
+[OK] Busca Global construída
+[OK] Seleção múltipla em Documentos Fiscais
+[OK] Centro de Processamento construído
+[OK] Diagnóstico com espaço livre
+[OK] 9 núcleos protegidos preservados por SHA-256
+[OK] Funções de PDF preservadas nesta versão por SHA-256
+[OK] VERSAO.txt atualizado
+[OK] pacote final com uma única pasta raiz
+[OK] sem __pycache__ / .pyc no pacote final

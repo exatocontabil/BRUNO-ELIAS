@@ -1,0 +1,22 @@
+EXATO CENTRAL FISCAL — AUDITORIA V071
+
+REFERÊNCIA MANUAL CONFIRMADA
+Login → certificado selecionado no Windows → Apps.aspx → 1. NFe/NFCe - Consulta → POST ConsultaOnlineCC.aspx.
+
+SAT
+- A captura automática deve iniciar no Login e esperar Apps.aspx.
+- CertificateAuth permanece somente como diagnóstico; não é usado como atalho para criar a sessão.
+- A sessão autenticada é preservada ao abrir a consulta pela área Aplicações.
+- A consulta usa o postback real do Web Forms e os filtros da tela.
+
+NF-e
+- Emitente: indAtor=1, checkpoint nfe_emitente.
+- Destinatário: indAtor=2, checkpoint nfe_destinatario.
+- Cursores anteriormente semeados por indAtor=9 não são usados para bloquear a recuperação do fluxo específico; XMLs repetidos são deduplicados pelo banco.
+- A sequência 117 → segundo ator não é disparada imediatamente quando o primeiro fluxo encerra por ausência de documentos, evitando repetir o padrão 117 → 657 observado no diagnóstico anterior.
+
+AUDITORIA
+- SAT não depende de Excel manual.
+- Comparação principal por chave de acesso normalizada.
+- Conferência visível: número, data e valor.
+- SAT sem XML, XML sem SAT e divergências permanecem suportados.

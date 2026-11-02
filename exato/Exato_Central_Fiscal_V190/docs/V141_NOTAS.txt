@@ -1,0 +1,25 @@
+V141 — SERVIDOR AUTOMÁTICO, SAÚDE DA CENTRAL E BACKUP AUTOMÁTICO
+
+1. SERVIDOR AUTOMÁTICO
+- Ao configurar este computador como Servidor Central, a V141 registra o servidor na inicialização do Windows para o usuário atual.
+- A entrada usa pythonw.exe quando disponível para não abrir janela de console.
+- A lógica antiga de ensure_server_running permanece e continua sendo usada como fallback/garantia na abertura do Exato.
+- Clientes não recebem a entrada de inicialização do servidor.
+
+2. STATUS DA CENTRAL
+- O cabeçalho agora mostra Central online, Central offline, Servidor Exato ou Central local.
+- A Manutenção mostra conectividade e sincronização sem executar novas consultas fiscais.
+
+3. SAÚDE DA CENTRAL
+- O servidor responde pelo endpoint de saúde existente com contagens de empresas, documentos, exportações e usuários.
+- O painel também mostra o estado do autostart e do backup automático.
+
+4. BACKUP AUTOMÁTICO
+- A rotina usa a função create_data_backup já existente.
+- A execução ocorre no processo do Servidor Central, uma vez ao dia ou na primeira inicialização quando o último backup automático está vencido.
+- O backup contém central_fiscal.db, usuarios.db, config.json e auditoria_historico.json.
+- A rotina remove somente backups marcados como automatico acima da retenção padrão; não remove backups manuais/pré-atualização.
+
+5. REGRESSÃO
+- Comparação AST V140→V141 deve confirmar 13/13 núcleos protegidos iguais.
+- Assets devem permanecer 31/31 iguais.

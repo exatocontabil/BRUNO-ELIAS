@@ -1,0 +1,21 @@
+V128 — CHECKLIST FINAL
+
+[OK] Base V127 utilizada
+[OK] APP_VERSION atualizado para V128
+[OK] Exatinho proativo contextual
+[OK] Retomada de contexto na abertura
+[OK] Resumo da sessão no painel
+[OK] Resumo da sessão no Dashboard
+[OK] Saúde da Central
+[OK] Ctrl+K com atalhos rápidos
+[OK] Sem alteração de núcleos fiscais protegidos
+[OK] py_compile
+[OK] compileall
+[OK] Smoke UI sob Xvfb
+[OK] Teste de painel/sem clipping
+[OK] Teste de presença/proatividade
+[OK] Teste de cStat 656/657
+[OK] Regressão do relatório PDF
+[OK] SHA-256/AST: 13/13 protegidos idênticos
+[OK] ZIP final validado
+[OK] __pycache__/pyc removidos do pacote final

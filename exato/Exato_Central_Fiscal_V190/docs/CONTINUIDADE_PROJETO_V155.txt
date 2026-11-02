@@ -1,0 +1,67 @@
+PROMPT DE CONTINUIDADE — EXATO CENTRAL FISCAL V155
+
+ESTADO ATUAL
+- V155 evolui a V154. Veja docs/V155_NOTAS.txt. Nenhuma regra fiscal protegida foi alterada (13/13 núcleos e 31/31 ativos iguais à V145).
+- O projeto é conduzido no Claude. Código no GitHub: brunoalbanoelias8-sketch/BRUNO-ELIAS, pasta exato/.
+
+REGRA DE VERSÃO (pedido do usuário)
+- TODO pacote novo entregue ao usuário recebe um número de versão novo (V156, V157...): pasta, APP_VERSION, .bat, VERSAO.txt, README, NOTAS, CONTINUIDADE, CHECKLIST e proteção dos núcleos. Nunca reenviar um ZIP diferente com o mesmo número.
+
+REGRAS QUE CONTINUAM VALENDO
+- Não quebrar funções validadas.
+- Não alterar os 13 núcleos fiscais protegidos sem autorização explícita.
+- Só criar nova Vxxx com autorização expressa.
+- Dados persistentes ficam em %LOCALAPPDATA%\Exato\Central Fiscal\Dados; nunca criar banco novo por versão.
+- Cada versão entrega NOTAS, CONTINUIDADE, CHECKLIST e comparação dos núcleos protegidos.
+
+TEMA VISUAL (V146)
+- Cores em constantes no topo de exato_central_fiscal.py: BG, SIDEBAR_BG, HEADER_BG, RED, RED_DARK, RED_SOFT, BORDER, MUTED, TEXT.
+- Estilos ttk em App._configure_styles. Topo em _build_header, menu em _build_body/_make_nav/_set_active_nav.
+- Ambiente de teste de interface: Python 3.12 + python3-tk + pillow + reportlab, com xvfb-run. EXATO_DATA_DIR aponta para uma pasta temporária.
+
+PADRÃO RESPONSIVO (V146)
+- Constantes: PAGE_MIN_WIDTH, RAIL_BELOW_WIDTH, RAIL_WIDTH. Menu: App._sidebar_apply_density. Página: App._sync_workspace_layout.
+- Para qualquer linha nova de botões use make_flow(frame) depois de criar os botões com pack (reverse=True, align='right' para grupos à direita).
+- O painel do Exatinho é flutuante (App._exatinho_place_panel); nunca redimensione o menu para abri-lo.
+- Teste de tamanhos: SIZE=1366x650 / 1100x600 / 1000x560 no ambiente xvfb (ver testes/test_v146_theme_ui.py).
+
+IDEIAS AINDA NÃO FEITAS
+- Tema escuro (precisa centralizar as cores antes), cadastro rápido de empresa pela busca, divisão do arquivo principal em módulos.
+- Selos em pílula nas demais tabelas só são possíveis com tabela própria (como em Empresas); no Treeview usamos símbolos e cores de linha.
+
+PENDÊNCIAS (herdadas da V145 + visual)
+1. Revisar no Windows fontes, DPI e telas pequenas.
+2. Botões: a capitalização é ajustada em tempo de execução (_sentence_case_button_text); ao editar textos novos, já escreva em capitalização normal.
+3. Telas internas (Auditoria, Manutenção, Buscar XML) já usam o tema; falta apenas etiquetas coloridas de situação onde hoje há texto simples.
+4. Resolvidas na V146: Exato IA (_natural_number_key), Central /auth/import_users, Python 3.12 nos .bat.
+5. Ainda abertas (precisam de autorização ou de teste no Windows): resultado "Concluído" da Busca Automática (deferred_actor, núcleos protegidos), acesso automático ao SAT, auditoria de nota cancelada, fluidez na troca de abas.
+
+NFS-e / V155 (resumo para continuar)
+- Portal por usuário e senha (exato_nfse_portal.py) calibrado com o retorno real do usuário: o download do XML é feito DE DENTRO da página (download_xml: fetch com credenciais; plano B: clique de download), porque pedidos soltos recebem HTTP 403; períodos são divididos em janelas de até 30 dias (period_windows; o portal recusa mais que isso); o acesso tenta primeiro SEM janela e só mostra o navegador se aparecer captcha (NeedVisibleBrowser, fallback_options); a sessão pode ser reaproveitada (session_state/on_session).
+- Senha e sessão guardadas só se o usuário pedir (caixa "Lembrar a senha desta empresa"): exato_acessos.AcessosStore (DPAPI no Windows; chave local fora dele; arquivo nfse_acessos.json em Dados, fora dos backups). App: ACESSOS, _nfse_load_saved_access, _nfse_forget_access.
+- Relatório mensal em lote (exato_nfse_pdf.generate_monthly_report_pdf): resumo por mês + uma seção por mês e tipo com todas as notas e total; sai na pasta do mês ao salvar XMLs (Relatorio_mensal_NFS-e_<Tipo>_<AAAA-MM>.pdf, no lugar do consolidado) e pelo botão "Relatório mensal (PDF)".
+- Automação: botão "Buscar e salvar tudo" (_nfse_search_and_save), escolhas lembradas (config nfse_prefs), sem período = mês anterior fechado, "Buscar sozinho ao abrir o Exato" (_nfse_auto_on_open) e _export_document_rows(auto_folder=True) usa a pasta já escolhida sem perguntar.
+- Layout: _workspace_watch reajusta a página quando o conteúdo cresce sem a janela mudar (resultado da busca não espreme mais a lista); lista com 12 linhas no mínimo.
+- Diretriz do usuário: automatizar ao máximo (menos cliques e trabalho manual).
+- Ainda pendente: XMLs reais de NFS-e prestada e tomada para calibrar o PDF; confirmar no portal real o download pela página; sessão/senha em busca em lote por usuário e senha; tentar de novo sozinho em falha de rede; autorização para os núcleos ("Última busca = Aguardando").
+
+NFS-e / V155 (portal: download dos XMLs)
+- Diagnóstico real do usuário: o portal respondeu HTTP 403 ao download do XML tanto por pedido solto (V151) quanto por fetch de dentro da página (V152). A V155 baixa como uma pessoa: download_xml tenta, na ordem, (1) aba nova com goto(url, referer=lista) e leitura do corpo (ou do download, se vier como anexo), (2) clique de verdade em "Download XML" da linha (abrindo o menu), (3) fetch da página. Se todas falharem, o diagnóstico (Logs/nfse_portal/download_*_semjanela|comjanela.txt) traz o que cada tentativa recebeu (status, cabeçalhos seguros, início do corpo, User-Agent, modo).
+- Se entrou mas TODOS os downloads falharam sem janela, fetch_via_portal repete a etapa com o navegador visível reaproveitando a sessão (info['repetiu_com_janela']). Opção "Mostrar o navegador na busca por usuário e senha" no menu Mais (nfse_prefs.show_browser).
+- Regra mantida: não contornar captcha nem disfarçar a automação (sem trocar User-Agent para enganar o portal).
+- Teste: test_v153_nfse_portal.py com portal simulado que só atende navegação com Referer, anexos, bloqueio de "HeadlessChrome" e recusa total.
+- Pendente: confirmar no portal real; se ainda der 403, ler o diagnóstico novo e testar à mão (entrar no portal e clicar em Download XML) para saber se a conta/perfil permite.
+
+NFS-e / V155 (captcha, relatório mensal e PDF da nota)
+- Captcha no download (portal por usuário e senha): aparece em UMA JANELA/ABA SEPARADA (a aba do download, _strategy_tab). A aba agora FICA ABERTA, vem para a frente (bring_to_front) e o Exato espera sem prazo curto (idle_s só vale sem captcha); captcha errado/expirado: o portal mostra de novo e a espera continua; janela fechada (TabClosed): reabre e repete a MESMA nota; só o botão Cancelar interrompe. Falha que não é captcha: repete a mesma nota (TIMEOUTS['retries'], pausa retry_pause_s) antes de contar como falha. Sem janela (headless) captcha => NeedVisibleBrowser => repete visível reaproveitando a sessão. Mensagem: "Resolva a confirmação de segurança na janela que abriu (nota X de N)". Teste: MODE 'captcha' do portal simulado (test_v154_nfse_portal.py) — cada nota é tentada até a 3ª vez antes de passar à próxima.
+- _looks_like_xml agora exige XML de verdade (<?xml, <NFSe ou infNFSe), senão a página HTML do captcha era tomada por XML.
+- Relatório mensal: NÃO usa seleção nem filtros (App._nfse_period_rows / _nfse_rows_for_reports(whole_period=True)): todas as notas do período, prestadas e tomadas. "PDF da relação" e "Lista em Excel" continuam seguindo seleção/filtro (texto dos botões diz isso).
+- Layout do relatório (generate_monthly_report_pdf): sem página vazia (lista do 1º mês logo após o resumo, mês novo = página nova), tabelas de 269 mm iguais, cabeçalhos vermelhos, letra 9, cabeçalho repetido nas páginas seguintes, "Totais do período" no fim.
+- PDF da nota calibrado com XML REAL prestado (fixture anonimizada testes/fixtures/nfse_real_prestada_anonimizada.xml, NÃO versionar XML real): nome do município e UF (cMun -> xLocEmi/xLocIncid/xLocPrestacao e UF pelos 2 primeiros dígitos), telefone/e-mail do prestador (emit/fone, emit/email), regime do Simples (opSimpNac 1/2/3), tributos aproximados (pTotTribSN), código nacional 17.23.01 + atividade + NBS, aviso de homologação (tpAmb 2). Falta XML real de nota TOMADA e entender valores baixos (R$ 0,23).
+
+Exatinho conversando / V155
+- exato_assistente.py (sem Tkinter, testável): detect_intent, parse_period, match_companies, answer(question, data, name) e daily_briefing(data). Recebe `data` (funções: today, companies, active_cnpj, summary, nfse_rows, cancelled_exported, unexported, last_runs, certs) e devolve {'text','lines','actions','confirm','topic'[,'run']}. Tudo local, sem IA externa (decisão de privacidade: dados fiscais não saem do computador).
+- Consultas no banco (exato_central_fiscal.py): db_assistant_summary, db_assistant_nfse_rows, db_assistant_cancelled_exported, db_assistant_unexported, db_assistant_last_runs.
+- Tela: App._chat_* (cartão flutuante na parte de baixo; Ctrl+J abre/fecha; botão "Conversar com o Exatinho" no painel; atalhos rápidos; caixa de digitar sempre visível), _assistant_data, _assistant_perform (goto, docs_cancelled_exported, cert_list, nfse_search[_save], nfse_all_save, nfse_report), _assistant_startup_briefing (uma vez por dia: balão + aviso rápido; config assistente_resumo_em).
+- Tarefas (buscar, salvar, relatório) SEMPRE pedem confirmação no chat; buscar usa o certificado da empresa (devolve o certificado que estava selecionado) ou a senha/sessão salva do portal; se não houver nenhum dos dois, avisa e abre a aba NFS-e. Relatório pelo Exatinho é salvo em <pasta dos clientes>/<empresa>/Relatorios_NFS-e/ sem janela.
+- Ideias não feitas: guia passo a passo apontando botões, explicar divergências da Auditoria, voz, IA externa opcional (só com consentimento e dados anonimizados).

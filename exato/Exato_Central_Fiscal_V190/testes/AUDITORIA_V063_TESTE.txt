@@ -1,0 +1,37 @@
+AUDITORIA V063 — PLANO DE TESTE
+
+Objetivo principal
+- Retestar a autenticação silenciosa no SAT sem deixar o erro de acesso ao Registro impedir a consulta.
+
+O que mudou tecnicamente
+1. A V063 mantém como primeira opção a política oficial AutoSelectCertificateForUrls no HKCU do Edge.
+2. Se o Windows negar essa gravação (WinError 5/Acesso negado), a auditoria NÃO encerra a execução.
+3. Nesse caso, o sistema tenta uma segunda forma: parâmetro de inicialização local do Edge com o payload em formato de lista JSON, sem alterar o Registro do Windows.
+4. O navegador continua em modo headless, sem aparecer para o usuário.
+5. O perfil/contexto da auditoria continua sendo novo a cada execução.
+6. O diagnóstico informa qual modo de seleção automática foi tentado.
+7. Nenhuma chave privada ou PFX é exportada.
+
+Por que esta versão merece teste
+- A V062 não chegou a testar o SAT porque o Windows bloqueou a escrita em HKCU\\Software\\Policies\\Microsoft\\Edge.
+- A V061 usava o parâmetro de linha de comando com formato incorreto (objeto único em vez da lista de entradas esperada pelo esquema da política).
+- A V063 corrige esse formato e usa o parâmetro como fallback, permitindo testar a hipótese sem exigir privilégios administrativos.
+
+Teste no escritório
+1. Abra a V063 pelo EXECUTAR.bat.
+2. Use o mesmo certificado da V061/V062.
+3. Use a mesma empresa e o mesmo período.
+4. Clique em AUDITAR DOCUMENTOS.
+5. Observe se a mensagem deixa de ser [WinError 5] Acesso negado.
+6. Observe se o SAT chega a sair da tela de login.
+7. Caso avance, observe se o sistema consegue exportar os resultados de NF-e/NFC-e.
+
+Não faça
+- Não execute como administrador apenas para contornar o erro.
+- Não altere manualmente o Registro.
+- Não troque o certificado.
+- Não abra o Edge manualmente para o teste.
+
+Se falhar
+- Envie a mensagem completa exibida pela V063.
+- Principalmente a linha "Modo de seleção automática tentado".

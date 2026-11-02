@@ -1,0 +1,40 @@
+V153 — CHECKLIST
+[x] py_compile exato_central_fiscal.py
+[x] 11 telas abrem sem erro (test_v146_theme_ui)
+[x] Topo acompanha a navegação
+[x] Tela Certificado: busca, filtros, vencimento, seleção e Continuar
+[x] 13/13 núcleos fiscais SAME
+[x] 31/31 assets SAME
+[x] Botões em capitalização normal / cabeçalhos alinhados
+[x] Importação de usuários da Central sem elevação de perfil (teste reproduz falha na V145)
+[x] Layout responsivo: 1366x650, 1100x600 e 1000x560 (menu de ícones, botões que quebram, rolagem de segurança)
+[x] Exatinho flutuante sem alterar o menu
+[x] Painel Hoje, selos de situação e telas vazias (test_v146_theme_ui)
+[x] Contador de pendências no menu (completo e de ícones)
+[x] Atalhos Ctrl+1..9 e F1
+[x] Avisos que somem sozinhos
+[x] Registro de erros (exato.log) e aviso amigável
+[x] Histórico e Documentos mais rápidos (medido)
+[x] Suíte atual + test_versao_consistente + GitHub Actions
+[x] Aba NFS-e: certificado (ADN simulado), importação, exportação, cancelamento, barreira para fluxos antigos
+[x] Modo usuário/senha testado contra portal simulado
+[x] Primeira busca REAL pelo Emissor Nacional com certificado: funcionou (301 documentos)
+[ ] Primeiro acesso REAL pelo portal com usuário e senha (pendente do usuário)
+[x] CNPJ pelo certificado, período, filtro Prestados/Tomados, PDF da relação, cadastro de empresa, máscaras de data
+[x] Mensagens sem linguagem de programação (friendly_message)
+[ ] Conferir valores/nomes das NFS-e com um XML real (pendente do usuário)
+[x] NFS-e como a NF-e: XML + PDF por nota + consolidado, exportada/cancelada exportada, lote de representações
+[x] Todas as empresas, resumo mensal (PDF/Excel), lista em Excel, cartões do Início, modo técnico
+[ ] Conferir o PDF da NFS-e com um XML real (pendente do usuário)
+[ ] Conferência visual no Windows (fontes/DPI) — pendente do usuário
+[x] Lista de NFS-e não espremida depois da busca (1366x650 e 1366x768) — test_v152_relatorio_e_automacao
+[x] Relatório mensal em lote (resumo + seção por mês e tipo, totais, canceladas à parte), na exportação e pelo botão
+[x] Portal simulado: download de dentro da página (403 para pedido solto), janelas de 30 dias, sessão reaproveitada, captcha -> janela
+[x] Senha salva protegida por empresa, esquecer, opção de não lembrar; nada em texto aberto
+[x] Buscar e salvar tudo, mês anterior como padrão, busca ao abrir, escolhas lembradas
+[x] Data do cabeçalho em português
+[ ] Download pela página e modo oculto no portal REAL (pendente do usuário)
+[ ] Windows: DPAPI (guardar/abrir senha) conferido no computador do usuário (pendente)
+[x] Portal simulado: download por aba nova (navegação com origem), anexo, bloqueio sem janela -> repete com janela, recusa total -> diagnóstico com cada tentativa
+[x] Menu Mais: Mostrar o navegador; mensagem quando nenhum XML baixa
+[ ] Download dos XMLs no portal REAL pelo novo método (pendente do usuário)

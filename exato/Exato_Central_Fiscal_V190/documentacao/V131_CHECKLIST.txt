@@ -1,0 +1,12 @@
+V131 — CHECKLIST
+[OK] Py_compile
+[OK] Compileall
+[OK] Persistência local após reinício (simulada por reabertura do banco)
+[OK] Exportação posterior sem nova consulta fiscal
+[OK] Habilitação de SALVAR XMLs + PDFs com documentos persistidos e período confirmado
+[OK] Painel ARQUIVO FISCAL LOCAL
+[OK] Smoke UI sob Xvfb
+[OK] Office Center regression aplicável
+[OK] 13/13 núcleos protegidos preservados
+[OK] ZIP extraído e conferido
+[INFO] Testes históricos que exigem APP_VERSION fixo de versões anteriores foram excluídos da classificação de falha.

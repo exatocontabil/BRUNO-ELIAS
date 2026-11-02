@@ -1,0 +1,28 @@
+AUDITORIA V061 — TESTE E ESCOPO
+
+1. Motor SAT x XML
+- Excel real do SAT: leitura de 49 documentos validada.
+- Chave de acesso normalizada para 44 dígitos.
+- Conciliação por chave; fallback por número + série + data.
+- Diferença de valores identificada por documento.
+- Divergência nos dois sentidos: SAT sem XML e XML sem SAT.
+
+2. Fluxo de interface
+- “BUSCAR MAIS DOCUMENTOS” removido.
+- “AUDITAR DOCUMENTOS” incluído em Documentos Fiscais.
+- Auditoria pode ser acionada pela tela de Documentos Fiscais com empresa e período já preenchidos.
+- “SELECIONAR EXCEL DO SAT” removido da interface final.
+
+3. Testes locais executados
+- py_compile: OK.
+- Smoke test GUI: OK.
+- Fluxo de auditoria via interface com fonte SAT simulada: OK.
+- Resumo com cinco indicadores: OK.
+- PDF com auditoria permanece suportado.
+
+4. Próxima validação no escritório
+- Confirmar acesso automático ao SAT com o certificado selecionado.
+- Confirmar preenchimento dos filtros.
+- Confirmar CAPTCHA/Cloudflare quando apresentado.
+- Confirmar download automático do Excel pelo botão Exportar.
+- Confirmar as quatro consultas: NF-e Emitente, NF-e Destinatário, NFC-e Emitente e NFC-e Destinatário.

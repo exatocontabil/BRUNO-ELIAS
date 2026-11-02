@@ -1,0 +1,23 @@
+V120 CHECKLIST
+
+[OK] Base técnica V119 preservada.
+[OK] APP_VERSION atualizado para V120.
+[OK] Centro Operacional adicionado ao Dashboard com estado ao vivo de processamento.
+[OK] Centro de Processamento existente reforçado sem tocar no motor de sincronização.
+[OK] Histórico de sincronizações recebeu filtro, detalhe contextual e atalhos para empresa/documentos.
+[OK] Documentos Fiscais recebeu seleção múltipla orientada a operação em lote.
+[OK] Selecionar todos / limpar seleção / geração em lote de representações fiscais adicionados.
+[OK] Geração em lote reutiliza generate_fiscal_representation_pdf sem alterar o gerador protegido.
+[OK] Pendências reorganizadas por prioridade com contadores de capturas e auditorias.
+[OK] Exato IA apenas integrado aos novos eventos de uso; motor comportamental preservado.
+[OK] py_compile / compileall.
+[OK] Regressão NF-e / scheduler.
+[OK] Regressão Auditoria multi-tipo + PDF.
+[OK] Regressão Exato IA / perguntas contextuais.
+[OK] Regressão do relatório PDF.
+[OK] Smoke test Dashboard / Documentos / Histórico / Pendências sob Xvfb.
+[OK] Smoke test do motor comportamental do Exato IA sob Xvfb.
+[OK] Teste específico do Centro Operacional e ações em lote.
+[OK] 13/13 núcleos protegidos permaneceram idênticos à V119 por SHA-256.
+[OK] Nenhum núcleo fiscal/auditoria/PDF protegido foi alterado.
+[OK] __pycache__, .pyc e temporários removidos do ZIP final.

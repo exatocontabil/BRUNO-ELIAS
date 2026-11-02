@@ -1,0 +1,32 @@
+V141 — CHECKLIST DE ENTREGA
+
+[OK] Base derivada diretamente da V140.
+[OK] APP_VERSION atualizado para V141.
+[OK] 13 núcleos fiscais protegidos: 13/13 SAME por AST.
+[OK] Assets oficiais: 31/31 SAME por SHA-256.
+[OK] Servidor Exato automático no Windows via HKCU Run.
+[OK] Fallback existente de inicialização do servidor preservado.
+[OK] Ao trocar de Servidor para Cliente, o autostart antigo é removido.
+[OK] Backup manual existente preservado.
+[OK] Backup automático diário no processo do Servidor Central.
+[OK] Retenção automática limitada sem apagar backups manuais/pré-atualização.
+[OK] Endpoint de saúde existente preservado e enriquecido.
+[OK] Status visual da Central no cabeçalho.
+[OK] Painel CENTRAL COMPARTILHADA em Manutenção.
+[OK] Sincronização V140 entre processos: OK.
+[OK] Autenticação V139: OK.
+[OK] Arquivo Fiscal Local V137: OK.
+[OK] UI smoke V141: OK.
+[OK] Login visual: OK.
+[OK] Visual smoke: OK.
+
+OBSERVAÇÃO
+O teste efetivo do registro HKCU\Software\Microsoft\Windows\CurrentVersion\Run precisa ser confirmado em um Windows real do escritório, porque o ambiente de validação atual é Linux. A implementação usa a API nativa winreg quando executada no Windows.
+
+VALIDAÇÃO OPERACIONAL RECOMENDADA
+1. Configurar uma máquina como Servidor Central V141.
+2. Confirmar que o Exato Central Fiscal Server aparece na inicialização do usuário do Windows.
+3. Reiniciar o computador servidor sem abrir manualmente o Exato.
+4. Testar a conexão de um computador cliente.
+5. Verificar o backup diário em Dados\Backups.
+6. Confirmar sincronização e status no cabeçalho/Manutenção.

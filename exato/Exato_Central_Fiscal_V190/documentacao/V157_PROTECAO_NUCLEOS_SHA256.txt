@@ -1,0 +1,20 @@
+V157 — PROTEÇÃO DOS 13 NÚCLEOS FISCAIS
+
+Comparação estrutural entre V145 e V157 por AST (ast.dump sem atributos de localização, SHA-256).
+
+1. _audit_build_rows | 3aa9c49b6b730da4166a3813e9545311357d21f5e12e663d8afd38869e164d8f | SAME
+2. _audit_compare_pair | a5e7949465c3705e97389089d0862b7c508bb498990fa273648a6520f90c58cf | SAME
+3. _audit_fallback_key | 734fa5fdf9dd68c559c3a82815f4129ee1eeabdece656e4316eb50c0d680e5d7 | SAME
+4. _audit_key | 648f90d9d44997fe446b78eb51bd48bd0f153990975a98295d7db304dcff3ef2 | SAME
+5. _audit_xml_rows | b1e8efd1659bee0cc0515e7c7046c2f2a1591a40585b63407b755a2ae0141a2c | SAME
+6. choose_nfe_actor | a3bed5d50e759d1e56f081cc98b912eb3db6e6b97f4d471f1dded0d1f96156ef | SAME
+7. mark_nfe_sync_cycle | 1756b1a1cd24f4a3ebaaa73a0f6c11c304cf3ddded936328715fb1194ff5f320 | SAME
+8. sync_documents_automatically | 372683440272593fa2d78ea900f69fa9b5f6d421fcb1b5177c85e30545183bcf | SAME
+9. test_sef_nfe_webservice | 581d27461a7c6ded04223515b7c1fb4899c90084a84a91974c12a51af6636a1f | SAME
+10. generate_fiscal_representation_pdf | 728c61dc759ca0bc2c208e068f0bcd35af9f965f78e65f4df75f22d6fd14caaa | SAME
+11. open_document_fiscal_representation | 4ab1ca947cbe19873c52f86f8591dbdbd3874103b3ca9b9af354bcda65e1c02e | SAME
+12. save_documents_organized | 83cf95e786a4bb2dcadc7f73da4ef4b772d652ff977b5ea37e2f73c425a2a70a | SAME
+13. generate_documents_pdf | 9b514dc8068074a017367c6928b5b61157e812f7f5ea72acfc5c68b5f1dcf2c8 | SAME
+
+RESULTADO: 13/13 SAME
+ATIVOS: 31/31 SAME

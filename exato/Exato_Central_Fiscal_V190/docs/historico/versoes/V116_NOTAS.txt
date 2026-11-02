@@ -1,0 +1,45 @@
+V116 — NOTAS
+
+Origem: V115.
+
+Objetivo desta versão:
+1. Refinar o Relatório de Documentos Fiscais com foco em enquadramento, distribuição vertical e textos mais curtos.
+2. Evitar overflow de mensagens dentro de cards e manter todo conteúdo contido na área útil.
+
+Alterações do relatório:
+- paginação continua coerente em sequência única;
+- paginação das tabelas passa a ser adaptativa à altura real das linhas, em vez de depender apenas de uma quantidade fixa de documentos por página;
+- mantém separação entre Entrada e Saída e reserva espaço para o EXATO IA no fim da seção;
+- textos do EXATO IA — ENTRADA/SAÍDA foram reduzidos para destacar apenas as informações essenciais;
+- texto do EXATO IA — ANÁLISE DO PERÍODO também foi compactado;
+- fallback do bloco de Pontos de Atenção evita repetições idênticas;
+- mensagens da Auditoria no relatório foram compactadas sem alterar o motor da Auditoria;
+- composição dos cards mantém quebra de linha e margem interna para impedir conteúdo fora das bordas;
+- o exemplo equivalente ao relatório analisado permanece com 6 páginas físicas;
+- EXATO IA — SAÍDA continua integrado à última página dos documentos de saída;
+- nenhum mecanismo de captura, auditoria ou representação fiscal foi alterado.
+
+Núcleo protegido:
+- 12/13 funções protegidas permanecem idênticas à V114 por SHA-256;
+- a única função protegida alterada continua sendo generate_documents_pdf, já autorizada para as melhorias do relatório.
+
+Itens deliberadamente não alterados:
+- Auditoria SAT × XML e seus critérios de negócio;
+- captura NF-e/NFC-e/CT-e;
+- fluxos Emitente/Destinatário;
+- geração individual de DANFE/DACTE;
+- salvamento organizado de XML/PDF;
+- contexto da Auditoria a partir de Documentos Fiscais;
+- animação/comportamento do Exato IA na Central.
+
+Validações desta versão:
+- py_compile;
+- teste de geração de relatório equivalente;
+- 6 páginas físicas no cenário de teste;
+- paginação 1 de 6 ... 6 de 6;
+- EXATO IA — ENTRADA presente uma vez;
+- EXATO IA — SAÍDA presente na última página;
+- revisão visual das páginas 1, 2 e 6;
+- regressões fiscais e de IA herdadas da V115;
+- comparação SHA-256 dos núcleos protegidos;
+- limpeza de __pycache__, .pyc e temporários antes do ZIP final.

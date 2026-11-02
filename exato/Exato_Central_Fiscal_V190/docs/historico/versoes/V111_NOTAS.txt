@@ -1,0 +1,10 @@
+V111 — Exato IA viva + linguagem visual consistente
+
+1. Exato IA global discreta no canto inferior esquerdo da área de trabalho, sem bloquear conteúdo.
+2. Movimento sutil de repouso (bob), com estados contextuais: repouso, dica, analisando, processando, concluído e atenção.
+3. Mensagens curtas em balão somente durante interação; o balão desaparece sozinho.
+4. Assets transparentes e contain, com margem de segurança para evitar cortes/deformações.
+5. Busca XML: IA entra em modo processando/concluído.
+6. Auditoria: IA entra em modo análise.
+7. Sidebar: símbolo Exato isolado, sem o bloco preto do logo completo.
+8. V110 foi preservada como base: núcleos fiscais, PDF/DANFE, NF-e Entrada/Saída e Auditoria multi-tipo mantidos.

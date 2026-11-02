@@ -1,0 +1,42 @@
+V117 — NOTAS
+
+Origem: V116.
+
+Objetivo desta versão:
+1. Corrigir definitivamente o enquadramento dos cards EXATO IA — ENTRADA e EXATO IA — SAÍDA no Relatório de Documentos Fiscais.
+2. Reduzir as mensagens para informação essencial, evitando overflow e excesso de texto.
+3. Manter o quadro “NATUREZA DA OPERAÇÃO” como o principal conteúdo analítico dos cards.
+
+Alterações do relatório:
+- análise textual detalhada de Entrada/Saída substituída por duas linhas curtas;
+- resumo: quantidade de documentos e valor total;
+- segunda linha: maior documento e valor;
+- removido o subtítulo intermediário “Análise da movimentação” dentro dos cards;
+- removido o rodapé textual redundante abaixo dos cards;
+- quadro “NATUREZA DA OPERAÇÃO” preservado como principal elemento analítico;
+- mesma composição aplicada de forma simétrica a Entrada e Saída;
+- mascote mantido dentro da área do card;
+- nenhum texto longo deve ultrapassar o enquadramento.
+
+Núcleos protegidos:
+- somente generate_documents_pdf permanece alterada em relação à V116, por autorização expressa para esta correção do PDF;
+- os outros 12 núcleos protegidos permanecem idênticos à V116.
+
+Itens deliberadamente não alterados:
+- Auditoria SAT × XML e seus critérios de negócio;
+- captura NF-e/NFC-e/CT-e;
+- fluxos Emitente/Destinatário;
+- geração individual de DANFE/DACTE;
+- salvamento organizado de XML/PDF;
+- animação/comportamento do Exato IA na Central.
+
+Validações planejadas:
+- py_compile;
+- relatório equivalente ao cenário de teste;
+- 6 páginas físicas;
+- paginação 1 de 6 ... 6 de 6;
+- EXATO IA — ENTRADA e SAÍDA uma vez cada;
+- cards sem texto de análise extensa;
+- regressões fiscais e IA herdadas da V116;
+- comparação SHA-256 dos 12 núcleos protegidos em relação à V116;
+- limpeza de __pycache__, .pyc e temporários antes do ZIP.

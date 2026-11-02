@@ -1,0 +1,27 @@
+V083 — Registro de testes da Auditoria Fiscal
+
+1. Importação dos arquivos reais do SAT
+   - NF-e + NFC-e: 64 registros únicos após deduplicação.
+   - Período: 01/08/2026 a 31/08/2026.
+   - Banco de teste disponível no ambiente: nenhum XML correspondente para o CNPJ testado.
+   - Resultado esperado e obtido: 64 “XML não localizado”, 0 conformes, 0 divergências.
+
+2. Caso misto sintético
+   - 1 documento conforme.
+   - 1 documento com divergência de valor de R$ 5,00.
+   - 1 documento sem XML.
+   - Resultado obtido: conforme=1, divergência=1, pendência=1.
+
+3. Caso integralmente conforme sintético
+   - 2 documentos.
+   - Resultado obtido: conforme=2, divergência=0, pendência=0.
+
+4. Regressão de chave/fallback
+   - NF-e e NFC-e com mesmo número/série/data não colidem.
+   - Entrada e Saída com mesma combinação também não colidem.
+
+5. UI/PDF
+   - Tela Auditoria Fiscal renderizada em Xvfb: OK.
+   - PDF misto: OK.
+   - PDF conforme: OK.
+   - PDF real com 64 pendências: OK.

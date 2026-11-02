@@ -1,0 +1,30 @@
+V135 — CHECKLIST FINAL
+
+[OK] V135 criada a partir da V134 com autorização expressa.
+[OK] Administrador inicial Bruno Elias pré-cadastrado com e-mail definido pelo usuário.
+[OK] Primeiro acesso do administrador com criação de senha no próprio programa.
+[OK] Tela de login.
+[OK] Cadastro de colaborador.
+[OK] Cadastro pendente aguardando aprovação.
+[OK] Perfis Administrador e Usuário.
+[OK] Aprovação/ativação, bloqueio e redefinição de senha.
+[OK] Proteção contra auto-bloqueio do administrador.
+[OK] Proteção contra bloqueio do último administrador ativo.
+[OK] Hash de senha com PBKDF2 + salt; sem senha em texto puro.
+[OK] Registro local de atividades de autenticação e gestão de contas.
+[OK] Cabeçalho com usuário autenticado e perfil.
+[OK] Sair e retorno à tela de login.
+[OK] Exatinho reconhece o usuário e personaliza a abertura.
+[OK] Testes de autenticação.
+[OK] Testes de UI de login/usuários sob Xvfb.
+[OK] Regressão do Arquivo Fiscal Local.
+[OK] Regressão da UI de Documentos Fiscais.
+[OK] Regressão de SALVAR XMLs NOVOS.
+[OK] Regressão do Exatinho.
+[OK] py_compile.
+[OK] compileall.
+[OK] Proteção 13/13 núcleos por SHA-256/AST.
+
+OBSERVAÇÃO
+- A autenticação da V135 é local ao ambiente de dados atual. Compartilhamento de usuários entre computadores ainda depende da futura camada centralizada.
+- Testes históricos que fixam APP_VERSION de versões antigas não são critérios de falha desta versão.

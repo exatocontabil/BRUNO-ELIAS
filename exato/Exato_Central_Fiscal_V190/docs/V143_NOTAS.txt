@@ -1,0 +1,43 @@
+V143 — SEPARAÇÃO DA SITUAÇÃO DE ATUALIZAÇÃO E RESULTADO DA BUSCA
+
+BASE
+- V143 parte diretamente da V142.
+- V142/V141/V140 permanecem como versões anteriores e não foram alteradas.
+
+OBJETIVO
+Evitar que a palavra “Problema” na tela Empresas seja interpretada como erro fiscal quando, na prática, a coluna anterior representava apenas tempo desde a última busca.
+
+ALTERAÇÕES
+1. A coluna “Situação” foi substituída por “Atualização”.
+2. “Atualização” usa três estados:
+   - Atualizada: houve busca nos últimos 24h.
+   - Atenção: última busca entre 24h e 72h.
+   - Desatualizada: mais de 72h sem busca ou nunca buscada.
+3. Foi criada a coluna “Última busca”, separando o resultado da tentativa mais recente:
+   - Concluída
+   - Com observação
+   - Cancelada
+   - Em andamento
+   - Aguardando
+   - Erro
+   - Não realizada
+4. Filtros da tela Empresas foram ajustados para usar “Desatualizadas” em vez de “Problema”.
+5. Foi adicionada legenda compacta abaixo da tabela explicando os três estados de Atualização.
+6. O banco passa a fornecer, sem alterar estruturas existentes, o último status e o texto de erro da tabela sync_runs para exibição da coluna “Última busca”.
+
+PERSISTÊNCIA
+- Nenhuma tabela existente foi recriada.
+- Não foi criada uma nova base por versão.
+- document_exports, Arquivo Fiscal Local e toda a lógica de reconhecimento de XML já exportado permanecem inalterados.
+
+PROTEÇÃO
+- Nenhum núcleo fiscal protegido foi alterado.
+- Assets e identidade visual preservados.
+
+TESTES
+- compileall.
+- classificação unitária de Atualizada/Atenção/Desatualizada.
+- tradução dos resultados da última busca.
+- consulta do banco com múltiplas empresas e diferentes resultados de busca.
+- smoke visual da tela Empresas em 1366x768 via Xvfb.
+- regressão estrutural dos 13 núcleos fiscais protegidos.

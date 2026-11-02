@@ -1,0 +1,20 @@
+V139 — CHECKLIST DE VALIDAÇÃO
+
+[OK] APP_VERSION = V139
+[OK] Cadastro novo = status active
+[OK] Login de usuário novo imediato
+[OK] Aprovação administrativa removida da UI
+[OK] Usuários legados pending migrados para active
+[OK] Banco dedicado usuarios.db criado
+[OK] Conta existente V138 migrada para usuarios.db
+[OK] Hash/salt da senha existente preservados
+[OK] Login persistente em processos consecutivos
+[OK] Backup inclui usuarios.db
+[OK] Recuperação “Esqueci minha senha” preservada
+[OK] Administrador pode bloquear/ativar/redefinir senha
+[OK] Exatinho preservado
+[OK] Logos e assets preservados
+[OK] V137 visual preservado como base
+[OK] Compilação Python
+[OK] ZIP validado
+[OK] 13 núcleos fiscais protegidos preservados

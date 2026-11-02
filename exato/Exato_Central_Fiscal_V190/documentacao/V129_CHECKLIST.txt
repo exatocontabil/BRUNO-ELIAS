@@ -1,0 +1,15 @@
+V129 — CHECKLIST DE VALIDAÇÃO
+
+[OK] py_compile
+[OK] compileall
+[OK] parser XLSX de cadastro de empresas
+[OK] cadastro de empresas em SQLite isolado
+[OK] janela Busca Automática
+[OK] opção Salvar XML automaticamente
+[OK] habilitar/desabilitar seleção de pasta raiz
+[OK] fila sequencial multiempresa (smoke sem SEFAZ real)
+[OK] cancelamento/estado da fila no smoke
+[OK] salvamento organizado em Empresa → Ano → Mês → Entrada/Saída → Tipo
+[OK] 13/13 núcleos protegidos idênticos por SHA-256/AST
+[OK] limpeza de __pycache__ e .pyc
+[PENDENTE/SEPARADO] Busca Global: correção registrada para próxima evolução

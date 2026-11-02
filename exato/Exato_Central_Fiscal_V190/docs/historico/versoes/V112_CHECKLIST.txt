@@ -1,0 +1,15 @@
+V112 CHECKLIST
+
+[OK] Exato IA fixa/discreta na sidebar.
+[OK] Microanimacao de repouso.
+[OK] Olhar em 3 direcoes conforme cursor (variantes transparentes).
+[OK] Frases ocasionais de personalidade/humor leve/motivacao.
+[OK] Estados contextuais por tela preservados.
+[OK] PDF multi-tipo: cabecalho dentro da area segura.
+[OK] PDF multi-tipo: mascote sem balao para evitar clipping.
+[OK] Mascote PDF transparente e integralmente enquadrado.
+[OK] 9 nucleos fiscais protegidos preservados.
+[OK] 4 renderizadores/rotinas PDF congelados preservados.
+[OK] py_compile.
+[OK] Regressao V112.
+[OK] UI smoke em Xvfb.

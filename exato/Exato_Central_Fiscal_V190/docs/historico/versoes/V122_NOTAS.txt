@@ -1,0 +1,48 @@
+V122 — EXATO IA 3.0 + ATENÇÃO CONTEXTUAL + DIAGNÓSTICO NF-e
+
+Base: V121
+
+Foco autorizado:
+- evolução do Exato IA de comportamento orientado a eventos para consciência contextual de sessão;
+- atenção visual a pontos relevantes da interface após cliques/eventos, sem seguir o cursor de forma mecânica o tempo todo;
+- memória curta da sessão com estado de trabalho, resultado e atenção;
+- curiosidade comportamental e olhares autônomos controlados;
+- maior silêncio e menor repetição de frases ociosas;
+- reações diferentes para sucesso, atenção, divergência, erro, auditoria e geração em lote;
+- continuidade entre eventos da mesma operação;
+- diagnóstico NF-e local, somente leitura, sem emitir novas consultas;
+- exposição clara do último cStat, interpretação, ator, próximo ator, cooldown e caminho do diagnóstico bruto;
+- manutenção da correção de apresentação do cStat 657 como divergência do órgão autorizador, sem classificar como bloqueio automático.
+
+EXATO IA:
+- event bus continua em memória de sessão;
+- novo contexto de sessão: working/result/attention/idle;
+- foco visual associado a cliques e eventos relevantes;
+- olhar pode priorizar um ponto importante da interface antes de retornar ao comportamento autônomo;
+- curiosidade controlada introduz pequenas observações sem fala obrigatória;
+- frases ociosas exigem mais silêncio entre ocorrências e priorizam o último evento significativo;
+- cStat 656 mantém tratamento de atenção por Consumo Indevido;
+- cStat 657 mantém tratamento de atenção por divergência do órgão autorizador.
+
+DIAGNÓSTICO NF-e:
+- painel adicionado em Manutenção e Segurança;
+- leitura exclusivamente local de nfe_sync_control e da última pasta DIAGNOSTICO_WEBSERVICE;
+- nenhum request fiscal é disparado ao abrir o diagnóstico;
+- checkpoint/NSU e SOAP de NF-e permanecem fora da alteração.
+
+PRESERVAÇÃO:
+- 13/13 núcleos protegidos permanecem idênticos à V121 por SHA-256;
+- nenhum motor de auditoria, captura NF-e/NFC-e/CT-e ou gerador fiscal/PDF protegido foi alterado.
+
+VALIDAÇÃO EXECUTADA:
+- py_compile / compileall;
+- regressão NF-e / scheduler;
+- regressão Auditoria multi-tipo + PDF;
+- regressão do relatório PDF com separação NF-e/NFC-e/CT-e;
+- regressão Exato IA / QA;
+- teste dedicado do event bus, foco contextual e cStat 656/657;
+- teste do motor procedural do Exato IA;
+- smoke de inicialização e navegação sob Xvfb;
+- inspeção de UI da tela de Manutenção e diagnóstico;
+- comparação SHA-256 dos 13 núcleos protegidos;
+- validação final do ZIP sem __pycache__, .pyc ou temporários.
