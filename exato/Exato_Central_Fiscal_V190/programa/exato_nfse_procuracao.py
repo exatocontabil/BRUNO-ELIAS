@@ -27,10 +27,14 @@ def raiz(cnpj):
     return d[:8] if len(d) == 14 else ''
 
 
-def modo_para(cert_cnpj, cnpj):
-    """'proprio' quando o certificado é da empresa (ou de outro estabelecimento da mesma raiz de CNPJ); 'procuracao' nos demais casos (inclui CPF)."""
-    a, b = raiz(cert_cnpj), raiz(cnpj)
-    return 'proprio' if (a and a == b) else 'procuracao'
+def modo_para(cert_doc, cnpj):
+    """'proprio' quando o certificado é da empresa (ou de outro estabelecimento da mesma raiz de CNPJ) ou quando não se sabe de quem ele é; 'procuracao' quando o
+    certificado é de outro CNPJ ou de uma pessoa (CPF). `cert_doc`: o documento (CNPJ/CPF) do titular do certificado."""
+    d = _d(cert_doc)
+    if len(d) == 11: return 'procuracao'
+    a, b = raiz(d), raiz(cnpj)
+    if not a: return 'proprio'
+    return 'proprio' if a == b else 'procuracao'
 
 
 def estado(config, cnpj):

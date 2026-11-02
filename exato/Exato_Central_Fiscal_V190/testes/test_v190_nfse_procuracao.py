@@ -12,7 +12,7 @@ A,B,C=PREST,'11222333000181','45723174000110'          # A: tem certificado pró
 # ---- módulo (sem tela)
 assert P.raiz('12.345.678/0001-95')=='12345678' and P.raiz('12345678909')==''
 assert P.modo_para('12345678000195','12345678000276')=='proprio'          # outro estabelecimento da mesma raiz
-assert P.modo_para('99888777000166','12345678000195')=='procuracao' and P.modo_para('12345678909','12345678000195')=='procuracao' and P.modo_para('','12345678000195')=='procuracao'
+assert P.modo_para('99888777000166','12345678000195')=='procuracao' and P.modo_para('12345678909','12345678000195')=='procuracao' and P.modo_para('','12345678000195')=='proprio'          # titular desconhecido: não presume procuração
 cfg={}; assert P.ligada(cfg) and not P.ligada({'nfse_prefs':{'procuracao':False}})
 agora=datetime(2026,11,3,10,0,0)
 P.registrar(cfg,B,'procuracao',False,'x',agora=agora)

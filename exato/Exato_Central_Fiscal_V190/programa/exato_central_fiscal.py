@@ -19753,7 +19753,7 @@ class App(tk.Tk):
         self._nfse_set_busy(True, f'Consultando o Emissor Nacional... ({_format_cnpj(cnpj)})', 'Continuando de onde a última busca parou.' if last else 'Primeira busca desta empresa: traz todo o histórico disponível, o que pode demorar alguns minutos.')
         def progress(total, batches):
             self.after(0, lambda: self.nfse_detail.config(text=f'{total} documento(s) recebido(s)...'))
-        modo = proc_mod.modo_para(self._nfse_cert_cnpj(self.nfse_selected), cnpj)          # V190: certificado de outro CNPJ = procuração
+        modo = proc_mod.modo_para((self.nfse_selected or {}).get('Document'), cnpj)          # V190: certificado de outro CNPJ = procuração
         def worker():
             try:
                 items, new_last, info = nfse_mod.fetch_all_new(thumb, last, homolog, cnpj, transport=(getattr(self, '_nfse_transport', None) or nfse_mod.adn_transport_windows), progress=progress, cancelled=self._nfse_cancel_event.is_set)
