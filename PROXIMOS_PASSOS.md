@@ -286,3 +286,9 @@ Plano V170: (a) dois estados separados: `selected` (Buscar XML) e `nfse_selected
 ## 02/11 — V190 feita (NFS-e por procuração)
 - Entregue: empresas sem certificado próprio buscadas pelo certificado do escritório (procuração Receita Federal), memória por empresa, causa explicada quando recusa, "por procuração" na Situação da busca, opção na tela NFS-e. Detalhes: docs/V190_NOTAS.txt.
 - A conferir com o usuário: testar com 1 empresa real com procuração; enviar exato.log (linhas "NFS-e por procuração"); print da seção "Para além do Emissor Web" do Portal da NFS-e. Depois: troca de empresa no portal (usuário e senha) se o retorno do portal real permitir.
+
+## 08/11 — Pedido: transformar o Exato em site (EM DEFINIÇÃO; nada implementado)
+- Decisões do usuário: toda busca "online" (pelo site); arquivos continuam salvos no servidor do escritório; quem pedir a busca usa os certificados instalados NA MÁQUINA dele.
+- Consequência técnica (explicada ao usuário): o navegador não usa certificado do Windows/A3 e a SEFAZ não aceita chamada do navegador (sem CORS) => é preciso um CONECTOR local pequeno em cada PC (único que toca o certificado; reaproveita as rotinas atuais de certificado via PowerShell). O site (backend + telas) fica no servidor.
+- Reaproveitável: ~27 módulos sem Tkinter + 61 funções db_* + os 13 núcleos protegidos (intocados). A refazer: as telas (≈700 métodos do App em Tkinter). Fases propostas: F1 site (login, Empresas, Situação da busca, Documentos, Repositório); F2 conector + buscas por certificado (NF-e/NFC-e/CT-e e NFS-e, incl. procuração); F3 Auditoria, relatórios, fechamento, Box-e/ZIP Domínio; F4 aposentar o programa instalado. O programa instalado (V190) segue funcionando durante a transição.
+- Perguntas em aberto: sistema operacional/capacidade do servidor do escritório; quantos usuários ao mesmo tempo; acesso só na rede do escritório ou também de fora; a rodada automática (4 h) precisa de um PC com certificados sempre ligado.
