@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block titulo %}Certificados A1 — Exato{% endblock %}
+{% block corpo %}<h1>Certificados A1</h1><p class="sub">Os certificados ficam guardados criptografados no servidor do escritório. A senha nunca aparece de novo.</p>
+{% if ok %}<div class="aviso ok">{{ ok }}</div>{% endif %}{% if erro %}<div class="aviso erro">{{ erro }}</div>{% endif %}
+<form method="post" action="/certificados" enctype="multipart/form-data" class="card"><h2>Enviar certificado</h2><input type="hidden" name="csrf" value="{{ csrf }}"><div class="linha">
+<div><label>Empresa</label><select name="empresa" required><option value="">Escolha...</option><option value="escritorio">Escritório (certificado com procuração)</option>{% for e in empresas %}<option value="{{ e.cnpj }}">{{ e.nome }} — {{ e.cnpj_fmt }}</option>{% endfor %}</select></div>
+<div><label>Arquivo A1 (.pfx ou .p12)</label><input type="file" name="arquivo" accept=".pfx,.p12" required></div><div><label>Senha do certificado</label><input type="password" name="senha" autocomplete="off" required></div><button>Guardar</button></div></form>
+<div class="card"><table><tr><th>Empresa</th><th>Titular</th><th>Validade</th><th>Enviado por</th><th></th></tr>
+{% for c in certs %}<tr><td>{{ c.nome }}</td><td>{{ c.titular }}</td><td><span class="pill {{ 'r' if c.vencido else 'g' }}">{{ c.validade }}</span></td><td>{{ c.enviado_por }}<br><small class="mu">{{ c.enviado_em }}</small></td>
+<td><form method="post" action="/certificados/remover"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="empresa" value="{{ c.id }}"><button class="sec">Remover</button></form></td></tr>
+{% else %}<tr><td colspan="5">Nenhum certificado guardado ainda.</td></tr>{% endfor %}</table></div>{% endblock %}

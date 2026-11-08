@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block titulo %}Situação da busca — Exato{% endblock %}
+{% block corpo %}<h1>Situação da busca</h1><p class="sub">Para cada empresa, o que o Exato já buscou. Atrasado = última busca há mais de 3 dias.</p>
+<div class="kpis"><div class="kpi"><b class="gr-t">{{ totais.em_dia }}</b><span>Em dia</span></div><div class="kpi"><b>{{ totais.atraso }}</b><span>Com atraso</span></div><div class="kpi"><b>{{ totais.nunca }}</b><span>Ainda não buscado</span></div><div class="kpi"><b>{{ totais.empresas }}</b><span>Empresas</span></div></div>
+<div class="card"><table><tr><th>Empresa</th>{% for f, nome in tipos %}<th>{{ nome }}</th>{% endfor %}<th>Certificado A1</th></tr>
+{% for l in linhas %}<tr><td><b>{{ l.nome }}</b><br><small class="mu">{{ l.cnpj_fmt }}</small></td>
+{% for f, nome in tipos %}{% set c = l.celulas[f] %}<td><span class="pill {{ {'em_dia':'g','atrasado':'a','nunca':'r','sem_notas':'n'}.get(c.estado,'n') }}">{{ c.texto if c.texto is defined else c.estado }}</span><br><small class="mu pre">{{ c.detalhe }}</small></td>{% endfor %}
+<td>{% if l.certificado %}<span class="pill {{ 'r' if l.certificado.vencido else 'g' }}">até {{ l.certificado.validade }}</span>{% else %}<span class="pill n">Sem A1</span>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6">Nenhuma empresa cadastrada.</td></tr>{% endfor %}</table></div>{% endblock %}

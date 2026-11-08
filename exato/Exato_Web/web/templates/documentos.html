@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block titulo %}Documentos — Exato{% endblock %}
+{% block corpo %}<h1>Documentos fiscais</h1><p class="sub">Os 300 mais recentes do filtro. O XML pode ser baixado a qualquer momento.</p>
+<form method="get" class="card"><div class="linha"><div><label>Empresa</label><select name="empresa"><option value="">Todas</option>{% for e in empresas %}<option value="{{ e.cnpj }}" {{ 'selected' if f.empresa==e.cnpj }}>{{ e.nome }}</option>{% endfor %}</select></div>
+<div><label>Tipo</label><select name="tipo"><option value="">Todos</option>{% for k,v in rotulos.items() %}<option value="{{ k }}" {{ 'selected' if f.tipo==k }}>{{ v }}</option>{% endfor %}</select></div>
+<div><label>Movimentação</label><select name="mov"><option value="">Todas</option><option {{ 'selected' if f.mov=='Entrada' }}>Entrada</option><option {{ 'selected' if f.mov=='Saída' }}>Saída</option></select></div>
+<div><label>Busca</label><input name="q" value="{{ f.q }}" placeholder="número, chave..."></div><button>Filtrar</button></div></form>
+<div class="card"><table><tr><th>Tipo</th><th>Nº</th><th>Empresa</th><th>Mov.</th><th>Data</th><th>Valor</th><th>Situação</th><th></th></tr>
+{% for d in docs %}<tr><td>{{ d.tipo }}</td><td>{{ d.numero }}</td><td>{{ d.empresa }}</td><td>{{ d.mov }}</td><td>{{ d.data }}</td><td>{{ d.valor }}</td><td><span class="pill {{ 'g' if d.situacao=='Autorizado' else 'r' if 'ancel' in d.situacao else 'n' }}">{{ d.situacao }}</span></td><td><a href="/documentos/{{ d.id }}/xml">XML</a></td></tr>
+{% else %}<tr><td colspan="8">Nenhum documento para este filtro.</td></tr>{% endfor %}</table></div>{% endblock %}
