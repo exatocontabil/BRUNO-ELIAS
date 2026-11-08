@@ -5,7 +5,7 @@ Fase 1: acesso, cofre e consulta. Fase 2: busca automática no servidor (NF-e, N
 
 ## O que já tem
 Login com verificação em duas etapas • cofre dos certificados A1 • empresas • situação da busca com busca automática (NF-e, NFC-e, CT-e, NFS-e, A1 próprio ou do escritório) •
-Auditoria (Excel do SAT, PDF do comparativo, buscar só os XML que faltam) • Repositório (XMLs em arquivos e ZIP por mês) • Relatórios em PDF • documentos e XML •
+Auditoria (Excel do SAT, PDF do comparativo, buscar só os XML que faltam) • Repositório (XMLs em arquivos e ZIP por mês) • Relatórios em PDF • Fechamento do mês (PDF + ZIPs de importação da Domínio) • Box-e (NFS-e por e-mail à Domínio, uma vez cada) • documentos e XML •
 importação dos dados do programa instalado (`python -m web.importar`). Instalação: `docs/INSTALACAO_WINDOWS.md`. Pacote: `python montar_web.py`.
 
 ## Como roda

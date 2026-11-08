@@ -443,6 +443,100 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
         log(u, 'RELATORIO_BAIXADO', jid)
         return FileResponse(str(p), media_type='application/pdf', filename=nome)
 
+    # ------------------------------------------------------------ fechamento do mês e ZIPs da Domínio
+    @app.get('/fechamento', response_class=HTMLResponse)
+    def fechamento_tela(request: Request, ok: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        return pagina(request, 'fechamento.html', {'linhas': motor.fechamento_linhas()[:400], 'fechando': bool(motor.estado_fech['fechando']), 'cfg': motor.fechamento_cfg(), 'ok': ok, 'tela': 'fechamento',
+                                                   'res': motor.estado_fech.get('resultado'), 'ultimo': motor.estado_fech.get('ultimo')}, user=u)
+
+    @app.post('/fechamento/agora')
+    def fechamento_agora(request: Request, csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if csrf_ok(request, csrf) and not motor.estado_fech['fechando']:
+            import threading; threading.Thread(target=motor.fechar_meses, kwargs={'manual': True}, daemon=True, name='fechamento').start(); log(u, 'FECHAMENTO_AGORA', '')
+        return RedirectResponse('/fechamento?ok=Fechando+os+meses+prontos...', status_code=303)
+
+    @app.post('/fechamento/auto')
+    def fechamento_auto(request: Request, ligar: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if csrf_ok(request, csrf): motor.fechamento_cfg()['ativo'] = (ligar == '1'); motor.salvar_cfg(); log(u, 'FECHAMENTO_AUTO', ligar)
+        return RedirectResponse('/fechamento', status_code=303)
+
+    @app.get('/fechamento/arquivo')
+    def fechamento_arquivo(request: Request, empresa: str = '', mes: str = '', nome: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        d = re.sub(r'\D', '', empresa)
+        if len(d) != 14 or not re.fullmatch(r'\d{4}-\d{2}', mes): return PlainTextResponse('Pedido inválido.', status_code=400)
+        marca = motor.fechamento_info(d, mes, core.db_get_company_name(d) or '')
+        permitidos = (set(marca.get('arquivos') or []) | {x for h in marca.get('historico') or [] for x in h.get('arquivos') or []}) if marca else set()          # inclui os arquivos das revisões anteriores
+        if not marca or nome not in permitidos or '/' in nome or '\\' in nome: return PlainTextResponse('Arquivo não encontrado.', status_code=404)          # só o que o fechamento gravou
+        p = motor.pasta_fechamento(d, mes, core.db_get_company_name(d) or '') / nome
+        if not p.exists(): return PlainTextResponse('Arquivo não encontrado.', status_code=404)
+        log(u, 'FECHAMENTO_BAIXADO', f'{d} {mes} {nome}'[:100])
+        return FileResponse(str(p), filename=nome, media_type='application/pdf' if nome.lower().endswith('.pdf') else 'application/zip')
+
+    # ------------------------------------------------------------ Box-e
+    boxe = nucleo.modulo('exato_boxe')
+
+    @app.get('/boxe', response_class=HTMLResponse)
+    def boxe_tela(request: Request, ok: str = '', erro: str = '', etapas: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        import json as _j
+        c = dict(motor.boxe_cfg()); c.pop('senha_protegida', None)
+        return pagina(request, 'boxe.html', {'c': c, 'tem_senha': bool(motor.boxe_cfg().get('senha_protegida')), 'pronto': motor.boxe_pronto(), 'res': boxe.resumo(str(core.DB_PATH)), 'ok': ok, 'erro': erro,
+                                             'etapas': _j.loads(etapas) if etapas else [], 'enviando': bool(motor.estado_boxe['enviando']), 'ultimo': motor.estado_boxe.get('resultado'), 'tela': 'boxe'}, user=u)
+
+    @app.post('/boxe/salvar')
+    def boxe_salvar(request: Request, destino: str = Form(''), servidor: str = Form(''), porta: str = Form('587'), seguranca_: str = Form('STARTTLS'), usuario_: str = Form(''), senha: str = Form(''),
+                    remetente: str = Form(''), tomadas: str = Form(''), antigas: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse(_msg('/boxe', 'erro', 'A página expirou.'), status_code=303)
+        aviso = boxe.conferir_servidor(servidor)
+        if aviso: return RedirectResponse(_msg('/boxe', 'erro', aviso), status_code=303)
+        try: pt = int(porta)
+        except ValueError: return RedirectResponse(_msg('/boxe', 'erro', 'A porta deve ser um número (por exemplo 587).'), status_code=303)
+        c = motor.boxe_cfg(); c.update({'destino': destino.strip() or boxe.DESTINO_PADRAO, 'servidor': servidor.strip(), 'porta': pt, 'seguranca': seguranca_ if seguranca_ in ('STARTTLS', 'SSL', 'NENHUMA') else 'STARTTLS',
+                                        'usuario': usuario_.strip(), 'remetente': remetente.strip(), 'tomadas': bool(tomadas)})
+        if senha: c['senha_protegida'] = cofre.proteger_texto(senha)          # a senha nunca é mostrada de novo
+        if not antigas and not c.get('desde'): c['desde'] = time.strftime('%Y-%m-%dT%H:%M:%S')          # só NFS-e novas desde agora (as antigas não são reenviadas)
+        if antigas: c['desde'] = ''
+        motor.salvar_cfg(); log(u, 'BOXE_CONFIGURADO', c['servidor'])
+        return RedirectResponse(_msg('/boxe', 'ok', 'Configuração guardada.'), status_code=303)
+
+    @app.post('/boxe/ativar')
+    def boxe_ativar(request: Request, ligar: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/boxe', status_code=303)
+        c = motor.boxe_cfg()
+        if ligar == '1' and not motor.boxe_pronto(): return RedirectResponse(_msg('/boxe', 'erro', 'Preencha o servidor, o usuário, a senha e o e-mail remetente antes de ligar.'), status_code=303)
+        c['ativo'] = (ligar == '1')
+        if c['ativo'] and not c.get('desde'): c['desde'] = time.strftime('%Y-%m-%dT%H:%M:%S')
+        motor.salvar_cfg(); log(u, 'BOXE_LIGADO' if c['ativo'] else 'BOXE_DESLIGADO', '')
+        return RedirectResponse(_msg('/boxe', 'ok', 'Box-e ligado: as NFS-e novas seguem sozinhas.' if c['ativo'] else 'Box-e desligado.'), status_code=303)
+
+    @app.post('/boxe/testar')
+    async def boxe_testar(request: Request, csrf: str = Form(''), enviar: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/boxe', status_code=303)
+        import json as _j
+        cfg_ = motor.boxe_cfg_envio()
+        if enviar:
+            try: await run_in_threadpool(boxe.enviar_teste, cfg_)
+            except Exception as e: return RedirectResponse(_msg('/boxe', 'erro', boxe.erro_amigavel(e)), status_code=303)
+            return RedirectResponse(_msg('/boxe', 'ok', 'E-mail de teste enviado para ' + str(cfg_.get('remetente')) + '.'), status_code=303)
+        etapas = await run_in_threadpool(boxe.testar_conexao, cfg_)
+        from urllib.parse import quote
+        return RedirectResponse('/boxe?etapas=' + quote(_j.dumps(etapas, ensure_ascii=False)), status_code=303)
+
     return app
 
 

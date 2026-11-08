@@ -7,6 +7,7 @@ Regras herdadas do programa: cada fluxo tem o seu ponto de continuação (NSU); 
 da SEFAZ não vale como "sem notas"; cobertura só é gravada se a busca terminou bem; o resultado de cada tipo é anotado com a causa explicada."""
 import os, re, sys, threading, time
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from . import config, nucleo
 from .cofre import CofreErro
@@ -29,6 +30,7 @@ class Motor:
         self.nfse_mod = nucleo.modulo('exato_nfse'); self.motivos = nucleo.modulo('exato_busca_motivos'); self.cobertura = nucleo.modulo('exato_cobertura'); self.proc = nucleo.modulo('exato_nfse_procuracao')
         self.nfse_transport = nfse_transport; self.homologacao = bool(homologacao)
         self.cfg = core.load_config(); self._cancelar = threading.Event(); self._trava = threading.Lock(); self._trava_repo = threading.Lock(); self.estado_repo = {'copiando': False, 'ultimo': None, 'resultado': None}
+        self._trava_fech = threading.Lock(); self.estado_fech = {'fechando': False, 'ultimo': None, 'resultado': None}; self._trava_boxe = threading.Lock(); self.estado_boxe = {'enviando': False, 'ultimo': None, 'resultado': None}; self.boxe_conectar = None
         self.estado = {'rodando': False, 'empresa': '', 'indice': 0, 'total': 0, 'inicio': None, 'ultimo': None, 'resumo': None}
         for cod, (t, e, a, g) in CAUSAS_WEB.items(): self.motivos.CAUSAS.setdefault(cod, (t, e, a, g))          # causas próprias do site (explicadas em linguagem simples)
 
@@ -264,8 +266,9 @@ class Motor:
             if not self.cancelado():
                 self.cfg['auto_round_last'] = datetime.now().isoformat(timespec='seconds'); self.salvar_cfg()
             if not self.cancelado():
-                try: self.copiar_repositorio()
-                except Exception: pass
+                for etapa in (self.copiar_repositorio, self.enviar_boxe, self.fechar_meses):          # depois da busca: copia os XMLs, manda as NFS-e ao Box-e e fecha os meses prontos
+                    try: etapa()
+                    except Exception: pass
             resumo['cancelada'] = self.cancelado(); self.estado.update(ultimo=datetime.now().isoformat(timespec='seconds'), resumo=resumo)
             return resumo
         finally:
@@ -288,6 +291,88 @@ class Motor:
             self.estado_repo.update(copiando=False); self._trava_repo.release()
 
     def cancelado_repo(self): return False
+
+    # ------------------------------------------------------------ Fechamento do mês (PDFs + ZIPs de importação da Domínio no Repositório)
+    def _nome_empresa(self, cnpj, nome_banco):
+        try: return self.core.db_company_verified_name(cnpj)
+        except Exception: return nome_banco, False
+
+    def _coberto(self, cnpj, mes):
+        """A busca já passou do fim do mês? (vale a cobertura mais recente entre NF-e, NFC-e e CT-e; sem informação, vale como sim)"""
+        try:
+            ano, m = int(mes[:4]), int(mes[5:]); fim = datetime(ano + (m == 12), m % 12 + 1, 1).date()
+            ate = nucleo.modulo('exato_situacao_busca').cobertura_empresa(str(self.core.DB_PATH), self.cfg, None, cnpj)
+            return True if ate is None else ate >= fim
+        except Exception: return True
+
+    def fechamento_cfg(self):
+        c = self.cfg.setdefault('fechamento', {}); c.setdefault('ativo', True); c.setdefault('dias', nucleo.modulo('exato_fechamento').DIAS_PADRAO); return c
+
+    def fechar_meses(self, manual=False):
+        """Fecha os meses prontos (encerrados, sem nota nova há alguns dias, tudo copiado, busca já passou do fim). `manual`: sem esperar os dias. Nunca sobrescreve."""
+        fech = nucleo.modulo('exato_fechamento'); cfgf = self.fechamento_cfg()
+        if not manual and not cfgf.get('ativo', True): return {'desligado': True}
+        if not self._trava_fech.acquire(blocking=False): return {'ja_fechando': True}
+        try:
+            self.estado_fech.update(fechando=True); estado = self.cfg.setdefault('fechamento_estado', {})
+            logo = self.core.LOGO_PATH if getattr(self.core, 'LOGO_PATH', None) and Path(self.core.LOGO_PATH).exists() else None
+            res = fech.fechar_pendentes(str(self.core.DB_PATH), str(config.ARQUIVOS), estado, dias=int(cfgf.get('dias') or fech.DIAS_PADRAO), forcar=manual, nome_empresa=self._nome_empresa, logo=logo,
+                                        cancelar=(lambda: False) if manual else self.cancelado, limite=None if manual else fech.LIMITE_RODADA, coberto=self._coberto)
+            if len(estado) > 6000:
+                for k in list(estado)[:len(estado) - 6000]: estado.pop(k, None)
+            self.salvar_cfg(); res['empresas'] = sorted(res.get('empresas') or []); self.estado_fech.update(ultimo=datetime.now().isoformat(timespec='seconds'), resultado={k: v for k, v in res.items() if k != 'feitos_lista'}); return res
+        except Exception:
+            try: self.core.log_exception('Web: fechamento do mês', sys.exc_info())
+            except Exception: pass
+            return {'erros': ['erro']}
+        finally:
+            self.estado_fech.update(fechando=False); self._trava_fech.release()
+
+    def pasta_fechamento(self, cnpj, mes, nome=''):
+        repo = nucleo.modulo('exato_repositorio'); fech = nucleo.modulo('exato_fechamento'); pasta_repo = repo._pasta_repo(str(config.ARQUIVOS))
+        return Path(fech._pasta_fechamento(pasta_repo, repo._Empresas(pasta_repo, self._nome_empresa).pasta(_d(cnpj), nome), mes))
+
+    def fechamento_info(self, cnpj, mes, nome=''):
+        """Marca do fechamento (dict: arquivos, revisao, fechado_em...) ou None."""
+        try: return nucleo.modulo('exato_fechamento').ler_marca(str(self.pasta_fechamento(cnpj, mes, nome)))
+        except Exception: return None
+
+    def fechamento_linhas(self):
+        fech = nucleo.modulo('exato_fechamento'); dias = int(self.fechamento_cfg().get('dias') or fech.DIAS_PADRAO); saida = []
+        for m in fech.meses(str(self.core.DB_PATH)):
+            motivo = fech.motivo(m, dias, coberto=self._coberto); marca = self.fechamento_info(m['cnpj'], m['mes'], m.get('nome') or '')
+            fechado = bool(marca) and marca.get('assinatura') == m['assinatura']
+            saida.append({'cnpj': m['cnpj'], 'nome': m.get('nome') or m['cnpj'], 'mes': m['mes'], 'notas': m['notas'], 'motivo': '' if fechado else motivo, 'fechado': bool(marca), 'em_dia': fechado,
+                          'revisao': int((marca or {}).get('revisao') or 0), 'arquivos': list((marca or {}).get('arquivos') or [])})
+        return sorted(saida, key=lambda x: (x['mes'], x['nome']), reverse=True)
+
+    # ------------------------------------------------------------ Box-e (NFS-e por e-mail para a Domínio)
+    def boxe_cfg(self):
+        boxe = nucleo.modulo('exato_boxe'); c = self.cfg.setdefault('boxe', {})
+        for k, v in (('ativo', False), ('destino', boxe.DESTINO_PADRAO), ('servidor', ''), ('porta', 587), ('seguranca', 'STARTTLS'), ('usuario', ''), ('senha_protegida', ''), ('remetente', ''), ('tomadas', False), ('desde', '')): c.setdefault(k, v)
+        return c
+
+    def boxe_cfg_envio(self):
+        c = dict(self.boxe_cfg()); c['senha'] = self.cofre.abrir_texto(c.get('senha_protegida') or '') if c.get('senha_protegida') else ''; return c
+
+    def boxe_pronto(self): return nucleo.modulo('exato_boxe').configurado(self.boxe_cfg_envio())
+
+    def enviar_boxe(self):
+        """Envia por e-mail ao Box-e as NFS-e novas, uma única vez cada (marca no Repositório). Só se o Box-e estiver ligado e configurado."""
+        boxe = nucleo.modulo('exato_boxe'); c = self.boxe_cfg()
+        if not c.get('ativo') or not self.boxe_pronto(): return {'ok': True, 'motivo': 'desligado'}
+        if not self._trava_boxe.acquire(blocking=False): return {'ok': True, 'motivo': 'ja_enviando'}
+        try:
+            self.estado_boxe.update(enviando=True)
+            r = boxe.enviar_pendentes(str(self.core.DB_PATH), self.boxe_cfg_envio(), str(config.ARQUIVOS), cancelar=self.cancelado, computador='site', incluir_tomadas=bool(c.get('tomadas')),
+                                      conectar=self.boxe_conectar, desde=str(c.get('desde') or ''))
+            self.estado_boxe.update(ultimo=datetime.now().isoformat(timespec='seconds'), resultado=r); return r
+        except Exception:
+            try: self.core.log_exception('Web: Box-e', sys.exc_info())
+            except Exception: pass
+            return {'ok': False, 'motivo': 'falha'}
+        finally:
+            self.estado_boxe.update(enviando=False); self._trava_boxe.release()
 
     # ------------------------------------------------------------ Auditoria: busca só do que falta (espelha _audit_buscar_faltantes, V185)
     def buscar_faltantes(self, cnpj, lista, thumb):

@@ -137,7 +137,7 @@ class ImportadorFalso:
 class Cofre:
     def __init__(self, pasta, chave=None, importador=None):
         self.pasta = Path(pasta); self.pasta.mkdir(parents=True, exist_ok=True)
-        self._aes = AESGCM(chave or carregar_chave_mestra(self.pasta))
+        chave = chave or carregar_chave_mestra(self.pasta); self._aes = AESGCM(chave); self._aes_txt = AESGCM(hashlib.sha256(chave + b'texto').digest())
         self.importador = importador or (ImportadorWindows() if sys.platform == 'win32' else ImportadorFalso())
         self._trava = threading.Lock(); self._em_uso = {}
 
@@ -155,6 +155,14 @@ class Cofre:
         except Exception: pass
         self._arq(cid, 'json').write_text(json.dumps(info, ensure_ascii=False, indent=1), encoding='utf-8')
         return info
+
+    def proteger_texto(self, texto):
+        """Criptografa um texto curto (ex.: a senha do e-mail do Box-e) para guardar na configuração. Devolve texto seguro para gravar."""
+        n = os.urandom(12); return base64.b64encode(n + self._aes_txt.encrypt(n, str(texto).encode('utf-8'), b'texto')).decode('ascii')
+
+    def abrir_texto(self, protegido):
+        try: b = base64.b64decode(protegido); return self._aes_txt.decrypt(b[:12], b[12:], b'texto').decode('utf-8')
+        except Exception: return ''
 
     def info(self, chave):
         try: return json.loads(self._arq(chave, 'json').read_text(encoding='utf-8'))

@@ -311,3 +311,8 @@ Plano V170: (a) dois estados separados: `selected` (Buscar XML) e `nfse_selected
 - Relatórios em PDF (documentos por tipo/movimentação) em segundo plano.
 - Pacote do servidor (`montar_web.py`) e guia `docs/INSTALACAO_WINDOWS.md` (Python, conta própria, HTTPS com Caddy, firewall, cópia diária).
 - Falta: fechamento do mês, Box-e/ZIP da Domínio, resumo diário por e-mail, manifestação do destinatário, relatório de NFS-e, auditoria/relatório de NFS-e; teste no servidor Windows real (ImportadorWindows, HTTPS).
+
+## 08/11 — Exato Web: Box-e e ZIP da Domínio (fechamento do mês) feitos
+- Fechamento do mês no site: ao fim de cada rodada fecha os meses prontos (encerrados, sem nota nova há N dias, tudo copiado, busca já passou do fim): PDF do mês (+ NFS-e) e ZIPs de importação da Domínio (um por tipo e movimentação, com eventos), em `<arquivos>\Repositório\<Empresa - CNPJ>\<Ano>\<Mês>\Fechamento`; nunca sobrescreve (revisão com data); tela Fechamento com "Fechar agora", ligar/desligar e download dos arquivos (inclui revisões antigas; só nomes que o fechamento gravou).
+- Box-e no site: NFS-e prestadas (e tomadas, se marcado) por e-mail, uma vez cada (marca no Repositório), só as novas desde a ativação (ou histórico, se pedido); senha do e-mail criptografada no cofre e nunca mostrada; testar conexão por etapas sem enviar; e-mail de teste; falha volta para a fila. Ordem na rodada: copia XMLs -> Box-e -> fecha meses.
+- Falta: resumo diário por e-mail, manifestação do destinatário, relatório/auditoria de NFS-e, teste no servidor Windows real (ImportadorWindows, HTTPS, e-mail real do Box-e).
