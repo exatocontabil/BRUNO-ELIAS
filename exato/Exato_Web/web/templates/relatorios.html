@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block titulo %}Relatórios — Exato{% endblock %}
+{% block corpo %}<h1>Relatórios em PDF</h1><p class="sub">Relatório dos documentos fiscais: uma seção por tipo e movimentação, autorizadas e canceladas em linhas separadas, faturamento e despesa sem misturar entrada com saída.</p>
+{% if erro %}<div class="aviso erro">{{ erro }}</div>{% endif %}
+<form method="post" action="/relatorios" class="card"><h2>Novo relatório</h2><input type="hidden" name="csrf" value="{{ csrf }}"><div class="linha">
+<div><label>Empresa</label><select name="empresa"><option value="">Todas</option>{% for e in empresas %}<option value="{{ e.cnpj }}">{{ e.nome }}</option>{% endfor %}</select></div>
+<div><label>Tipo</label><select name="tipo"><option value="">Todos</option>{% for k,v in rotulos.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></div>
+<div><label>Movimentação</label><select name="mov"><option value="">As duas</option><option>Entrada</option><option>Saída</option></select></div>
+<div><label>De</label><input type="date" name="de"></div><div><label>Até</label><input type="date" name="ate"></div><button>Gerar PDF</button></div></form>
+<div class="card"><h2>Relatórios pedidos</h2><table><tr><th>Quando</th><th>Empresa</th><th>Período</th><th>Situação</th><th></th></tr>
+{% for j in jobs %}<tr><td>{{ j.inicio.replace('T',' ') }}<br><small class="mu">{{ j.por }}</small></td><td>{{ j.empresa or ('Empresa filtrada' if j.filtros.empresa else 'Todas') }}</td><td>{{ j.periodo or '—' }}</td>
+<td>{% if j.estado=='pronto' %}<span class="pill g">Pronto • {{ j.total }} doc(s)</span>{% elif j.estado=='erro' %}<span class="pill r">{{ j.erro }}</span>{% else %}<span class="pill b">Gerando...</span>{% endif %}</td>
+<td>{% if j.estado=='pronto' %}<a href="/relatorios/{{ j.id }}/pdf">Baixar PDF</a>{% endif %}</td></tr>{% else %}<tr><td colspan="5">Nenhum relatório pedido ainda.</td></tr>{% endfor %}</table>
+{% if jobs and jobs[0].estado=='gerando' %}<small class="mu">Gerando... esta página se atualiza sozinha.</small><script src="/static/recarregar.js"></script>{% endif %}</div>{% endblock %}

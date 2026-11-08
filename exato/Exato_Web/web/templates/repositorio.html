@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block titulo %}Repositório — Exato{% endblock %}
+{% block corpo %}<h1>Repositório de XML</h1><p class="sub">Todos os XMLs guardados também em arquivos, organizados por empresa, ano, mês e tipo. Nunca são apagados nem sobrescritos.</p>
+{% if ok %}<div class="aviso ok">{{ ok }}</div>{% endif %}
+<div class="kpis"><div class="kpi"><b>{{ res.copiados }}</b><span>XMLs na pasta de arquivos</span></div><div class="kpi"><b>{{ res.fila }}</b><span>Ainda faltam copiar</span></div><div class="kpi"><b>{{ res.erros }}</b><span>Com erro</span></div><div class="kpi"><b>{{ res.total }}</b><span>Documentos no banco</span></div></div>
+<div class="card"><div class="linha"><form method="post" action="/repositorio/copiar"><input type="hidden" name="csrf" value="{{ csrf }}"><button {{ 'disabled' if copiando }}>{{ 'Copiando...' if copiando else 'Copiar agora' }}</button></form>
+<small class="mu">Pasta no servidor: <b>{{ pasta }}</b>{% if res.ultima_copia %} • última cópia {{ res.ultima_copia.replace('T',' ') }}{% endif %}</small></div>
+{% for texto, n in res.motivos %}<div class="aviso erro" style="margin-top:10px">{{ n }} documento(s): {{ texto }}</div>{% endfor %}</div>
+<div class="card"><h2>Por empresa e mês</h2><table><tr><th>Empresa</th><th>Mês</th><th>Documentos</th><th>Copiados</th><th>Baixar</th></tr>
+{% for l in linhas %}<tr><td>{{ l.nome }}<br><small class="mu">{{ l.cnpj_fmt }}</small></td><td>{{ l.mes }}</td><td>{{ l.docs }}</td><td><span class="pill {{ 'g' if l.copiados==l.docs else 'a' }}">{{ l.copiados }}</span></td>
+<td>{% if l.zip %}<a href="/repositorio/zip?empresa={{ l.cnpj }}&mes={{ l.mes }}">ZIP do mês</a>{% endif %}</td></tr>{% else %}<tr><td colspan="5">Nenhum documento ainda.</td></tr>{% endfor %}</table></div>{% endblock %}

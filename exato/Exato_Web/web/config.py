@@ -3,6 +3,7 @@
 EXATO_WEB_DADOS      pasta dos dados do site (banco, usuários, cofre dos certificados, registros). Padrão: <usuário>/ExatoWebDados
 EXATO_WEB_HTTPS      "1" (padrão em produção) = cookies só por HTTPS; "0" só para teste no próprio servidor
 EXATO_WEB_EXIGIR_2FA "1" (padrão) = todo usuário precisa do código do aplicativo autenticador para entrar
+EXATO_WEB_ARQUIVOS  pasta onde ficam os XMLs em arquivos organizados (Repositório). Padrão: <dados>/Arquivos. Pode ser outro disco.
 EXATO_CORE_DIR       pasta com os módulos do Exato (padrão: a pasta `nucleo` do pacote; no desenvolvimento, a versão mais nova do programa)
 """
 import os, re, secrets, sys
@@ -14,6 +15,9 @@ DADOS.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault('EXATO_DATA_DIR', str(DADOS / 'nucleo'))          # o código do Exato guarda o banco aqui (antes de importá-lo)
 HTTPS = os.environ.get('EXATO_WEB_HTTPS', '1') != '0'
 EXIGIR_2FA = os.environ.get('EXATO_WEB_EXIGIR_2FA', '1') != '0'
+ARQUIVOS = Path(os.environ.get('EXATO_WEB_ARQUIVOS') or (DADOS / 'Arquivos'))
+try: ARQUIVOS.mkdir(parents=True, exist_ok=True)          # a pasta dos XMLs precisa existir para o Repositório considerá-la acessível
+except Exception: pass
 SESSAO_HORAS = 10
 TENTATIVAS_LOGIN = 5
 BLOQUEIO_MINUTOS = 15

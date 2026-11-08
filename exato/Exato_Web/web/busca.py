@@ -8,7 +8,7 @@ da SEFAZ não vale como "sem notas"; cobertura só é gravada se a busca termino
 import os, re, sys, threading, time
 from datetime import datetime, timedelta
 
-from . import nucleo
+from . import config, nucleo
 from .cofre import CofreErro
 
 FAMILIAS_XML = ('nfe', 'nfce', 'cte')
@@ -28,7 +28,7 @@ class Motor:
         self.core, self.cofre = core, cofre
         self.nfse_mod = nucleo.modulo('exato_nfse'); self.motivos = nucleo.modulo('exato_busca_motivos'); self.cobertura = nucleo.modulo('exato_cobertura'); self.proc = nucleo.modulo('exato_nfse_procuracao')
         self.nfse_transport = nfse_transport; self.homologacao = bool(homologacao)
-        self.cfg = core.load_config(); self._cancelar = threading.Event(); self._trava = threading.Lock()
+        self.cfg = core.load_config(); self._cancelar = threading.Event(); self._trava = threading.Lock(); self._trava_repo = threading.Lock(); self.estado_repo = {'copiando': False, 'ultimo': None, 'resultado': None}
         self.estado = {'rodando': False, 'empresa': '', 'indice': 0, 'total': 0, 'inicio': None, 'ultimo': None, 'resumo': None}
         for cod, (t, e, a, g) in CAUSAS_WEB.items(): self.motivos.CAUSAS.setdefault(cod, (t, e, a, g))          # causas próprias do site (explicadas em linguagem simples)
 
@@ -263,10 +263,31 @@ class Motor:
                     self.ocorrencia(cnpj, FAMILIAS_XML, 'erro_desconhecido', 'erro inesperado'); resumo['xml_obs'] += 1
             if not self.cancelado():
                 self.cfg['auto_round_last'] = datetime.now().isoformat(timespec='seconds'); self.salvar_cfg()
+            if not self.cancelado():
+                try: self.copiar_repositorio()
+                except Exception: pass
             resumo['cancelada'] = self.cancelado(); self.estado.update(ultimo=datetime.now().isoformat(timespec='seconds'), resumo=resumo)
             return resumo
         finally:
             self.estado.update(rodando=False, empresa=''); self._trava.release()
+
+    # ------------------------------------------------------------ Repositório (XMLs em arquivos organizados, guardados para sempre)
+    def copiar_repositorio(self, ignorar_pausa=False):
+        """Copia para a pasta de arquivos os XMLs que ainda não estão lá (Empresa - CNPJ / Ano / Mês / Tipo). Nunca sobrescreve e nunca apaga."""
+        repo = nucleo.modulo('exato_repositorio')
+        if not self._trava_repo.acquire(blocking=False): return {'ja_copiando': True}
+        try:
+            self.estado_repo.update(copiando=True)
+            r = repo.copiar_pendentes(str(self.core.DB_PATH), str(config.ARQUIVOS), cancelar=self.cancelado_repo, ignorar_pausa=ignorar_pausa)
+            self.estado_repo.update(ultimo=datetime.now().isoformat(timespec='seconds'), resultado=r); return r
+        except Exception:
+            try: self.core.log_exception('Web: cópia para o Repositório', sys.exc_info())
+            except Exception: pass
+            return {'ok': False, 'motivo': 'falha'}
+        finally:
+            self.estado_repo.update(copiando=False); self._trava_repo.release()
+
+    def cancelado_repo(self): return False
 
     # ------------------------------------------------------------ Auditoria: busca só do que falta (espelha _audit_buscar_faltantes, V185)
     def buscar_faltantes(self, cnpj, lista, thumb):

@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, config, nucleo, seguranca
+from . import auditoria as aud, config, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -368,6 +368,80 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
             motor._cancelar.clear(); log(u, 'AUDITORIA_BUSCAR_FALTANTES', aid)
             import threading; threading.Thread(target=_tarefa_faltantes, args=(aid, u.get('email', '')), daemon=True, name='auditoria-busca').start()
         return RedirectResponse('/auditoria/' + aid, status_code=303)
+
+    # ------------------------------------------------------------ repositório (XMLs em arquivos) e download em ZIP
+    repo = nucleo.modulo('exato_repositorio')
+
+    @app.get('/repositorio', response_class=HTMLResponse)
+    def repositorio_tela(request: Request, ok: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        db = str(core.DB_PATH); res = repo.resumo(db); linhas = []
+        for cnpj, nome, mes, docs, copiados in repo.por_empresa_mes(db)[:300]:
+            linhas.append({'cnpj': cnpj, 'cnpj_fmt': core._format_cnpj(cnpj), 'nome': nome or cnpj, 'mes': mes, 'docs': docs, 'copiados': copiados, 'zip': bool(re.fullmatch(r'\d{4}-\d{2}', mes))})
+        return pagina(request, 'repositorio.html', {'res': res, 'linhas': linhas, 'pasta': str(config.ARQUIVOS), 'copiando': bool(motor.estado_repo['copiando']), 'ultimo': motor.estado_repo.get('ultimo'), 'ok': ok, 'tela': 'repositorio'}, user=u)
+
+    @app.post('/repositorio/copiar')
+    def repositorio_copiar(request: Request, csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if csrf_ok(request, csrf) and not motor.estado_repo['copiando']:
+            import threading; threading.Thread(target=motor.copiar_repositorio, kwargs={'ignorar_pausa': True}, daemon=True, name='repositorio').start(); log(u, 'REPOSITORIO_COPIAR', '')
+        return RedirectResponse('/repositorio?ok=Copiando+os+XMLs+para+a+pasta+de+arquivos...', status_code=303)
+
+    @app.get('/repositorio/zip')
+    def repositorio_zip(request: Request, empresa: str = '', mes: str = '', tipo: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        d = re.sub(r'\D', '', empresa)
+        if len(d) != 14 or not re.fullmatch(r'\d{4}-\d{2}', mes) or (tipo and tipo not in ROTULOS_TIPO): return PlainTextResponse('Pedido inválido.', status_code=400)
+        import tempfile, zipfile
+        from starlette.background import BackgroundTask
+        tmp = tempfile.NamedTemporaryFile(prefix='exato_zip_', suffix='.zip', dir=str(config.DADOS), delete=False); tmp.close()
+        con = sqlite3.connect(str(core.DB_PATH), timeout=30); n = 0
+        try:
+            sql = ("SELECT family, direction, number, access_key, status, xml, doc_id FROM documents WHERE cnpj=? AND substr(COALESCE(NULLIF(issued_at,''),first_seen_at),1,7)=?" + (' AND family=?' if tipo else ''))
+            with zipfile.ZipFile(tmp.name, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+                for fam, direc, num, chave, status, xml, doc_id in con.execute(sql, (d, mes) + ((tipo,) if tipo else ())):
+                    if not xml: continue
+                    pasta = 'Eventos' if status == 'Evento' else f"{ROTULOS_TIPO.get(str(fam).lower(), fam)}/{'Entrada' if str(direc).lower().startswith('e') else 'Saida'}"
+                    nome = re.sub(r'[^0-9A-Za-z_.-]', '_', f'{num or "s-n"}_{chave or doc_id}')[:90] + '.xml'
+                    z.writestr(f'{pasta}/{nome}', bytes(xml)); n += 1
+        finally:
+            con.close()
+        if not n:
+            Path(tmp.name).unlink(missing_ok=True); return PlainTextResponse('Nenhum XML neste mês.', status_code=404)
+        log(u, 'ZIP_BAIXADO', f'{d} {mes} {n}')
+        return FileResponse(tmp.name, media_type='application/zip', filename=f'XML_{d}_{mes}.zip', background=BackgroundTask(lambda: Path(tmp.name).unlink(missing_ok=True)))
+
+    # ------------------------------------------------------------ relatórios em PDF
+    @app.get('/relatorios', response_class=HTMLResponse)
+    def relatorios_tela(request: Request, erro: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        return pagina(request, 'relatorios.html', {'empresas': empresas_lista(), 'jobs': rel.recentes(30), 'erro': erro, 'tela': 'relatorios'}, user=u)
+
+    @app.post('/relatorios')
+    def relatorios_pedir(request: Request, empresa: str = Form(''), tipo: str = Form(''), mov: str = Form(''), de: str = Form(''), ate: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/relatorios', status_code=303)
+        try: j = rel.pedir(empresa, tipo, mov, de, ate, u.get('email', ''))
+        except rel.RelatorioErro as e:
+            from urllib.parse import quote
+            return RedirectResponse('/relatorios?erro=' + quote(str(e)), status_code=303)
+        log(u, 'RELATORIO_PEDIDO', j['id'])
+        return RedirectResponse('/relatorios', status_code=303)
+
+    @app.get('/relatorios/{jid}/pdf')
+    def relatorio_pdf(request: Request, jid: str):
+        u, r = exigir(request)
+        if r: return r
+        p = rel.caminho_pdf(jid)
+        if not p: return PlainTextResponse('Relatório não encontrado ou ainda sendo gerado.', status_code=404)
+        j = rel.ler(jid); nome = re.sub(r'[^0-9A-Za-z_-]', '_', f"Relatorio_{j.get('empresa') or 'documentos'}_{j.get('periodo','')}")[:80] + '.pdf'
+        log(u, 'RELATORIO_BAIXADO', jid)
+        return FileResponse(str(p), media_type='application/pdf', filename=nome)
 
     return app
 

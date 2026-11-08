@@ -303,3 +303,11 @@ Plano V170: (a) dois estados separados: `selected` (Buscar XML) e `nfse_selected
 - Servidor confirmado Windows; usuário fora do escritório: tudo feito e testado aqui com simulação, sem depender do escritório.
 - Feito: `web/busca.py` (espelha `_run_sync_all`/`_finish_sync_all`/`_nfse_run_all` do V190: NF-e/NFC-e/CT-e e NFS-e, A1 próprio ou do escritório = procuração, pontos de continuação, espera da SEFAZ, causas explicadas, cobertura só se terminou bem), `web/agendador.py` (rodada a cada 4 h, sob pedido, por empresa, cancelar, uma por vez), telas (Buscar o que falta / todas / cancelar / ligar-desligar automática, andamento ao vivo), sessões revogáveis no servidor. Testes: exato/Exato_Web/testes/test_web_f1.py e test_web_f2.py.
 - Falta (fase 3): Auditoria, relatórios em PDF, fechamento do mês, Box-e/ZIP Domínio, Repositório em arquivos no servidor, importar os dados do programa instalado, manifestação do destinatário (como o SIEG). Testes no servidor real: ImportadorWindows, HTTPS, firewall.
+
+## 08/11 — Exato Web fase 3 (parte 1) feita
+- Importação dos dados do programa instalado (`python -m web.importar`, pasta Dados ou backup .zip; nada duplica, ponto de busca nunca volta, banco de origem só lido).
+- Auditoria no site: Excel do SAT -> conferência -> PDF do comparativo (o que o fiscal anexa na Acessórias) -> histórico; "Buscar só os XML que faltam" (faixa de NSU, sem mexer no ponto da busca normal) e refaz a auditoria sozinho.
+- Repositório: XMLs em arquivos (Empresa - CNPJ/Ano/Mês/Tipo, nunca sobrescreve), cópia ao fim de cada rodada, tela e ZIP por mês.
+- Relatórios em PDF (documentos por tipo/movimentação) em segundo plano.
+- Pacote do servidor (`montar_web.py`) e guia `docs/INSTALACAO_WINDOWS.md` (Python, conta própria, HTTPS com Caddy, firewall, cópia diária).
+- Falta: fechamento do mês, Box-e/ZIP da Domínio, resumo diário por e-mail, manifestação do destinatário, relatório de NFS-e, auditoria/relatório de NFS-e; teste no servidor Windows real (ImportadorWindows, HTTPS).
