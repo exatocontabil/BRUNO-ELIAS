@@ -490,7 +490,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
         import json as _j
         c = dict(motor.boxe_cfg()); c.pop('senha_protegida', None)
         return pagina(request, 'boxe.html', {'c': c, 'tem_senha': bool(motor.boxe_cfg().get('senha_protegida')), 'pronto': motor.boxe_pronto(), 'res': boxe.resumo(str(core.DB_PATH)), 'ok': ok, 'erro': erro,
-                                             'etapas': _j.loads(etapas) if etapas else [], 'enviando': bool(motor.estado_boxe['enviando']), 'ultimo': motor.estado_boxe.get('resultado'), 'tela': 'boxe'}, user=u)
+                                             'resumo': motor.resumo_cfg(), 'etapas': _j.loads(etapas) if etapas else [], 'enviando': bool(motor.estado_boxe['enviando']), 'ultimo': motor.estado_boxe.get('resultado'), 'tela': 'boxe'}, user=u)
 
     @app.post('/boxe/salvar')
     def boxe_salvar(request: Request, destino: str = Form(''), servidor: str = Form(''), porta: str = Form('587'), seguranca_: str = Form('STARTTLS'), usuario_: str = Form(''), senha: str = Form(''),
@@ -536,6 +536,34 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
         etapas = await run_in_threadpool(boxe.testar_conexao, cfg_)
         from urllib.parse import quote
         return RedirectResponse('/boxe?etapas=' + quote(_j.dumps(etapas, ensure_ascii=False)), status_code=303)
+
+    # ------------------------------------------------------------ resumo diário
+    @app.get('/resumo/previa', response_class=HTMLResponse)
+    def resumo_previa(request: Request):
+        u, r = exigir(request)
+        if r: return r
+        return pagina(request, 'resumo_previa.html', {'r': motor.resumo_montar(), 'tela': 'boxe'}, user=u)
+
+    @app.post('/resumo/salvar')
+    def resumo_salvar(request: Request, destino: str = Form(''), ligar: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse(_msg('/boxe', 'erro', 'A página expirou.'), status_code=303)
+        d = destino.strip()
+        if ligar and not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+', d): return RedirectResponse(_msg('/boxe', 'erro', 'Informe o e-mail que vai receber o resumo.'), status_code=303)
+        c = motor.resumo_cfg(); c['destino'] = d; c['ativo'] = bool(ligar); motor.salvar_cfg(); log(u, 'RESUMO_DIARIO', 'ligado' if ligar else 'desligado')
+        aviso = '' if motor.boxe_pronto() or not ligar else ' Atenção: falta configurar o e-mail de envio abaixo; o resumo só sai depois disso.'
+        return RedirectResponse(_msg('/boxe', 'ok', ('Resumo diário ligado.' if ligar else 'Resumo diário desligado.') + aviso), status_code=303)
+
+    @app.post('/resumo/enviar')
+    async def resumo_enviar(request: Request, csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/boxe', status_code=303)
+        res = await run_in_threadpool(motor.enviar_resumo, True)
+        if res['enviado']: return RedirectResponse(_msg('/boxe', 'ok', 'Resumo enviado para ' + str(motor.resumo_cfg().get('destino')) + '.'), status_code=303)
+        msg = {'sem_destino': 'Informe o e-mail que vai receber o resumo e clique em Guardar.', 'sem_email': 'Configure primeiro o e-mail de envio (servidor, usuário e senha).'}.get(res['motivo'], res.get('erro') or 'Não consegui enviar agora.')
+        return RedirectResponse(_msg('/boxe', 'erro', msg), status_code=303)
 
     return app
 

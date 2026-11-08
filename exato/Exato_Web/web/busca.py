@@ -30,7 +30,7 @@ class Motor:
         self.nfse_mod = nucleo.modulo('exato_nfse'); self.motivos = nucleo.modulo('exato_busca_motivos'); self.cobertura = nucleo.modulo('exato_cobertura'); self.proc = nucleo.modulo('exato_nfse_procuracao')
         self.nfse_transport = nfse_transport; self.homologacao = bool(homologacao)
         self.cfg = core.load_config(); self._cancelar = threading.Event(); self._trava = threading.Lock(); self._trava_repo = threading.Lock(); self.estado_repo = {'copiando': False, 'ultimo': None, 'resultado': None}
-        self._trava_fech = threading.Lock(); self.estado_fech = {'fechando': False, 'ultimo': None, 'resultado': None}; self._trava_boxe = threading.Lock(); self.estado_boxe = {'enviando': False, 'ultimo': None, 'resultado': None}; self.boxe_conectar = None
+        self._trava_fech = threading.Lock(); self.estado_fech = {'fechando': False, 'ultimo': None, 'resultado': None}; self._trava_boxe = threading.Lock(); self._trava_resumo = threading.Lock(); self.estado_boxe = {'enviando': False, 'ultimo': None, 'resultado': None}; self.boxe_conectar = None
         self.estado = {'rodando': False, 'empresa': '', 'indice': 0, 'total': 0, 'inicio': None, 'ultimo': None, 'resumo': None}
         for cod, (t, e, a, g) in CAUSAS_WEB.items(): self.motivos.CAUSAS.setdefault(cod, (t, e, a, g))          # causas próprias do site (explicadas em linguagem simples)
 
@@ -373,6 +373,33 @@ class Motor:
             return {'ok': False, 'motivo': 'falha'}
         finally:
             self.estado_boxe.update(enviando=False); self._trava_boxe.release()
+
+    # ------------------------------------------------------------ Resumo diário por e-mail (usa o e-mail do Box-e)
+    def resumo_cfg(self):
+        c = self.cfg.setdefault('resumo_diario', {})
+        for k, v in (('ativo', False), ('destino', ''), ('ultimo', '')): c.setdefault(k, v)
+        return c
+
+    def resumo_montar(self, hoje=None):
+        return nucleo.modulo('exato_resumo_diario').montar(str(self.core.DB_PATH), self.cfg, None, hoje=hoje, canceladas_sem_evento=lambda c: len(self.core.db_canceladas_sem_evento(c, '')), acessos=dict(self.cfg.get('nfse_acesso') or {}))
+
+    def enviar_resumo(self, forcar=False, agora=None):
+        """Uma vez por dia, depois das 7h, manda o resumo por e-mail. `forcar`: manda agora (teste), sem marcar o dia. Devolve {'enviado','motivo'}."""
+        rd = nucleo.modulo('exato_resumo_diario'); c = self.resumo_cfg(); agora = agora or datetime.now()
+        if not forcar and (not rd.deve_enviar(c, agora) or self.estado['rodando']): return {'enviado': False, 'motivo': 'nao_e_hora'}
+        if not c.get('destino'): return {'enviado': False, 'motivo': 'sem_destino'}
+        if not self.boxe_pronto(): return {'enviado': False, 'motivo': 'sem_email'}
+        if not self._trava_resumo.acquire(blocking=False): return {'enviado': False, 'motivo': 'enviando'}
+        try:
+            rd.enviar(self.boxe_cfg_envio(), c['destino'], self.resumo_montar(agora.date()), conectar=self.boxe_conectar)
+            if not forcar: c['ultimo'] = agora.strftime('%Y-%m-%d'); self.salvar_cfg()
+            return {'enviado': True, 'motivo': ''}
+        except Exception as exc:
+            try: self.core.log_exception('Web: resumo diário', sys.exc_info())
+            except Exception: pass
+            return {'enviado': False, 'motivo': 'falha', 'erro': nucleo.modulo('exato_boxe').erro_amigavel(exc)}
+        finally:
+            self._trava_resumo.release()
 
     # ------------------------------------------------------------ Auditoria: busca só do que falta (espelha _audit_buscar_faltantes, V185)
     def buscar_faltantes(self, cnpj, lista, thumb):

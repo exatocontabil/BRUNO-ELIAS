@@ -1,0 +1,2 @@
+{% extends "base.html" %}{% block titulo %}Resumo diário — Exato{% endblock %}
+{% block corpo %}<h1>Resumo diário</h1><p class="sub">Assim o e-mail chega: {{ r.assunto }}</p><div class="card">{{ r.html|safe }}</div><a class="botao" href="/boxe">Voltar</a>{% endblock %}
