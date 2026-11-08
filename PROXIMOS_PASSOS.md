@@ -321,3 +321,6 @@ Plano V170: (a) dois estados separados: `selected` (Buscar XML) e `nfse_selected
 - Resumo diário por e-mail (um por dia, após 7h, usa o e-mail do Box-e) com tela, prévia e envio de teste.
 - Manifestação do destinatário (Ciência da Operação) com confirmação, histórico, automático por empresa (desligado) e chave de homologação. Só simulada: testar em homologação no servidor real e conferir a resposta do Ambiente Nacional.
 - Falta: relatório/auditoria de NFS-e no site; teste no servidor Windows real (importação do A1, HTTPS, firewall, e-mail, SEFAZ).
+
+## Exato Web: conferência e relatório de NFS-e feitos
+Tela NFS-e (conferência) + relatório mensal em PDF no site. Falta só o teste no servidor Windows real (A1, HTTPS, firewall, e-mail, SEFAZ/Emissor Nacional, manifestação em homologação).

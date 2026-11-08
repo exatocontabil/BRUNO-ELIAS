@@ -28,3 +28,6 @@
 
 ## Manifestação do destinatário (Ciência da Operação 210210)
 `web/manifestacao.py`: NF-e de entrada que chegaram só como resumo (resNFe) recebem a Ciência no Ambiente Nacional (evento assinado RSA-SHA1 com o A1 do cofre, enviado com o certificado no repositório do Windows). Só quando alguém pede (caixa "Confirmo") ou se a empresa foi ligada de propósito (automático, desligado por padrão); limite de 50 por clique; para após 3 recusas ou falha de rede; nunca reenvia o que já foi registrado; histórico em `web.db`. Há chave de homologação na tela. Testado só com o Ambiente Nacional simulado (assinatura conferida): testar primeiro em homologação no servidor. Confirmação/desconhecimento/não realizada continuam decisão do contador.
+
+## NFS-e no site
+`web/nfse_conferencia.py` + tela "NFS-e": por empresa e período mostra prestadas x tomadas (autorizadas e canceladas separadas), ISS retido, ISS devido a outro município, cancelada sem o XML do cancelamento e numeração de prestadas faltando; "Gerar relatório mensal em PDF" usa o mesmo `generate_monthly_report_pdf` do programa instalado (`relatorios.pedir_nfse`, em segundo plano). Só lê o banco; nunca cria nota nem evento.

@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import auditoria as aud, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -413,6 +413,26 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
             Path(tmp.name).unlink(missing_ok=True); return PlainTextResponse('Nenhum XML neste mês.', status_code=404)
         log(u, 'ZIP_BAIXADO', f'{d} {mes} {n}')
         return FileResponse(tmp.name, media_type='application/zip', filename=f'XML_{d}_{mes}.zip', background=BackgroundTask(lambda: Path(tmp.name).unlink(missing_ok=True)))
+
+    # ------------------------------------------------------------ conferência e relatório mensal de NFS-e
+    @app.get('/nfse', response_class=HTMLResponse)
+    async def nfse_tela(request: Request, empresa: str = '', de: str = '', ate: str = '', erro: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        d = re.sub(r'\D', '', empresa); conf = None
+        if len(d) == 14 and re.fullmatch(r'(\d{4}-\d{2}-\d{2})?', de) and re.fullmatch(r'(\d{4}-\d{2}-\d{2})?', ate):
+            conf = await run_in_threadpool(nfc.conferir, d, de, ate)
+        return pagina(request, 'nfse.html', {'empresas': empresas_lista(), 'sel': d, 'de': de, 'ate': ate, 'c': conf, 'erro': erro, 'tela': 'nfse'}, user=u)
+
+    @app.post('/nfse/relatorio')
+    def nfse_relatorio(request: Request, empresa: str = Form(''), de: str = Form(''), ate: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/nfse', status_code=303)
+        try: j = rel.pedir_nfse(empresa, de, ate, u.get('email', ''))
+        except rel.RelatorioErro as e: return RedirectResponse(_msg('/nfse', 'erro', str(e)), status_code=303)
+        log(u, 'RELATORIO_NFSE_PEDIDO', j['id'])
+        return RedirectResponse('/relatorios', status_code=303)
 
     # ------------------------------------------------------------ relatórios em PDF
     @app.get('/relatorios', response_class=HTMLResponse)

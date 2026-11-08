@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block titulo %}NFS-e — Exato{% endblock %}
+{% block corpo %}<h1>Conferência e relatório de NFS-e</h1><p class="sub">Veja o que existe de NFS-e da empresa (prestadas e tomadas, autorizadas e canceladas separadas), o que merece conferência e gere o relatório mensal em PDF.</p>
+{% if erro %}<div class="aviso erro">{{ erro }}</div>{% endif %}
+<form method="get" action="/nfse" class="card"><div class="linha"><div><label>Empresa</label><select name="empresa" required><option value="">Escolha</option>{% for e in empresas %}<option value="{{ e.cnpj }}" {{ 'selected' if e.cnpj==sel }}>{{ e.nome }}</option>{% endfor %}</select></div>
+<div><label>De</label><input type="date" name="de" value="{{ de }}"></div><div><label>Até</label><input type="date" name="ate" value="{{ ate }}"></div><button>Conferir</button></div></form>
+{% if c %}<div class="card"><h2>Resumo ({{ c.total }} nota(s))</h2><table><tr><th></th><th>Autorizadas</th><th>Canceladas</th><th>Valor das autorizadas</th></tr>
+<tr><td>Prestadas</td><td>{{ c.prestadas.aut }}</td><td>{{ c.prestadas.canc }}</td><td>R$ {{ '%.2f'|format(c.prestadas.valor|float) }}</td></tr>
+<tr><td>Tomadas</td><td>{{ c.tomadas.aut }}</td><td>{{ c.tomadas.canc }}</td><td>R$ {{ '%.2f'|format(c.tomadas.valor|float) }}</td></tr></table>
+<p>ISS retido: <b>R$ {{ '%.2f'|format(c.iss_retido|float) }}</b> • ISS devido a outro município: <b>{{ c.iss_fora.qtd }}</b> nota(s), R$ {{ '%.2f'|format(c.iss_fora.valor|float) }}</p>
+{% if c.lacunas %}<p>Numeração de prestadas faltando: <b>{{ c.lacunas }}</b></p>{% endif %}
+{% for a in c.avisos %}<div class="aviso">{{ a }}</div>{% endfor %}{% if not c.avisos %}<div class="aviso ok">Nada para conferir.</div>{% endif %}
+{% if c.total %}<form method="post" action="/nfse/relatorio"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="empresa" value="{{ sel }}"><input type="hidden" name="de" value="{{ de }}"><input type="hidden" name="ate" value="{{ ate }}"><button>Gerar relatório mensal em PDF</button></form>{% endif %}</div>{% endif %}{% endblock %}

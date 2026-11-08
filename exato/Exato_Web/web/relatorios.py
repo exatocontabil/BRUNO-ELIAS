@@ -64,6 +64,42 @@ def _executar(job, filtros):
     _salvar(job)
 
 
+def _executar_nfse(job, filtros):
+    """Relatório mensal de NFS-e (o mesmo do programa instalado): resumo por mês e lista de prestadas e tomadas, autorizadas e canceladas separadas."""
+    core = nucleo.core(); pdf = nucleo.modulo('exato_nfse_pdf')
+    try:
+        rows = [r for r in core.db_list_documents(cnpj=filtros['empresa'], family='nfse', limit=200000, date_from=filtros['de'], date_to=filtros['ate']) if r.get('status') != 'Evento']
+        data = []
+        for r in rows:
+            try: data.append(pdf.report_row_from_xml(bytes(r['xml']), filtros['empresa'], 'Cancelada' if r.get('status') == 'Cancelado' else 'Autorizada'))
+            except Exception: continue
+        if not data: raise RelatorioErro('Não há NFS-e neste filtro para o relatório.')
+        job['total'] = len(data); _salvar(job); empresa = core.db_get_company_name(filtros['empresa']) or ''
+        periodo = (f"{filtros['de'][8:]}/{filtros['de'][5:7]}/{filtros['de'][:4]} a {filtros['ate'][8:]}/{filtros['ate'][5:7]}/{filtros['ate'][:4]}" if filtros['de'] and filtros['ate'] else 'Todo o período')
+        logo = core.LOGO_PATH if getattr(core, 'LOGO_PATH', None) and Path(core.LOGO_PATH).exists() else None
+        pdf.generate_monthly_report_pdf(data, str(pasta() / f"{job['id']}.pdf"), empresa, filtros['empresa'], periodo, logo)
+        job.update(estado='pronto', fim=datetime.now().isoformat(timespec='seconds'), empresa=empresa, periodo=periodo)
+    except RelatorioErro as e: job.update(estado='erro', erro=str(e))
+    except Exception:
+        try: core.log_exception('Web: relatório mensal de NFS-e', sys.exc_info())
+        except Exception: pass
+        job.update(estado='erro', erro='Não foi possível gerar o relatório. O detalhe foi guardado no registro de erros.')
+    _salvar(job)
+
+
+def pedir_nfse(empresa, de='', ate='', por='', em_segundo_plano=True):
+    core = nucleo.core(); d = re.sub(r'\D', '', empresa or '')
+    if len(d) != 14 or not core._is_valid_cnpj(d): raise RelatorioErro('Escolha uma empresa válida.')
+    for x in (de, ate):
+        if x and not re.fullmatch(r'\d{4}-\d{2}-\d{2}', x): raise RelatorioErro('Data inválida.')
+    if de and ate and de > ate: raise RelatorioErro('A data inicial não pode ser maior que a final.')
+    job = {'id': secrets.token_hex(8), 'estado': 'gerando', 'inicio': datetime.now().isoformat(timespec='seconds'), 'por': por, 'total': 0, 'empresa': '', 'periodo': '', 'erro': '', 'filtros': {'empresa': d, 'tipo': 'nfse', 'mov': '', 'de': de, 'ate': ate}}
+    _salvar(job)
+    if em_segundo_plano: threading.Thread(target=_executar_nfse, args=(job, job['filtros']), daemon=True, name='relatorio-nfse').start()
+    else: _executar_nfse(job, job['filtros'])
+    return job
+
+
 def pedir(empresa='', tipo='', mov='', de='', ate='', por='', em_segundo_plano=True):
     """Cria o trabalho e começa a gerar. Devolve o trabalho (com o `id`)."""
     core = nucleo.core(); d = re.sub(r'\D', '', empresa or '')
