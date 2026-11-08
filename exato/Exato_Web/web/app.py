@@ -323,7 +323,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
         res = aud.ler(aid)
         if not res: return PlainTextResponse('Auditoria não encontrada.', status_code=404)
         linhas = [l for l in res['linhas'] if not situacao or l['situacao'] == situacao]
-        return pagina(request, 'auditoria_resultado.html', {'a': res, 'linhas': linhas[:600], 'total_linhas': len(linhas), 'f_situacao': situacao, 'cnpj_fmt': core._format_cnpj(res['cnpj']), 'tela': 'auditoria'}, user=u)
+        return pagina(request, 'auditoria_resultado.html', {'a': res, 'rodando': bool(motor.estado['rodando']), 'linhas': linhas[:600], 'total_linhas': len(linhas), 'f_situacao': situacao, 'cnpj_fmt': core._format_cnpj(res['cnpj']), 'tela': 'auditoria'}, user=u)
 
     @app.get('/auditoria/{aid}/pdf')
     def auditoria_pdf(request: Request, aid: str):
@@ -333,6 +333,41 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
         if not p: return PlainTextResponse('Auditoria não encontrada.', status_code=404)
         log(u, 'AUDITORIA_PDF_BAIXADO', aid)
         return FileResponse(str(p), media_type='application/pdf', filename=p.name)
+
+    def _tarefa_faltantes(aid, email):
+        """Em segundo plano: busca só os XMLs que faltam e, se achou algum, refaz a auditoria com os mesmos Excels."""
+        try:
+            res = aud.ler(aid); cnpj = res['cnpj']; cid = motor.certificado_para(cnpj)
+            motor.estado.update(empresa=res['empresa'], indice=1, total=1)
+            if cid is None:
+                aud.atualizar(aid, busca={'em': time.strftime('%Y-%m-%dT%H:%M:%S'), 'mensagem': 'Esta empresa não tem certificado A1 guardado no site (nem o do escritório). Envie o certificado na tela Certificados A1.', 'nova': ''}); return
+            with cofre.usar(cid) as thumb: r = motor.buscar_faltantes(cnpj, res['faltantes'], thumb)
+            total = len(res['faltantes']); restam = len(r.get('restam') or []); achadas = max(0, total - restam)
+            partes = [f'{achadas} de {total} XML encontrado(s)' if not r.get('cancelado') else 'Busca cancelada']
+            if restam: partes.append(f'{restam} ainda sem XML (a SEFAZ não entregou)')
+            partes += r.get('esperar') or []; partes += r.get('erros') or []
+            nova = ''
+            if r.get('novos'):
+                try: nova = aud.auditar(cnpj, aud.excels_guardados(aid), res['tipos'], res['periodo'][0], res['periodo'][1], email)['id']
+                except Exception: nova = ''
+            aud.atualizar(aid, busca={'em': time.strftime('%Y-%m-%dT%H:%M:%S'), 'mensagem': ' • '.join(partes), 'nova': nova})
+        except Exception as exc:
+            try: core.log_exception('Web: auditoria (buscar o que falta)', __import__('sys').exc_info())
+            except Exception: pass
+            aud.atualizar(aid, busca={'em': time.strftime('%Y-%m-%dT%H:%M:%S'), 'mensagem': 'A busca não foi concluída. O detalhe foi guardado no registro de erros.', 'nova': ''})
+        finally:
+            motor.estado.update(rodando=False, empresa=''); motor._trava.release()
+
+    @app.post('/auditoria/{aid}/buscar-faltantes')
+    def auditoria_buscar_faltantes(request: Request, aid: str, csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        res = aud.ler(aid)
+        if not res: return PlainTextResponse('Auditoria não encontrada.', status_code=404)
+        if csrf_ok(request, csrf) and res.get('faltantes') and motor.reservar():
+            motor._cancelar.clear(); log(u, 'AUDITORIA_BUSCAR_FALTANTES', aid)
+            import threading; threading.Thread(target=_tarefa_faltantes, args=(aid, u.get('email', '')), daemon=True, name='auditoria-busca').start()
+        return RedirectResponse('/auditoria/' + aid, status_code=303)
 
     return app
 

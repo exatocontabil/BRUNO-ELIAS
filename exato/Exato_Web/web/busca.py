@@ -268,6 +268,57 @@ class Motor:
         finally:
             self.estado.update(rodando=False, empresa=''); self._trava.release()
 
+    # ------------------------------------------------------------ Auditoria: busca só do que falta (espelha _audit_buscar_faltantes, V185)
+    def buscar_faltantes(self, cnpj, lista, thumb):
+        """Busca SÓ a faixa de NSU em volta das notas "SAT sem XML na Central". Nunca move o ponto de continuação da busca normal. `lista`: itens de
+        `exato_auditoria_busca.faltantes`. Devolve {'novos','erros','esperar','concluidos','restam','cancelado'}."""
+        core, cnpj = self.core, _d(cnpj); ab = nucleo.modulo('exato_auditoria_busca'); grupos = ab.agrupar(lista); homolog = self.homologacao
+        resumo = {'novos': 0, 'erros': [], 'esperar': [], 'concluidos': [], 'cancelado': False}
+        core.busca_progresso_iniciar(cnpj)
+        try:
+            for (fam, ator), itens in grupos.items():
+                if self.cancelado(): resumo['cancelado'] = True; break
+                nome = ab.NOMES.get(fam, fam) + (' (saída)' if ator == '1' else ' (entrada)' if ator == '2' else '')
+                plano = ab.janela(str(core.DB_PATH), cnpj, fam, ator, itens)
+                if fam == 'nfe':
+                    espera, _c = core.nfe_cooldown_remaining(self.cfg, cnpj)
+                    if espera > 0: resumo['esperar'].append(f'{nome}: a SEFAZ pede para esperar {core._format_nfe_wait(espera)}'); continue
+                    fetch = lambda th, c, n, a=int(ator or 2): core._fetch_log('NF-e', c, n, lambda: core.test_sef_nfe_webservice(th, c, homolog, 1, n, a))
+                else:
+                    fetch = lambda th, c, n: core._fetch_log('NFC-e', c, n, lambda: core.test_sef_nfce_webservice(th, c, 1, 3, n))
+                parou = [False]
+                def cb(evt, ator=ator, nome=nome, plano=plano, parou=parou):
+                    info = evt.get('info') or {}; docs = info.get('documents') or []
+                    if ator:
+                        for d in docs: d['actor_code'] = str(ator); d['actor_label'] = core.nfe_actor_meta(ator)[0]
+                    try: nn, _nd = core.db_upsert_documents(cnpj, docs); resumo['novos'] += nn
+                    except Exception as exc: resumo['erros'].append(f'{nome}: não consegui gravar ({core.friendly_message(str(exc))})'); parou[0] = True
+                    retorno = info.get('ultNSURet') or info.get('ultNSU') or ''
+                    try:
+                        if plano['fim'] and int(str(retorno)) >= plano['fim']: parou[0] = True          # já passou das notas que faltam
+                    except Exception: pass
+                r = core.sync_documents_automatically(fetch, thumb, cnpj, f'{fam}_{ator}_dirigida', start_nsu=plano['inicio'], progress_cb=cb, stop_cb=lambda: parou[0] or self.cancelado())
+                info_fim = r.get('last_info') or {}
+                if fam == 'nfe' and str(info_fim.get('cstat') or ''):
+                    try: core.record_nfe_actor_result(self.cfg, cnpj, str(ator or 2), str(info_fim.get('cstat')), str(info_fim.get('motivo') or r.get('end_reason') or ''))
+                    except Exception: pass
+                if r.get('cancelled') and not parou[0]: resumo['cancelado'] = True; break
+                if not r.get('ok') and not parou[0] and not r.get('cancelled'): resumo['erros'].append(f"{nome}: {core.friendly_message(str(r.get('message') or r.get('end_reason') or 'a SEFAZ não respondeu'))}")
+                else: resumo['concluidos'].append((fam, ator))
+        except Exception:
+            try: core.log_exception('Web: auditoria, busca dirigida', sys.exc_info())
+            except Exception: pass
+            resumo['erros'].append('Erro inesperado na busca (guardado no registro de erros).')
+        finally:
+            core.busca_progresso_fim()
+        feitos = set(resumo['concluidos'])
+        def atores_do(i): return [i['ator']] if i['ator'] or i['familia'] != 'nfe' else ['1', '2']
+        tentados = {i['chave'] for i in lista if all((i['familia'], a) in feitos for a in atores_do(i))}
+        resumo['restam'] = ab.ainda_sem_xml(str(core.DB_PATH), cnpj, lista); carimbo = datetime.now().strftime('%d/%m %H:%M')
+        for i in resumo['restam']:
+            if i['chave'] in tentados: core.AUDIT_TENTADAS[i['chave']] = f'Procurei na SEFAZ em {carimbo} e ela não entregou este XML (conferi a faixa de notas em volta). Se a nota é válida, tente de novo mais tarde.'
+        self.salvar_cfg(); return resumo
+
     def _doc_do_certificado(self, cid):
         info = self.cofre.info(cid) or {}; return info.get('titular_cnpj') or ''
 

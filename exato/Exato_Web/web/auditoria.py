@@ -83,11 +83,12 @@ def auditar(cnpj, arquivos, familias, data_ini, data_fim, enviado_por='', agora=
         linhas.append({'situacao': core._audit_status_label_for_row(r), 'numero': str(r.get('numero') or ''), 'data': str(r.get('data') or '')[:10], 'modelo': str(r.get('modelo') or ''),
                        'documento': str(r.get('situacao_doc') or ''), 'valor_sat': '' if r.get('valor_sat') is None else _dec(r.get('valor_sat')), 'valor_xml': '' if r.get('valor_xml') is None else _dec(r.get('valor_xml')),
                        'observacao': str(r.get('observacao') or '')})
+    ab = nucleo.modulo('exato_auditoria_busca'); faltantes = ab.faltantes(combined.get('display_rows') or [], selected[0] if len(selected) == 1 else '')
     resumo = {'id': aid, 'cnpj': cnpj, 'empresa': nome, 'periodo': [data_ini, data_fim], 'tipos': selected, 'criada_em': agora.isoformat(timespec='seconds'), 'por': enviado_por,
               'status': ai.get('status', ''), 'titulo': ai.get('title', ''), 'mensagem': ai.get('message', ''), 'conciliados': len(combined.get('matched') or []),
               'sem_xml': len(combined.get('sat_only') or []), 'so_xml': len(combined.get('xml_only') or []), 'canceladas': len(combined.get('cancelled_xml') or []),
               'divergencias': sum(1 for r in combined.get('audit_rows') or [] if r.get('status') == 'Divergência'), 'sat_total': _dec(combined.get('sat_total')),
-              'valor_conciliado': _dec(combined.get('matched_xml_total')), 'pdf': pdf.name, 'linhas': linhas}
+              'valor_conciliado': _dec(combined.get('matched_xml_total')), 'pdf': pdf.name, 'faltantes': faltantes, 'busca': None, 'linhas': linhas}
     (pasta / 'resumo.json').write_text(json.dumps(resumo, ensure_ascii=False, indent=1), encoding='utf-8')
     return resumo
 
@@ -117,3 +118,14 @@ def caminho_pdf(aid):
     if not r: return None
     p = pasta_auditorias() / aid / r['pdf']
     return p if p.exists() else None
+
+
+def atualizar(aid, **campos):
+    """Acrescenta campos ao resumo de uma auditoria (ex.: o resultado da busca dos XMLs que faltam)."""
+    r = ler(aid)
+    if not r: return None
+    r.update(campos); (pasta_auditorias() / aid / 'resumo.json').write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding='utf-8'); return r
+
+
+def excels_guardados(aid):
+    return sorted((pasta_auditorias() / aid).glob('SAT_*.xlsx')) if ler(aid) else []
