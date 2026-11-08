@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, config, nucleo, relatorios as rel, seguranca
+from . import auditoria as aud, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -17,7 +17,7 @@ AQUI = Path(__file__).resolve().parent
 ROTULOS_TIPO = {'nfe': 'NF-e', 'nfce': 'NFC-e', 'cte': 'CT-e', 'nfse': 'NFS-e'}
 
 
-def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
+def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, manif_transporte=None):
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)          # sem página de documentação técnica exposta na internet
     app.mount('/static', StaticFiles(directory=str(AQUI / 'static')), name='static')
     tpl = Jinja2Templates(directory=str(AQUI / 'templates'))
@@ -28,7 +28,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
     totp = seguranca.Totp(config.DADOS / 'web.db', chave)
     limite = seguranca.LimiteLogin(); sessoes = seguranca.Sessoes(config.DADOS / 'web.db')
     app.state.cofre, app.state.totp, app.state.limite, app.state.core, app.state.sessoes = cofre, totp, limite, core, sessoes
-    motor = Motor(core, cofre, nfse_transport=nfse_transport); agendador = Agendador(motor); app.state.motor, app.state.agendador = motor, agendador
+    motor = Motor(core, cofre, nfse_transport=nfse_transport); motor.manifestador = manif.Manifestador(core, cofre, motor.certificado_para, transporte=manif_transporte); agendador = Agendador(motor); app.state.motor, app.state.agendador = motor, agendador
     if iniciar_agendador: agendador.iniciar()
     motivos = nucleo.modulo('exato_busca_motivos'); situacao = nucleo.modulo('exato_situacao_busca')
 
@@ -564,6 +564,47 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
         if res['enviado']: return RedirectResponse(_msg('/boxe', 'ok', 'Resumo enviado para ' + str(motor.resumo_cfg().get('destino')) + '.'), status_code=303)
         msg = {'sem_destino': 'Informe o e-mail que vai receber o resumo e clique em Guardar.', 'sem_email': 'Configure primeiro o e-mail de envio (servidor, usuário e senha).'}.get(res['motivo'], res.get('erro') or 'Não consegui enviar agora.')
         return RedirectResponse(_msg('/boxe', 'erro', msg), status_code=303)
+
+    # ------------------------------------------------------------ manifestação do destinatário
+    @app.get('/manifestacao', response_class=HTMLResponse)
+    def manifestacao_tela(request: Request, ok: str = '', erro: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        cont = motor.manifestador.contagem(); cfgm = motor.manif_cfg(); nomes = {e['cnpj']: e for e in empresas_lista()}
+        linhas = [{'cnpj': c, 'nome': (nomes.get(c) or {}).get('nome') or c, 'cnpj_fmt': core._format_cnpj(c), 'pendentes': n, 'auto': bool(cfgm['auto'].get(c)), 'a1': bool(motor.certificado_para(c))} for c, n in sorted(cont.items(), key=lambda x: -x[1])]
+        for e in nomes.values():
+            if e['cnpj'] not in cont: linhas.append({'cnpj': e['cnpj'], 'nome': e['nome'], 'cnpj_fmt': e['cnpj_fmt'], 'pendentes': 0, 'auto': bool(cfgm['auto'].get(e['cnpj'])), 'a1': bool(motor.certificado_para(e['cnpj']))})
+        return pagina(request, 'manifestacao.html', {'linhas': linhas, 'hist': motor.manifestador.historico(60), 'homolog': bool(cfgm.get('homologacao')), 'ok': ok, 'erro': erro, 'limite': manif.LIMITE_PADRAO, 'tela': 'manifestacao'}, user=u)
+
+    @app.post('/manifestacao/agora')
+    async def manifestacao_agora(request: Request, empresa: str = Form(''), confirmo: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse(_msg('/manifestacao', 'erro', 'A página expirou.'), status_code=303)
+        d = re.sub(r'\D', '', empresa)
+        if len(d) != 14: return RedirectResponse(_msg('/manifestacao', 'erro', 'Escolha a empresa.'), status_code=303)
+        if not confirmo: return RedirectResponse(_msg('/manifestacao', 'erro', 'Marque a confirmação: a Ciência da Operação é registrada na SEFAZ em nome da empresa.'), status_code=303)
+        res = await run_in_threadpool(motor.manifestar, d, manif.LIMITE_PADRAO, u.get('email', ''))
+        log(u, 'MANIFESTACAO_CIENCIA', f"{d} registradas={res['registradas']} erros={len(res['erros'])}")
+        partes = [f"{res['registradas']} ciência(s) registrada(s)"] + ([f"{res['ja']} já estavam registradas"] if res['ja'] else []) + ([f"{res['restantes']} ainda pendentes (clique de novo)"] if res['restantes'] else [])
+        if res['erros']: return RedirectResponse(_msg('/manifestacao', 'erro', ' • '.join(partes) + ' • ' + ' | '.join(res['erros'][:3])), status_code=303)
+        return RedirectResponse(_msg('/manifestacao', 'ok', ' • '.join(partes) + '. O XML completo chega na próxima busca.'), status_code=303)
+
+    @app.post('/manifestacao/auto')
+    def manifestacao_auto(request: Request, empresa: str = Form(''), ligar: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        d = re.sub(r'\D', '', empresa)
+        if csrf_ok(request, csrf) and len(d) == 14:
+            motor.manif_cfg()['auto'][d] = (ligar == '1'); motor.salvar_cfg(); log(u, 'MANIFESTACAO_AUTO', f'{d} {ligar}')
+        return RedirectResponse('/manifestacao', status_code=303)
+
+    @app.post('/manifestacao/ambiente')
+    def manifestacao_ambiente(request: Request, homolog: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if csrf_ok(request, csrf): motor.manif_cfg()['homologacao'] = (homolog == '1'); motor.salvar_cfg(); log(u, 'MANIFESTACAO_AMBIENTE', 'homologação' if homolog == '1' else 'produção')
+        return RedirectResponse('/manifestacao', status_code=303)
 
     return app
 

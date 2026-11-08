@@ -30,7 +30,7 @@ class Motor:
         self.nfse_mod = nucleo.modulo('exato_nfse'); self.motivos = nucleo.modulo('exato_busca_motivos'); self.cobertura = nucleo.modulo('exato_cobertura'); self.proc = nucleo.modulo('exato_nfse_procuracao')
         self.nfse_transport = nfse_transport; self.homologacao = bool(homologacao)
         self.cfg = core.load_config(); self._cancelar = threading.Event(); self._trava = threading.Lock(); self._trava_repo = threading.Lock(); self.estado_repo = {'copiando': False, 'ultimo': None, 'resultado': None}
-        self._trava_fech = threading.Lock(); self.estado_fech = {'fechando': False, 'ultimo': None, 'resultado': None}; self._trava_boxe = threading.Lock(); self._trava_resumo = threading.Lock(); self.estado_boxe = {'enviando': False, 'ultimo': None, 'resultado': None}; self.boxe_conectar = None
+        self._trava_fech = threading.Lock(); self.estado_fech = {'fechando': False, 'ultimo': None, 'resultado': None}; self._trava_boxe = threading.Lock(); self._trava_resumo = threading.Lock(); self.estado_boxe = {'enviando': False, 'ultimo': None, 'resultado': None}; self.boxe_conectar = None; self.manifestador = None
         self.estado = {'rodando': False, 'empresa': '', 'indice': 0, 'total': 0, 'inicio': None, 'ultimo': None, 'resumo': None}
         for cod, (t, e, a, g) in CAUSAS_WEB.items(): self.motivos.CAUSAS.setdefault(cod, (t, e, a, g))          # causas próprias do site (explicadas em linguagem simples)
 
@@ -251,6 +251,9 @@ class Motor:
                     with self.cofre.usar(cid) as thumb:
                         r = self.buscar_xml(cnpj, thumb)
                         resumo['xml_ok' if r['ok'] or r['adiado'] else 'xml_obs'] += 1; resumo['xml_novos'] += r['novos']
+                        if self.manif_cfg()['auto'].get(cnpj) and not self.cancelado():          # só as empresas ligadas de propósito: a próxima busca traz o XML completo
+                            try: m = self.manifestar(cnpj, limite=100, por='automático'); resumo['manifestadas'] = resumo.get('manifestadas', 0) + m['registradas']
+                            except Exception: pass
                         if not self.cancelado():
                             modo = self.proc.modo_para(self._doc_do_certificado(cid), cnpj) if cid == ESCRITORIO else 'proprio'
                             if modo != 'procuracao' or not self.proc.ligada(self.cfg) or self.proc.tentar_agora(self.cfg, cnpj, manual=manual):
@@ -373,6 +376,15 @@ class Motor:
             return {'ok': False, 'motivo': 'falha'}
         finally:
             self.estado_boxe.update(enviando=False); self._trava_boxe.release()
+
+    # ------------------------------------------------------------ Manifestação do destinatário (Ciência da Operação)
+    def manif_cfg(self):
+        c = self.cfg.setdefault('manifestacao', {}); c.setdefault('auto', {}); c.setdefault('homologacao', False); return c
+
+    def manifestar(self, cnpj, limite=50, por=''):
+        """Manifesta a Ciência das NF-e pendentes da empresa (só quando pedido, ou se a empresa foi ligada para o modo automático)."""
+        if self.manifestador is None: return {'registradas': 0, 'ja': 0, 'erros': ['A manifestação não está disponível.'], 'restantes': 0}
+        self.manifestador.homologacao = bool(self.manif_cfg().get('homologacao')); return self.manifestador.manifestar(cnpj, limite=limite, por=por, cancelar=None)
 
     # ------------------------------------------------------------ Resumo diário por e-mail (usa o e-mail do Box-e)
     def resumo_cfg(self):

@@ -25,3 +25,6 @@
 
 ## Não testado ainda
 - `ImportadorWindows` (colocar o A1 no repositório do Windows e retirá-lo) foi escrito mas só roda no Windows: testar no servidor antes de qualquer busca real.
+
+## Manifestação do destinatário (Ciência da Operação 210210)
+`web/manifestacao.py`: NF-e de entrada que chegaram só como resumo (resNFe) recebem a Ciência no Ambiente Nacional (evento assinado RSA-SHA1 com o A1 do cofre, enviado com o certificado no repositório do Windows). Só quando alguém pede (caixa "Confirmo") ou se a empresa foi ligada de propósito (automático, desligado por padrão); limite de 50 por clique; para após 3 recusas ou falha de rede; nunca reenvia o que já foi registrado; histórico em `web.db`. Há chave de homologação na tela. Testado só com o Ambiente Nacional simulado (assinatura conferida): testar primeiro em homologação no servidor. Confirmação/desconhecimento/não realizada continuam decisão do contador.

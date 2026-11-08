@@ -190,6 +190,15 @@ class Cofre:
         except Exception: raise CofreErro('Não foi possível abrir o certificado guardado (a chave do cofre mudou?). Envie o certificado de novo.')
         return base64.b64decode(d['pfx']), d['senha']
 
+    def material(self, chave):
+        """(chave privada, certificado) do A1, carregados só na memória — para assinar documentos (ex.: eventos da NF-e) sem passar pelo Windows."""
+        pfx, senha = self._abrir(chave)
+        try:
+            k, cert, _extra = pkcs12.load_key_and_certificates(pfx, senha.encode('utf-8'))
+        except Exception:
+            raise CofreErro('Não foi possível abrir o certificado guardado. Envie o certificado de novo.')
+        return k, cert
+
     @contextlib.contextmanager
     def usar(self, chave):
         """Dá o certificado ao Windows só durante o bloco e devolve a impressão digital (thumbprint) que as rotinas fiscais usam."""
