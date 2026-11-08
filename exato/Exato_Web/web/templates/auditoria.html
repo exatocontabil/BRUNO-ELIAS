@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block titulo %}Auditoria — Exato{% endblock %}
+{% block corpo %}<h1>Auditoria Fiscal</h1><p class="sub">Confere o Excel do SAT com os XMLs guardados e gera o PDF do comparativo (o documento que o setor fiscal anexa na tarefa).</p>
+{% if ok %}<div class="aviso ok">{{ ok }}</div>{% endif %}{% if erro %}<div class="aviso erro">{{ erro }}</div>{% endif %}
+<form method="post" action="/auditoria" enctype="multipart/form-data" class="card"><h2>Nova auditoria</h2><input type="hidden" name="csrf" value="{{ csrf }}"><div class="linha">
+<div><label>Empresa</label><select name="empresa" required><option value="">Escolha...</option>{% for e in empresas %}<option value="{{ e.cnpj }}" {{ 'selected' if f_empresa==e.cnpj }}>{{ e.nome }} — {{ e.cnpj_fmt }}</option>{% endfor %}</select></div>
+<div><label>De</label><input type="date" name="de" value="{{ ini }}" required></div><div><label>Até</label><input type="date" name="ate" value="{{ fim }}" required></div>
+<div><label>Tipos</label><label style="display:inline;margin-right:12px"><input type="checkbox" name="tipo_nfe" value="1" checked> NF-e</label><label style="display:inline"><input type="checkbox" name="tipo_nfce" value="1"> NFC-e</label></div></div>
+<div class="linha"><div><label>Excel(s) do SAT (.xlsx — um por tipo)</label><input type="file" name="arquivos" accept=".xlsx" multiple required></div><button>Conferir e gerar o PDF</button></div></form>
+<div class="card"><h2>Auditorias feitas</h2><table><tr><th>Quando</th><th>Empresa</th><th>Período</th><th>Resultado</th><th>Sem XML</th><th></th></tr>
+{% for h in hist %}<tr><td>{{ h.criada_em.replace('T',' ') }}<br><small class="mu">{{ h.por }}</small></td><td>{{ h.empresa }}</td><td>{{ h.periodo[0][8:] }}/{{ h.periodo[0][5:7] }} a {{ h.periodo[1][8:] }}/{{ h.periodo[1][5:7] }}/{{ h.periodo[1][:4] }}</td>
+<td><span class="pill {{ 'g' if h.status=='conforme' else 'r' if h.status=='divergencia' else 'a' }}">{{ 'Conforme' if h.status=='conforme' else 'Com divergência' if h.status=='divergencia' else 'Atenção' }}</span></td><td>{{ h.sem_xml }}</td>
+<td><a href="/auditoria/{{ h.id }}">Abrir</a> • <a href="/auditoria/{{ h.id }}/pdf">PDF</a></td></tr>{% else %}<tr><td colspan="6">Nenhuma auditoria feita ainda.</td></tr>{% endfor %}</table></div>{% endblock %}

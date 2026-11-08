@@ -3,11 +3,12 @@ import re, secrets, sqlite3, time
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request, UploadFile, File
-from fastapi.responses import HTMLResponse, RedirectResponse, Response, PlainTextResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response, PlainTextResponse, FileResponse
+from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import config, nucleo, seguranca
+from . import auditoria as aud, config, nucleo, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -275,6 +276,63 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
         import json
         e = dict(motor.estado); e['progresso'] = core.busca_progresso_texto() if e.get('rodando') else ''; e['auto'] = agendador.ligado(); e['proxima'] = agendador.proxima()
         return Response(json.dumps(e, ensure_ascii=False), media_type='application/json', headers={'Cache-Control': 'no-store'})
+
+    # ------------------------------------------------------------ auditoria
+    def _msg(url, tipo, texto):
+        from urllib.parse import quote
+        return f'{url}?{tipo}=' + quote(texto)
+
+    @app.get('/auditoria', response_class=HTMLResponse)
+    def auditoria_tela(request: Request, ok: str = '', erro: str = '', empresa: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        hoje = time.localtime(); ini_mes = time.mktime((hoje.tm_year, hoje.tm_mon, 1, 0, 0, 0, 0, 0, -1)) - 86400
+        ant = time.localtime(ini_mes); import calendar
+        ini = f'{ant.tm_year}-{ant.tm_mon:02d}-01'; fim = f'{ant.tm_year}-{ant.tm_mon:02d}-{calendar.monthrange(ant.tm_year, ant.tm_mon)[1]:02d}'
+        return pagina(request, 'auditoria.html', {'empresas': empresas_lista(), 'hist': aud.historico(60, empresa), 'ok': ok, 'erro': erro, 'ini': ini, 'fim': fim, 'f_empresa': empresa, 'tela': 'auditoria'}, user=u)
+
+    @app.post('/auditoria')
+    async def auditoria_enviar(request: Request, empresa: str = Form(''), de: str = Form(''), ate: str = Form(''), tipo_nfe: str = Form(''), tipo_nfce: str = Form(''),
+                               csrf: str = Form(''), arquivos: list[UploadFile] = File(default=[])):
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse(_msg('/auditoria', 'erro', 'A página expirou. Tente de novo.'), status_code=303)
+        arqs = [a for a in (arquivos or []) if a and a.filename]
+        if not arqs or len(arqs) > aud.MAX_ARQUIVOS: return RedirectResponse(_msg('/auditoria', 'erro', f'Envie de 1 a {aud.MAX_ARQUIVOS} arquivos Excel (.xlsx) do SAT.'), status_code=303)
+        import tempfile
+        tmp = Path(tempfile.mkdtemp(prefix='exato_aud_', dir=str(config.DADOS)))
+        try:
+            caminhos = []
+            for i, a in enumerate(arqs, 1):
+                if not str(a.filename).lower().endswith('.xlsx'): return RedirectResponse(_msg('/auditoria', 'erro', f'"{a.filename}" não é um Excel (.xlsx) do SAT.'), status_code=303)
+                dados = await a.read(aud.MAX_ARQUIVO + 1)
+                if len(dados) > aud.MAX_ARQUIVO: return RedirectResponse(_msg('/auditoria', 'erro', f'"{a.filename}" é grande demais.'), status_code=303)
+                p = tmp / f'sat_{i}.xlsx'; p.write_bytes(dados); caminhos.append(p)
+            fams = [f for f, v in (('nfe', tipo_nfe), ('nfce', tipo_nfce)) if v]
+            try: res = await run_in_threadpool(aud.auditar, empresa, caminhos, fams, de, ate, u.get('email', ''))
+            except aud.AuditoriaErro as e: return RedirectResponse(_msg('/auditoria', 'erro', str(e)), status_code=303)
+            log(u, 'AUDITORIA_FEITA', f"{res['id']} {res['status']}")
+            return RedirectResponse('/auditoria/' + res['id'], status_code=303)
+        finally:
+            import shutil; shutil.rmtree(tmp, ignore_errors=True)
+
+    @app.get('/auditoria/{aid}', response_class=HTMLResponse)
+    def auditoria_resultado(request: Request, aid: str, situacao: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        res = aud.ler(aid)
+        if not res: return PlainTextResponse('Auditoria não encontrada.', status_code=404)
+        linhas = [l for l in res['linhas'] if not situacao or l['situacao'] == situacao]
+        return pagina(request, 'auditoria_resultado.html', {'a': res, 'linhas': linhas[:600], 'total_linhas': len(linhas), 'f_situacao': situacao, 'cnpj_fmt': core._format_cnpj(res['cnpj']), 'tela': 'auditoria'}, user=u)
+
+    @app.get('/auditoria/{aid}/pdf')
+    def auditoria_pdf(request: Request, aid: str):
+        u, r = exigir(request)
+        if r: return r
+        p = aud.caminho_pdf(aid)
+        if not p: return PlainTextResponse('Auditoria não encontrada.', status_code=404)
+        log(u, 'AUDITORIA_PDF_BAIXADO', aid)
+        return FileResponse(str(p), media_type='application/pdf', filename=p.name)
 
     return app
 
