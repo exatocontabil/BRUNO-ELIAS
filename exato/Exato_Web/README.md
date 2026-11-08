@@ -1,7 +1,7 @@
 # Exato Web
 
 Site do escritório (Exato Central Fiscal na internet): login com verificação em duas etapas, cofre dos certificados A1, empresas, situação da busca e documentos.
-Fase 1 (esta). A busca automática no servidor é a fase 2.
+Fase 1: acesso, cofre e consulta. Fase 2: busca automática no servidor (NF-e, NFC-e, CT-e e NFS-e, inclusive por procuração), a cada 4 horas e sob pedido.
 
 ## Como roda
 - Python 3.12+ **no Windows** (as rotinas fiscais do Exato usam o repositório de certificados do Windows). O servidor do escritório serve.
@@ -13,4 +13,4 @@ Fase 1 (esta). A busca automática no servidor é a fase 2.
 ## Regras
 - Nunca abrir o site na internet sem HTTPS e sem a verificação em duas etapas (vem ligada).
 - Os módulos do Exato (inclusive os 13 núcleos fiscais protegidos) são usados como estão; nada deles é alterado.
-- Testes: `python testes/test_web_f1.py`.
+- Testes: `python testes/test_web_f1.py` e `python testes/test_web_f2.py` (SEFAZ e Emissor Nacional simulados).

@@ -36,7 +36,8 @@ def main(argv=None):
     elif a.cmd == 'senha':
         u = core.db_auth_get_user(a.email)
         if not u: sys.exit('Usuário não encontrado.')
-        core.db_auth_set_password(u['id'], _senha()); print('Senha trocada.')
+        core.db_auth_set_password(u['id'], _senha())
+        seguranca.Sessoes(config.DADOS / 'web.db').revogar_usuario(u['id']); print('Senha trocada. Os acessos abertos dessa pessoa foram encerrados.')
     elif a.cmd == 'zerar-2fa':
         u = core.db_auth_get_user(a.email)
         if not u: sys.exit('Usuário não encontrado.')

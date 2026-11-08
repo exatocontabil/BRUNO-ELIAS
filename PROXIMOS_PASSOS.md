@@ -298,3 +298,8 @@ Plano V170: (a) dois estados separados: `selected` (Buscar XML) e `nfse_selected
 - Feito (fase 1): login + TOTP, limite de tentativas, CSRF, cofre A1, empresas, situação da busca, documentos/baixar XML. Teste: exato/Exato_Web/testes/test_web_f1.py. Docs: exato/Exato_Web/docs/ARQUITETURA.md.
 - Próximo (fase 2): agendador no servidor (rodada 4 h, cliente novo, NFS-e por certificado/procuração) com `Cofre.usar()` + rotinas atuais; precisa Windows (rotinas fiscais usam PowerShell/repositório de certificados). Testar `ImportadorWindows` no servidor real. HTTPS/proxy/firewall e cópia diária antes de abrir na internet.
 - Perguntas: o servidor é Windows? Quem cuida de HTTPS/domínio/firewall? Importar os dados do programa instalado (empresas, notas) para o site.
+
+## 08/11 — Exato Web fase 2 feita (busca no servidor)
+- Servidor confirmado Windows; usuário fora do escritório: tudo feito e testado aqui com simulação, sem depender do escritório.
+- Feito: `web/busca.py` (espelha `_run_sync_all`/`_finish_sync_all`/`_nfse_run_all` do V190: NF-e/NFC-e/CT-e e NFS-e, A1 próprio ou do escritório = procuração, pontos de continuação, espera da SEFAZ, causas explicadas, cobertura só se terminou bem), `web/agendador.py` (rodada a cada 4 h, sob pedido, por empresa, cancelar, uma por vez), telas (Buscar o que falta / todas / cancelar / ligar-desligar automática, andamento ao vivo), sessões revogáveis no servidor. Testes: exato/Exato_Web/testes/test_web_f1.py e test_web_f2.py.
+- Falta (fase 3): Auditoria, relatórios em PDF, fechamento do mês, Box-e/ZIP Domínio, Repositório em arquivos no servidor, importar os dados do programa instalado, manifestação do destinatário (como o SIEG). Testes no servidor real: ImportadorWindows, HTTPS, firewall.

@@ -9,7 +9,7 @@
 1. **Site** (`web/`): FastAPI + páginas HTML. Usa o código do Exato (`web.nucleo`) para banco, situação da busca, relatórios etc.
 2. **Cofre** (`web/cofre.py`): A1 criptografado (AES-256-GCM); chave mestra protegida pelo DPAPI da conta que roda o site. Para consultar a SEFAZ, o certificado é colocado no repositório do Windows só durante a consulta (sem exportar a chave) e retirado em seguida.
 3. **Segurança** (`web/seguranca.py`): sessão assinada, CSRF, limite de tentativas, TOTP obrigatório, cabeçalhos de segurança.
-4. **Fase 2 (a fazer)**: agendador no servidor (rodada a cada 4 h, cliente novo, NFS-e por certificado e procuração), usando `Cofre.usar(cnpj)` + as rotinas atuais.
+4. **Busca no servidor (`web/busca.py`, `web/agendador.py`)**: espelha a busca do programa instalado (NF-e, NFC-e, CT-e e NFS-e; pontos de continuação, espera da SEFAZ, causas explicadas) usando `Cofre.usar(cnpj)`; rodada a cada 4 h, sob pedido e por empresa. A empresa usa o A1 próprio; sem ele, o A1 do escritório (procuração).
 
 ## Para abrir na internet (obrigatório)
 - HTTPS na frente (ex.: Caddy ou IIS com certificado válido), repassando para `127.0.0.1:8443`. Nada de HTTP aberto.

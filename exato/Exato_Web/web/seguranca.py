@@ -130,3 +130,25 @@ class Totp:
 
     def desativar(self, uid):
         c = self._con(); c.execute("DELETE FROM totp WHERE user_id=?", (uid,)); c.commit(); c.close()
+
+
+class Sessoes:
+    """Sessões válidas guardadas no servidor (web.db): sair do site ou trocar a senha derruba a sessão na hora, mesmo que alguém tenha copiado o cookie."""
+    def __init__(self, caminho):
+        self.caminho = Path(caminho)
+        c = self._con(); c.execute("CREATE TABLE IF NOT EXISTS sessoes(id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, expira REAL NOT NULL)"); c.commit(); c.close()
+
+    def _con(self): return sqlite3.connect(self.caminho, timeout=15)
+
+    def criar(self, uid, validade_s):
+        sid = secrets.token_urlsafe(24); c = self._con()
+        c.execute("DELETE FROM sessoes WHERE expira < ?", (time.time(),)); c.execute("INSERT INTO sessoes(id, user_id, expira) VALUES(?,?,?)", (sid, uid, time.time() + validade_s)); c.commit(); c.close(); return sid
+
+    def usuario(self, sid):
+        c = self._con(); r = c.execute("SELECT user_id FROM sessoes WHERE id=? AND expira>=?", (str(sid or ''), time.time())).fetchone(); c.close(); return r[0] if r else None
+
+    def revogar(self, sid):
+        c = self._con(); c.execute("DELETE FROM sessoes WHERE id=?", (str(sid or ''),)); c.commit(); c.close()
+
+    def revogar_usuario(self, uid):
+        c = self._con(); c.execute("DELETE FROM sessoes WHERE user_id=?", (uid,)); c.commit(); c.close()

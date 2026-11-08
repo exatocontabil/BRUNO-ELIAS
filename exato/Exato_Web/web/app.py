@@ -8,13 +8,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from . import config, nucleo, seguranca
+from .agendador import Agendador
+from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
 
 AQUI = Path(__file__).resolve().parent
 ROTULOS_TIPO = {'nfe': 'NF-e', 'nfce': 'NFC-e', 'cte': 'CT-e', 'nfse': 'NFS-e'}
 
 
-def criar_app(importador=None):
+def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None):
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)          # sem página de documentação técnica exposta na internet
     app.mount('/static', StaticFiles(directory=str(AQUI / 'static')), name='static')
     tpl = Jinja2Templates(directory=str(AQUI / 'templates'))
@@ -23,8 +25,10 @@ def criar_app(importador=None):
     chave = carregar_chave_mestra(pasta_cofre)
     cofre = Cofre(pasta_cofre, chave, importador=importador)
     totp = seguranca.Totp(config.DADOS / 'web.db', chave)
-    limite = seguranca.LimiteLogin()
-    app.state.cofre, app.state.totp, app.state.limite, app.state.core = cofre, totp, limite, core
+    limite = seguranca.LimiteLogin(); sessoes = seguranca.Sessoes(config.DADOS / 'web.db')
+    app.state.cofre, app.state.totp, app.state.limite, app.state.core, app.state.sessoes = cofre, totp, limite, core, sessoes
+    motor = Motor(core, cofre, nfse_transport=nfse_transport); agendador = Agendador(motor); app.state.motor, app.state.agendador = motor, agendador
+    if iniciar_agendador: agendador.iniciar()
     motivos = nucleo.modulo('exato_busca_motivos'); situacao = nucleo.modulo('exato_situacao_busca')
 
     # ------------------------------------------------------------ ajudantes
@@ -35,7 +39,7 @@ def criar_app(importador=None):
 
     def usuario(request):
         d = seguranca.verificar(request.cookies.get('exato_sessao', ''))
-        if not d: return None
+        if not d or sessoes.usuario(d.get('sid')) != d.get('uid'): return None          # sessão encerrada no servidor (sair, troca de senha) não vale mais
         u = core.db_auth_get_user_by_id(d.get('uid'))
         return core._auth_user_from_row(u) if u and str(u.get('status')) == 'active' else None
 
@@ -71,7 +75,8 @@ def criar_app(importador=None):
         return resp
 
     def sessao_completa(resp, u):
-        cookie(resp, 'exato_sessao', seguranca.assinar({'uid': u['id']}, config.SESSAO_HORAS * 3600), config.SESSAO_HORAS * 3600)
+        sid = sessoes.criar(u['id'], config.SESSAO_HORAS * 3600)
+        cookie(resp, 'exato_sessao', seguranca.assinar({'uid': u['id'], 'sid': sid}, config.SESSAO_HORAS * 3600), config.SESSAO_HORAS * 3600)
         resp.delete_cookie('exato_pre', path='/')
 
     # ------------------------------------------------------------ acesso
@@ -142,6 +147,8 @@ def criar_app(importador=None):
 
     @app.post('/sair')
     def sair(request: Request, csrf: str = Form('')):
+        d = seguranca.verificar(request.cookies.get('exato_sessao', ''))
+        if d: sessoes.revogar(d.get('sid'))
         resp = RedirectResponse('/login', status_code=303); resp.delete_cookie('exato_sessao', path='/'); return resp
 
     @app.get('/')
@@ -207,9 +214,9 @@ def criar_app(importador=None):
     def situacao_tela(request: Request):
         u, r = exigir(request)
         if r: return r
-        cfg = core.load_config(); oc = motivos.ultimas(str(core.DB_PATH)); linhas = situacao.linhas(str(core.DB_PATH), cfg, None, ocorrencias=oc, diagnostico={}, acessos=dict(cfg.get('nfse_acesso') or {}))
+        cfg = motor.cfg; oc = motivos.ultimas(str(core.DB_PATH)); linhas = situacao.linhas(str(core.DB_PATH), cfg, None, ocorrencias=oc, diagnostico={}, acessos=dict(cfg.get('nfse_acesso') or {}))
         for l in linhas: l['cnpj_fmt'] = core._format_cnpj(l['cnpj']); l['certificado'] = cofre.info(l['cnpj'])
-        return pagina(request, 'situacao.html', {'linhas': linhas, 'totais': situacao.totais(linhas), 'tipos': situacao.TIPOS, 'tela': 'situacao'}, user=u)
+        return pagina(request, 'situacao.html', {'linhas': linhas, 'totais': situacao.totais(linhas), 'tipos': situacao.TIPOS, 'tela': 'situacao', 'rodando': bool(motor.estado['rodando']), 'auto': agendador.ligado(), 'proxima': agendador.proxima()}, user=u)
 
     @app.get('/documentos', response_class=HTMLResponse)
     def documentos(request: Request, empresa: str = '', tipo: str = '', mov: str = '', q: str = ''):
@@ -232,4 +239,46 @@ def criar_app(importador=None):
         xml = row[0] if isinstance(row[0], bytes) else str(row[0]).encode('utf-8'); log(u, 'XML_BAIXADO', str(doc_id)[:60])
         return Response(xml, media_type='application/xml', headers={'Content-Disposition': f'attachment; filename="{re.sub(r"[^0-9A-Za-z_.-]", "_", str(doc_id))[:80]}.xml"'})
 
+    # ------------------------------------------------------------ busca
+    def pendentes():
+        cfg = motor.cfg; oc = motivos.ultimas(str(core.DB_PATH))
+        return [l['cnpj'] for l in situacao.linhas(str(core.DB_PATH), cfg, None, ocorrencias=oc, diagnostico={}) if l['pendentes']]
+
+    @app.post('/busca/agora')
+    def busca_agora(request: Request, empresa: str = Form(''), pendentes_so: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/situacao', status_code=303)
+        only = [empresa] if empresa else (pendentes() if pendentes_so else None)
+        if only is not None and not only: return RedirectResponse('/situacao', status_code=303)
+        if agendador.disparar(only=only, manual=True): log(u, 'BUSCA_PEDIDA', (empresa or ('pendentes' if pendentes_so else 'todas'))[:40])
+        return RedirectResponse('/situacao', status_code=303)
+
+    @app.post('/busca/cancelar')
+    def busca_cancelar(request: Request, csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if csrf_ok(request, csrf): motor.cancelar(); log(u, 'BUSCA_CANCELADA', '')
+        return RedirectResponse('/situacao', status_code=303)
+
+    @app.post('/busca/auto')
+    def busca_auto(request: Request, ligar: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if csrf_ok(request, csrf): agendador.definir(ligar == '1'); log(u, 'BUSCA_AUTOMATICA', 'ligada' if ligar == '1' else 'desligada')
+        return RedirectResponse('/situacao', status_code=303)
+
+    @app.get('/busca/estado')
+    def busca_estado(request: Request):
+        u, r = exigir(request)
+        if r: return Response('{}', status_code=401, media_type='application/json')
+        import json
+        e = dict(motor.estado); e['progresso'] = core.busca_progresso_texto() if e.get('rodando') else ''; e['auto'] = agendador.ligado(); e['proxima'] = agendador.proxima()
+        return Response(json.dumps(e, ensure_ascii=False), media_type='application/json', headers={'Cache-Control': 'no-store'})
+
     return app
+
+
+def app_producao():
+    """Fábrica usada pelo servidor: igual ao site de teste, mas com o agendador da busca automática ligado."""
+    return criar_app(iniciar_agendador=True)

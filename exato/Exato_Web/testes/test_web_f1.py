@@ -3,7 +3,7 @@ import os, re, sys, tempfile, datetime, sqlite3
 from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 os.environ['EXATO_WEB_DADOS'] = tempfile.mkdtemp(prefix='exato_web_'); os.environ['EXATO_WEB_HTTPS'] = '0'; os.environ['EXATO_WEB_COFRE_CHAVE'] = 'chave-de-teste'
-sys.path.insert(0, str(RAIZ))
+sys.path.insert(0, str(RAIZ)); sys.path.insert(0, str(RAIZ / 'testes'))
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -14,11 +14,7 @@ from web import config, seguranca, cofre as cofre_mod
 from web.app import criar_app
 
 
-def gerar_a1(cnpj, senha, dias=365, nome='EMPRESA TESTE LTDA'):
-    chave = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    nm = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, f'{nome}:{cnpj}')]); agora = datetime.datetime.now(datetime.timezone.utc)
-    cert = x509.CertificateBuilder().subject_name(nm).issuer_name(nm).public_key(chave.public_key()).serial_number(x509.random_serial_number()).not_valid_before(agora - datetime.timedelta(days=max(10, 2 - dias))).not_valid_after(agora + datetime.timedelta(days=dias)).sign(chave, hashes.SHA256())
-    return pkcs12.serialize_key_and_certificates(b'x', chave, cert, None, serialization.BestAvailableEncryption(senha.encode()))
+from ajuda_web import gerar_a1
 
 
 # ---- cofre (sem site)
@@ -73,7 +69,9 @@ r = c.post('/conta/2fa', data={'codigo': '000000', 'csrf': tk}); assert r.status
 r = c.post('/conta/2fa', data={'codigo': seguranca.codigo_totp(seg), 'csrf': tk}); assert r.status_code == 303 and r.headers['location'] == '/situacao' and 'exato_sessao' in c.cookies
 assert c.get('/situacao').status_code == 200
 # sair e entrar de novo: agora pede o código, e o mesmo código não vale duas vezes
-c.post('/sair', data={'csrf': tk}); c.cookies.delete('exato_sessao')
+copia = c.cookies.get('exato_sessao'); c.post('/sair', data={'csrf': tk}); c.cookies.delete('exato_sessao')
+c.cookies.set('exato_sessao', copia); assert c.get('/situacao').status_code == 303          # cookie copiado depois de sair não vale mais
+c.cookies.delete('exato_sessao')
 r = c.post('/login', data={'email': 'maria@exemplo.com.br', 'senha': 'SenhaForte#2026', 'csrf': tk}); assert r.headers['location'] == '/login/codigo'
 r = c.post('/login/codigo', data={'codigo': seguranca.codigo_totp(seg), 'csrf': tk}); assert r.status_code == 401          # mesmo passo já usado na ativação
 import time; novo = seguranca.codigo_totp(seg, time.time() + 30)

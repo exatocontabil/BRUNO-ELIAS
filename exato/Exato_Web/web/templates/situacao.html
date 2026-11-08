@@ -1,8 +1,15 @@
 {% extends "base.html" %}{% block titulo %}Situação da busca — Exato{% endblock %}
 {% block corpo %}<h1>Situação da busca</h1><p class="sub">Para cada empresa, o que o Exato já buscou. Atrasado = última busca há mais de 3 dias.</p>
+<div id="estado-busca" class="aviso b" data-rodando="{{ 1 if rodando else 0 }}" {{ '' if rodando else 'hidden' }}>Buscando...</div>
+<div class="card"><div class="linha">
+<form method="post" action="/busca/agora"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="pendentes_so" value="1"><button>Buscar o que falta</button></form>
+<form method="post" action="/busca/agora"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="sec">Buscar todas as empresas</button></form>
+<form method="post" action="/busca/cancelar"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="sec">Cancelar</button></form>
+<form method="post" action="/busca/auto"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="ligar" value="{{ 0 if auto else 1 }}"><button class="sec">{{ 'Desligar' if auto else 'Ligar' }} a atualização automática (a cada 4 horas)</button></form>
+<small class="mu">{{ 'Próxima rodada automática: ' ~ proxima if auto and proxima else 'Atualização automática desligada.' if not auto else '' }}</small></div></div>
 <div class="kpis"><div class="kpi"><b class="gr-t">{{ totais.em_dia }}</b><span>Em dia</span></div><div class="kpi"><b>{{ totais.atraso }}</b><span>Com atraso</span></div><div class="kpi"><b>{{ totais.nunca }}</b><span>Ainda não buscado</span></div><div class="kpi"><b>{{ totais.empresas }}</b><span>Empresas</span></div></div>
 <div class="card"><table><tr><th>Empresa</th>{% for f, nome in tipos %}<th>{{ nome }}</th>{% endfor %}<th>Certificado A1</th></tr>
 {% for l in linhas %}<tr><td><b>{{ l.nome }}</b><br><small class="mu">{{ l.cnpj_fmt }}</small></td>
-{% for f, nome in tipos %}{% set c = l.celulas[f] %}<td><span class="pill {{ {'em_dia':'g','atrasado':'a','nunca':'r','sem_notas':'n'}.get(c.estado,'n') }}">{{ c.texto if c.texto is defined else c.estado }}</span><br><small class="mu pre">{{ c.detalhe }}</small></td>{% endfor %}
+{% for f, nome in tipos %}{% set c = l.celulas[f] %}<td><span class="pill {{ {'em_dia':'g','atrasado':'a','nunca':'r','sem_notas':'n'}.get(c.estado,'n') }}">{{ c.texto if c.texto is defined else c.estado }}</span><br><small class="mu pre">{{ c.detalhe }}</small>{% if c.causa %}<br><small class="pre" style="color:#A3121F" title="{{ c.causa.acao }}">{{ c.causa.titulo }}</small>{% endif %}</td>{% endfor %}
 <td>{% if l.certificado %}<span class="pill {{ 'r' if l.certificado.vencido else 'g' }}">até {{ l.certificado.validade }}</span>{% else %}<span class="pill n">Sem A1</span>{% endif %}</td></tr>
-{% else %}<tr><td colspan="6">Nenhuma empresa cadastrada.</td></tr>{% endfor %}</table></div>{% endblock %}
+{% else %}<tr><td colspan="6">Nenhuma empresa cadastrada.</td></tr>{% endfor %}</table></div><script src="/static/situacao.js"></script>{% endblock %}
