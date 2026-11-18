@@ -330,3 +330,6 @@ Tela NFS-e (conferência) + relatório mensal em PDF no site. Falta só o teste 
 - Pedido do usuário (guardado para a próxima versão): **melhorar o layout do Exato Web, deixando mais moderno.**
 - Falta testar no servidor: importar empresas, enviar A1, primeira busca (ImportadorWindows), Box-e/e-mail, HTTPS (Caddy)/firewall, manifestação em homologação.
 - Ideia pedida/oferecida: `.bat` de cópia diária da pasta `ExatoWebDados` (cofre incluso).
+
+## Exato Web: novo visual (18/11/2026)
+Layout refeito (inspirado em sistemas como o SIEG): menu lateral agrupado com ícones, barra de topo com aviso de busca e botão claro/escuro, painel de saúde da carteira, filtros e busca nas tabelas, login em duas colunas, celular com menu recolhido. Sem fontes nem scripts de fora (`web/static/estilo.css`, `app.js`, `tema.js`, `templates/_ui.html`). Falta conferir no servidor real e ajustar com o que você achar.

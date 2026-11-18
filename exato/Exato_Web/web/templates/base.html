@@ -1,7 +1,25 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{% block titulo %}Exato Central Fiscal{% endblock %}</title><link rel="icon" href="/static/logo.png"><link rel="stylesheet" href="/static/estilo.css"></head>
-<body>{% if usuario %}<div class="layout"><nav class="menu"><div class="logo"><img src="/static/logo.png" alt=""><b>exato</b></div>
-<a href="/situacao" class="{{ 'ativo' if tela=='situacao' }}">Situação da busca</a><a href="/buscar" class="{{ 'ativo' if tela=='buscar' }}">Buscar notas</a><a href="/empresas" class="{{ 'ativo' if tela=='empresas' }}">Empresas</a>
-<a href="/auditoria" class="{{ 'ativo' if tela=='auditoria' }}">Auditoria</a><a href="/certificados" class="{{ 'ativo' if tela=='certificados' }}">Certificados A1</a><a href="/nfse" class="{{ 'ativo' if tela=='nfse' }}">NFS-e</a><a href="/manifestacao" class="{{ 'ativo' if tela=='manifestacao' }}">Manifestação</a><a href="/repositorio" class="{{ 'ativo' if tela=='repositorio' }}">Repositório</a><a href="/fechamento" class="{{ 'ativo' if tela=='fechamento' }}">Fechamento</a><a href="/boxe" class="{{ 'ativo' if tela=='boxe' }}">Box-e</a><a href="/relatorios" class="{{ 'ativo' if tela=='relatorios' }}">Relatórios</a><a href="/documentos" class="{{ 'ativo' if tela=='documentos' }}">Documentos</a>
-<form method="post" action="/sair"><input type="hidden" name="csrf" value="{{ csrf }}"><small class="mu">{{ usuario.name }}</small><br><button class="sec" style="margin-top:8px;width:100%">Sair</button></form></nav>
-<main class="conteudo">{% block corpo %}{% endblock %}</main></div>{% else %}{% block solo %}{% endblock %}{% endif %}</body></html>
+{% from "_ui.html" import ic, iniciais %}<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block titulo %}Exato Central Fiscal{% endblock %}</title><meta name="color-scheme" content="light dark"><link rel="icon" href="/static/logo.png"><script src="/static/tema.js"></script><link rel="stylesheet" href="/static/estilo.css"></head>
+<body>{% if usuario %}<div class="layout"><input type="checkbox" id="navchk" aria-hidden="true"><nav class="menu"><div class="logo"><img src="/static/logo.png" alt=""><div><b>exato</b><small>Central Fiscal</small></div></div>
+<div class="grupo">Visão geral</div>
+<a href="/situacao" class="{{ 'ativo' if tela=='situacao' }}">{{ ic('activity') }}Situação da busca</a>
+<a href="/buscar" class="{{ 'ativo' if tela=='buscar' }}">{{ ic('download') }}Buscar notas</a>
+<div class="grupo">Carteira</div>
+<a href="/empresas" class="{{ 'ativo' if tela=='empresas' }}">{{ ic('briefcase') }}Empresas</a>
+<a href="/certificados" class="{{ 'ativo' if tela=='certificados' }}">{{ ic('key') }}Certificados A1</a>
+<a href="/documentos" class="{{ 'ativo' if tela=='documentos' }}">{{ ic('file') }}Documentos</a>
+<div class="grupo">Fiscal</div>
+<a href="/nfse" class="{{ 'ativo' if tela=='nfse' }}">{{ ic('receipt') }}NFS-e</a>
+<a href="/auditoria" class="{{ 'ativo' if tela=='auditoria' }}">{{ ic('check-square') }}Auditoria</a>
+<a href="/manifestacao" class="{{ 'ativo' if tela=='manifestacao' }}">{{ ic('mail') }}Manifestação</a>
+<a href="/fechamento" class="{{ 'ativo' if tela=='fechamento' }}">{{ ic('calendar') }}Fechamento</a>
+<div class="grupo">Arquivo e envios</div>
+<a href="/repositorio" class="{{ 'ativo' if tela=='repositorio' }}">{{ ic('database') }}Repositório</a>
+<a href="/boxe" class="{{ 'ativo' if tela=='boxe' }}">{{ ic('send') }}Box-e e resumo</a>
+<a href="/relatorios" class="{{ 'ativo' if tela=='relatorios' }}">{{ ic('bar-chart') }}Relatórios</a>
+<div class="rodape"><div class="conta"><span class="av" style="--h:{{ (usuario.email|length * 37) % 360 }}">{{ iniciais(usuario.name) }}</span><div><b>{{ usuario.name }}</b><small>{{ 'Administrador' if usuario.role=='admin' else 'Usuário' }}</small></div><form method="post" action="/sair" class="sair"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="sec" title="Sair" aria-label="Sair">{{ ic('log-out') }}</button></form></div>
+</div></nav>
+<div class="principal"><header class="topo"><label for="navchk" class="burger" aria-label="Menu">{{ ic('menu') }}</label><div class="crumb"><span class="raiz">Exato Web</span>{{ ic('chevron') }}<b>{{ {'situacao':'Situação da busca','buscar':'Buscar notas','empresas':'Empresas','certificados':'Certificados A1','documentos':'Documentos','nfse':'NFS-e','auditoria':'Auditoria','manifestacao':'Manifestação','fechamento':'Fechamento','repositorio':'Repositório','boxe':'Box-e e resumo','relatorios':'Relatórios'}.get(tela, '') }}</b></div><span class="espaco"></span>
+<span class="chip" id="chip-busca">{% if rodando %}{% endif %}<i class="ponto"></i><span class="txt">Busca</span></span>
+<button type="button" class="icone-btn" data-tema title="Claro / escuro" aria-label="Alternar tema claro e escuro">{{ ic('moon') }}</button></header>
+<main class="conteudo">{% block corpo %}{% endblock %}</main></div></div><script src="/static/app.js" defer></script>{% else %}{% block solo %}{% endblock %}<script src="/static/app.js" defer></script>{% endif %}</body></html>

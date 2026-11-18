@@ -1,5 +1,10 @@
-{% extends "base.html" %}{% block titulo %}Entrar — Exato Central Fiscal{% endblock %}
-{% block solo %}<div class="entrar"><div class="logo"><img src="/static/logo.png" alt=""><h1>Exato Central Fiscal</h1></div>
-<form method="post" action="/login" class="card">{% if erro %}<div class="aviso erro">{{ erro }}</div>{% endif %}
-<input type="hidden" name="csrf" value="{{ csrf }}"><label>E-mail</label><input name="email" type="email" autocomplete="username" required autofocus>
-<label>Senha</label><input name="senha" type="password" autocomplete="current-password" required><button>Entrar</button></form></div>{% endblock %}
+{% extends "base.html" %}{% from "_ui.html" import ic %}{% block titulo %}Entrar — Exato Central Fiscal{% endblock %}
+{% block solo %}<div class="entrada"><section class="vitrine"><div class="marca"><img src="/static/logo.png" alt="">exato</div>
+<div><h2>Todos os XMLs dos seus clientes, buscados e guardados sozinhos.</h2><p>NF-e, NFC-e, CT-e e NFS-e direto da SEFAZ e do Emissor Nacional, com auditoria, fechamento do mês e envio ao Box-e e à Domínio.</p>
+<ul><li>{{ ic('download') }}<span><b>Busca automática</b><br><small>De hora em hora, sem pedir XML ao cliente.</small></span></li><li>{{ ic('check-square') }}<span><b>Auditoria em PDF</b><br><small>SAT x XML, com o que falta e por quê.</small></span></li><li>{{ ic('lock') }}<span><b>Certificados protegidos</b><br><small>Guardados criptografados, acesso com verificação em duas etapas.</small></span></li></ul></div>
+<small>Exato Central Fiscal • Exato Web</small></section>
+<section class="lado"><div class="caixa"><div class="mini-logo"><img src="/static/logo.png" alt="">exato</div><h1>Entrar</h1><p class="sub">Use o e-mail e a senha que o escritório cadastrou para você.</p>
+<form method="post" action="/login" class="card">{% if erro %}<div class="aviso erro">{{ ic('alert') }}<span>{{ erro }}</span></div>{% endif %}
+<input type="hidden" name="csrf" value="{{ csrf }}"><label>E-mail</label><input name="email" type="email" autocomplete="username" required autofocus placeholder="voce@escritorio.com.br">
+<label>Senha</label><input name="senha" type="password" autocomplete="current-password" required placeholder="Sua senha"><button>Entrar</button></form>
+<div class="selo-seguro">{{ ic('lock') }}Conexão protegida • verificação em duas etapas</div></div></section></div>{% endblock %}

@@ -3,7 +3,7 @@
 {% if erro %}<div class="aviso erro">{{ erro }}</div>{% endif %}
 <form method="get" action="/nfse" class="card"><div class="linha"><div><label>Empresa</label><select name="empresa" required><option value="">Escolha</option>{% for e in empresas %}<option value="{{ e.cnpj }}" {{ 'selected' if e.cnpj==sel }}>{{ e.nome }}</option>{% endfor %}</select></div>
 <div><label>De</label><input type="date" name="de" value="{{ de }}"></div><div><label>Até</label><input type="date" name="ate" value="{{ ate }}"></div><button>Conferir</button></div></form>
-{% if c %}<div class="card"><h2>Resumo ({{ c.total }} nota(s))</h2><table><tr><th></th><th>Autorizadas</th><th>Canceladas</th><th>Valor das autorizadas</th></tr>
+{% if not c %}<div class="card" style="text-align:center;padding:36px 20px"><h2 style="justify-content:center">Escolha uma empresa</h2><p class="mu" style="margin:0">Mostramos as NFS-e prestadas e tomadas, o que merece conferência e o botão do relatório mensal em PDF.</p></div>{% endif %}{% if c %}<div class="card"><h2>Resumo ({{ c.total }} nota(s))</h2><table><tr><th></th><th>Autorizadas</th><th>Canceladas</th><th>Valor das autorizadas</th></tr>
 <tr><td>Prestadas</td><td>{{ c.prestadas.aut }}</td><td>{{ c.prestadas.canc }}</td><td>R$ {{ '%.2f'|format(c.prestadas.valor|float) }}</td></tr>
 <tr><td>Tomadas</td><td>{{ c.tomadas.aut }}</td><td>{{ c.tomadas.canc }}</td><td>R$ {{ '%.2f'|format(c.tomadas.valor|float) }}</td></tr></table>
 <p>ISS retido: <b>R$ {{ '%.2f'|format(c.iss_retido|float) }}</b> • ISS devido a outro município: <b>{{ c.iss_fora.qtd }}</b> nota(s), R$ {{ '%.2f'|format(c.iss_fora.valor|float) }}</p>
