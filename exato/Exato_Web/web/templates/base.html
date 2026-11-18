@@ -1,5 +1,5 @@
 {% from "_ui.html" import ic, iniciais %}<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{% block titulo %}Exato Central Fiscal{% endblock %}</title><meta name="color-scheme" content="light dark"><link rel="icon" href="/static/logo.png"><script src="/static/tema.js"></script><link rel="stylesheet" href="/static/estilo.css"></head>
+<title>{% block titulo %}Exato Central Fiscal{% endblock %}</title><meta name="color-scheme" content="light dark"><link rel="icon" href="/static/logo.png"><script src="/static/tema.js?v={{ asset_v }}"></script><link rel="stylesheet" href="/static/estilo.css?v={{ asset_v }}"></head>
 <body>{% if usuario %}<div class="layout"><input type="checkbox" id="navchk" aria-hidden="true"><nav class="menu"><div class="logo"><img src="/static/logo.png" alt=""><div><b>exato</b><small>Central Fiscal</small></div></div>
 <div class="grupo">Visão geral</div>
 <a href="/situacao" class="{{ 'ativo' if tela=='situacao' }}">{{ ic('activity') }}Situação da busca</a>
@@ -22,4 +22,4 @@
 <div class="principal"><header class="topo"><label for="navchk" class="burger" aria-label="Menu">{{ ic('menu') }}</label><div class="crumb"><span class="raiz">Exato Web</span>{{ ic('chevron') }}<b>{{ {'situacao':'Situação da busca','buscar':'Buscar notas','empresas':'Empresas','certificados':'Certificados A1','documentos':'Documentos','nfse':'NFS-e','auditoria':'Auditoria','manifestacao':'Manifestação','fechamento':'Fechamento','repositorio':'Repositório','boxe':'Box-e e resumo','relatorios':'Relatórios'}.get(tela, '') }}</b></div><span class="espaco"></span>
 <span class="chip" id="chip-busca">{% if rodando %}{% endif %}<i class="ponto"></i><span class="txt">Busca</span></span>
 <button type="button" class="icone-btn" data-tema title="Claro / escuro" aria-label="Alternar tema claro e escuro">{{ ic('moon') }}</button></header>
-<main class="conteudo">{% block corpo %}{% endblock %}</main></div></div><script src="/static/app.js" defer></script>{% else %}{% block solo %}{% endblock %}<script src="/static/app.js" defer></script>{% endif %}</body></html>
+<main class="conteudo">{% block corpo %}{% endblock %}</main></div></div><script src="/static/app.js?v={{ asset_v }}" defer></script>{% else %}{% block solo %}{% endblock %}<script src="/static/app.js?v={{ asset_v }}" defer></script>{% endif %}</body></html>

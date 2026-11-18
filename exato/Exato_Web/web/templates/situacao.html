@@ -36,4 +36,4 @@
 <td>{% if l.certificado %}<span class="pill {{ 'r' if l.certificado.vencido else 'g' }}">até {{ l.certificado.validade[5:7] ~ '/' ~ l.certificado.validade[:4] if l.certificado.validade[4:5] == '-' else l.certificado.validade }}</span>{% else %}<span class="pill n">Sem A1</span>{% endif %}</td></tr>
 {% else %}<tr><td colspan="6" class="vazio">Nenhuma empresa cadastrada.</td></tr>{% endfor %}
 <tr class="sem-resultado" hidden><td colspan="6" class="vazio">Nenhuma empresa encontrada com esse filtro.</td></tr></tbody></table></div></div>
-<script src="/static/situacao.js"></script>{% endblock %}
+<script src="/static/situacao.js?v={{ asset_v }}"></script>{% endblock %}

@@ -48,7 +48,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
 
     def pagina(request, nome, ctx=None, status=200, user=None):
         c = dict(ctx or {}); tk = csrf_do_pedido(request)
-        c.update({'request': request, 'csrf': tk, 'usuario': user, 'rotulos': ROTULOS_TIPO})
+        c.update({'request': request, 'csrf': tk, 'usuario': user, 'rotulos': ROTULOS_TIPO, 'asset_v': int(max((f.stat().st_mtime for f in (AQUI / 'static').iterdir() if f.is_file()), default=0))})
         resp = tpl.TemplateResponse(request, nome, c, status_code=status)
         if 'exato_csrf' not in request.cookies: cookie(resp, 'exato_csrf', tk, 86400 * 30, http_only=False)
         resp.headers['Cache-Control'] = 'no-store'
@@ -73,6 +73,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         resp.headers.update({'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin',
                              'Content-Security-Policy': "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; form-action 'self'"})
         if config.HTTPS: resp.headers['Strict-Transport-Security'] = 'max-age=31536000'
+        if request.url.path.startswith('/static/'): resp.headers['Cache-Control'] = 'no-cache'          # o navegador confere se o arquivo mudou (depois de uma atualização do site, nada de visual antigo)
         return resp
 
     def sessao_completa(resp, u):
