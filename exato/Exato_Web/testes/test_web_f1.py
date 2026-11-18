@@ -65,6 +65,7 @@ app.state.limite.acertou('testclient', 'maria@exemplo.com.br'); app.state.limite
 r = c.post('/login', data={'email': 'maria@exemplo.com.br', 'senha': 'SenhaForte#2026', 'csrf': tk}); assert r.status_code == 303 and r.headers['location'] == '/conta/2fa' and 'exato_sessao' not in c.cookies
 assert c.get('/situacao').status_code == 303          # ainda sem sessão
 r = c.get('/conta/2fa'); seg = re.search(r'<code class="seg">([A-Z2-7]+)</code>', r.text).group(1)
+assert '<svg' in r.text and 'scale(5)' in r.text          # QR code para o aplicativo ler
 r = c.post('/conta/2fa', data={'codigo': '000000', 'csrf': tk}); assert r.status_code == 400
 r = c.post('/conta/2fa', data={'codigo': seguranca.codigo_totp(seg), 'csrf': tk}); assert r.status_code == 303 and r.headers['location'] == '/situacao' and 'exato_sessao' in c.cookies
 assert c.get('/situacao').status_code == 200

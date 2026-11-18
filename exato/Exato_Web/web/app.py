@@ -103,6 +103,13 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         else: sessao_completa(resp, u)
         return resp
 
+    def qr_svg(uri):
+        """QR code (SVG) para o aplicativo autenticador ler com a câmera; sem o pacote, a tela só mostra a chave."""
+        try:
+            import segno
+            return segno.make(uri, error='m').svg_inline(scale=5, border=2, dark='#0F172A', light='#FFFFFF')
+        except Exception: return ''
+
     def pre(request):
         d = seguranca.verificar(request.cookies.get('exato_pre', ''))
         return d if d else None
@@ -133,7 +140,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         info = core.db_auth_get_user_by_id(uid); email = info['email']
         seg = totp.preparar(uid)
         if seg is None: return RedirectResponse('/situacao', status_code=303)
-        return pagina(request, 'config2fa.html', {'segredo': seg, 'uri': seguranca.uri_totp(seg, email), 'erro': ''}, user=u)
+        return pagina(request, 'config2fa.html', {'segredo': seg, 'uri': seguranca.uri_totp(seg, email), 'qr': qr_svg(seguranca.uri_totp(seg, email)), 'erro': ''}, user=u)
 
     @app.post('/conta/2fa')
     def config_2fa_envio(request: Request, codigo: str = Form(''), csrf: str = Form('')):
@@ -142,7 +149,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if uid is None or not csrf_ok(request, csrf): return RedirectResponse('/login', status_code=303)
         if not totp.confirmar(uid, codigo):
             seg = totp.preparar(uid) or ''
-            return pagina(request, 'config2fa.html', {'segredo': seg, 'uri': seguranca.uri_totp(seg, core.db_auth_get_user_by_id(uid)['email']) if seg else '', 'erro': 'Código inválido. Confira o código mostrado no aplicativo e tente de novo.'}, 400, user=u)
+            return pagina(request, 'config2fa.html', {'segredo': seg, 'uri': seguranca.uri_totp(seg, core.db_auth_get_user_by_id(uid)['email']) if seg else '', 'qr': qr_svg(seguranca.uri_totp(seg, core.db_auth_get_user_by_id(uid)['email'])) if seg else '', 'erro': 'Código inválido. Confira o código mostrado no aplicativo e tente de novo.'}, 400, user=u)
         usr = core._auth_user_from_row(core.db_auth_get_user_by_id(uid)); log(usr, '2FA_ATIVADO', 'Verificação em duas etapas ativada')
         resp = RedirectResponse('/situacao', status_code=303); sessao_completa(resp, usr); return resp
 

@@ -6,3 +6,4 @@ cryptography>=41
 httpx>=0.28
 reportlab>=4
 pillow>=10
+segno>=1.6
