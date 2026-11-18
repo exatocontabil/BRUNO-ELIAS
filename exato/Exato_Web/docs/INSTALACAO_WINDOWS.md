@@ -54,3 +54,17 @@ Sem a pasta `cofre` o site não abre os certificados: ela precisa ir junto, e a 
 Dia a dia: `PARAR_SITE.bat` (desliga), `LIGAR_SITE.bat` (liga), `VER_REGISTRO_DO_SITE.bat` (o que antes aparecia na janela preta; fica em `ExatoWebDados\logs\servidor_saida.log`), `REMOVER_INICIO_AUTOMATICO.bat` (volta ao modo antigo).
 Para atualizar: `PARAR_SITE.bat` → trocar a pasta `web` → `LIGAR_SITE.bat`.
 Não testado em Windows real nesta versão: se algo falhar, mande o texto da janela do instalador e o registro do site.
+
+
+## Endereço do escritório com cadeado (https://fiscal.exatosolucoescontabeis.com)
+
+Só para a rede do escritório (nada abre para a internet). Usa o Caddy com certificado do próprio escritório.
+
+1. Com o site instalado em uma pasta do computador (ex.: `C:\ExatoWeb`, veja "Ligar sozinho"), rode `INSTALAR_ENDERECO_COMERCIAL.bat` **a partir dessa pasta**.
+2. Ele baixa o Caddy, cria a configuração, liga o endereço junto com o Windows (tarefa "Exato Web Endereco"), libera a porta 443 só para a rede local e mostra o IP do computador.
+3. No cPanel da HostGator > Editor de Zona: registro tipo **A**, nome `fiscal.exatosolucoescontabeis.com`, endereço = o IP mostrado (reserve esse IP no roteador).
+4. Em cada outro computador (no máximo 3): copie a pasta `para_os_outros_pcs` e rode `INSTALAR_CERTIFICADO_NESTE_PC.bat` (uma vez; o Windows pode pedir um "Sim").
+5. Abra `https://fiscal.exatosolucoescontabeis.com`.
+
+Proteção contra "DNS rebinding" de alguns roteadores pode bloquear nome público apontando para IP interno: o `.bat` dos computadores oferece registrar o nome no arquivo hosts.
+Não testado em Windows real nesta versão.
