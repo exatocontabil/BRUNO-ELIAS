@@ -28,7 +28,7 @@ res = aud.auditar(CN, [f_ok], ['nfe'], '2026-09-01', '2026-09-30', 'maria@x.com'
 assert res['conciliados'] == 5 and res['sem_xml'] == 1 and res['divergencias'] == 0 and res['status'] in ('atencao', 'divergencia') and res['empresa']
 assert [l['situacao'] for l in res['linhas']].count('Sem correspondência') == 1 and any(l['numero'] == '6' and 'não foi localizado' in l['observacao'] for l in res['linhas'])
 pdf = aud.caminho_pdf(res['id']); assert pdf and pdf.stat().st_size > 5000
-import pypdf; texto = ' '.join((p.extract_text() or '') for p in pypdf.PdfReader(str(pdf)).pages); assert 'AUDITORIA FISCAL' in texto and 'PADARIA TESTE' in texto
+import pypdf; texto = ' '.join((p.extract_text() or '') for p in pypdf.PdfReader(str(pdf)).pages); assert 'Auditoria fiscal' in texto and 'PADARIA TESTE' in texto
 assert (config.DADOS / 'auditorias' / res['id'] / 'SAT_1.xlsx').exists() and aud.historico()[0]['id'] == res['id'] and not any('linhas' in h for h in aud.historico())
 # valor diferente = divergência; tudo certo = conforme
 f_div = tmp / 'sat_div.xlsx'; sat_xlsx(f_div, [1, 2, 3, 4, 5], {**VAL, 3: '333.00'})

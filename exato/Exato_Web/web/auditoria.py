@@ -2,12 +2,12 @@
 
 Espelha o que o programa instalado faz em `_import_sat_audit` e `_finish_sat_audit` (V190) usando as mesmas rotinas de leitura, conferência, análise e PDF.
 Cada auditoria fica numa pasta própria (`<dados>/auditorias/<AAAAMMDD_HHMMSS_CNPJ>/`) com o resumo, o PDF e uma cópia dos Excels do SAT."""
-import json, re, shutil
+import json, re, shutil, sys
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 
-from . import config, nucleo
+from . import config, nucleo, pdf_auditoria
 
 ID_RE = re.compile(r'^\d{8}_\d{6}_\d{14}$')
 FAMILIAS = ('nfe', 'nfce')
@@ -76,7 +76,11 @@ def auditar(cnpj, arquivos, familias, data_ini, data_fim, enviado_por='', agora=
     try: core._audit_history_save(combined, nome, cnpj, copias)
     except Exception: pass
     pdf = pasta / f'Auditoria_Fiscal_{cnpj}_{agora.strftime("%Y%m%d")}.pdf'
-    core.generate_audit_pdf(combined, str(pdf), nome, cnpj, data_ini, data_fim, [Path(c).name for c in copias])
+    try: pdf_auditoria.gerar(core, combined, str(pdf), nome, cnpj, data_ini, data_fim, [Path(c).name for c in copias])          # visual novo
+    except Exception:
+        try: core.log_exception('Web: PDF novo da auditoria (usando o antigo)', sys.exc_info())
+        except Exception: pass
+        core.generate_audit_pdf(combined, str(pdf), nome, cnpj, data_ini, data_fim, [Path(c).name for c in copias])
     ai = combined.get('ai_analysis') or {}
     linhas = []
     for r in combined.get('display_rows') or []:

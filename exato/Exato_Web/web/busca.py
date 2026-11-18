@@ -39,6 +39,8 @@ class Motor:
         self._plano = {'modo': 'continuar', 'volta': False, 'parcial': False, 'de': None, 'ate': None}          # como a busca em curso começa (busca manual)
         try: from . import fechamento_eventos; fechamento_eventos.instalar(core, nucleo.modulo('exato_fechamento'))          # ZIP do Fechamento com os eventos das notas (e sem os resumos)
         except Exception: pass
+        try: from . import pdf_nfse; pdf_nfse.instalar()          # relatório mensal de NFS-e e PDF do Fechamento no visual novo (só no site)
+        except Exception: pass
         for cod, (t, e, a, g) in CAUSAS_WEB.items(): self.motivos.CAUSAS.setdefault(cod, (t, e, a, g))          # causas próprias do site (explicadas em linguagem simples)
 
     # ------------------------------------------------------------ anotações
