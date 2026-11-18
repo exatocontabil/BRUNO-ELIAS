@@ -1,5 +1,7 @@
 # Exato Web — instalação no servidor Windows
 
+> **Instalando em outra máquina? Siga primeiro o `GUIA_NOVA_MAQUINA.md`** (passo a passo atualizado, com o que aprendemos na primeira instalação). Este arquivo guarda os detalhes.
+
 Faça com calma, na ordem. Cada passo tem um jeito de conferir.
 
 ## 1. Programas
