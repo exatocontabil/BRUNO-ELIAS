@@ -41,3 +41,16 @@ Sem a pasta `cofre` o site não abre os certificados: ela precisa ir junto, e a 
 ## 8. No dia a dia
 - Usuário novo: `python -m web.usuarios criar ...`. Perdeu o celular: `python -m web.usuarios zerar-2fa --email ...`. Trocou a senha: `... senha --email ...` (derruba os acessos abertos).
 - Atualizar: pare o site, extraia o pacote novo por cima (os dados ficam fora da pasta) e inicie de novo.
+
+
+## Ligar sozinho com o Windows, sem janela preta
+
+1. Feche a janela preta do site, se estiver aberta.
+2. Dê dois cliques em `INSTALAR_INICIO_AUTOMATICO.bat` (pede permissão de administrador).
+3. Se a pasta do site estiver na rede (`\\SERVER\...`), ele pergunta uma pasta **deste computador** (padrão `C:\ExatoWeb`) e copia o site para lá.
+4. Informe o usuário do Windows (**o mesmo que já usava o site**: o cofre dos certificados e os dados ficam ligados a ele) e a senha. A senha fica só no Windows.
+5. Pronto: a tarefa "Exato Web" liga com o computador, escondida, e reinicia sozinha se cair.
+
+Dia a dia: `PARAR_SITE.bat` (desliga), `LIGAR_SITE.bat` (liga), `VER_REGISTRO_DO_SITE.bat` (o que antes aparecia na janela preta; fica em `ExatoWebDados\logs\servidor_saida.log`), `REMOVER_INICIO_AUTOMATICO.bat` (volta ao modo antigo).
+Para atualizar: `PARAR_SITE.bat` → trocar a pasta `web` → `LIGAR_SITE.bat`.
+Não testado em Windows real nesta versão: se algo falhar, mande o texto da janela do instalador e o registro do site.
