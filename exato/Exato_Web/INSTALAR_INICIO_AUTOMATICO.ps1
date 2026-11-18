@@ -35,9 +35,14 @@ try {
     Write-Host 'Importante: use o MESMO usuario do Windows que ja usava o site (os certificados guardados e os dados pertencem a ele).' -ForegroundColor Yellow
     $usuario = Read-Host "Usuario do Windows (Enter = $padrao)"
     if (-not $usuario) { $usuario = $padrao }
-    $senha = Read-Host "Senha do Windows de $usuario (so o Windows guarda; o Exato Web nao le)" -AsSecureString
+    $senha = Read-Host "Senha do Windows de $usuario (so o Windows guarda). Se este usuario NAO tem senha, so aperte Enter" -AsSecureString
     $plana = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($senha))
-    if (-not $plana) { throw 'Sem senha nao da para ligar o site antes de alguem entrar no Windows.' }
+    $semSenha = -not $plana
+    if ($semSenha) {
+        Write-Host ''
+        Write-Host 'Sem senha, o Windows nao deixa ligar o site antes de alguem entrar. Entao ele vai ligar assim que ESTE USUARIO entrar no Windows (tambem escondido, sem janela preta).' -ForegroundColor Yellow
+        Write-Host 'Dica: para ligar mesmo com o computador reiniciado e ninguem presente, ative a entrada automatica no Windows (digite netplwiz no menu Iniciar) ou crie uma senha.' -ForegroundColor Yellow
+    }
 
     # 4) Se o site antigo (janela preta) esta aberto, avisa.
     $porta = 8443
@@ -46,9 +51,15 @@ try {
 
     # 5) Cria a tarefa: liga com o Windows, roda escondida, reinicia sozinha se cair, sem limite de tempo.
     $acao = New-ScheduledTaskAction -Execute $pyw -Argument '-m web.servico' -WorkingDirectory $pasta
-    $gatilho = New-ScheduledTaskTrigger -AtStartup
     $cfg = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit (New-TimeSpan -Seconds 0) -MultipleInstances IgnoreNew
-    Register-ScheduledTask -TaskName $Nome -Action $acao -Trigger $gatilho -Settings $cfg -User $usuario -Password $plana -RunLevel Limited -Force | Out-Null
+    if ($semSenha) {
+        $gatilho = New-ScheduledTaskTrigger -AtLogOn -User $usuario
+        $principal = New-ScheduledTaskPrincipal -UserId $usuario -LogonType Interactive -RunLevel Limited
+        Register-ScheduledTask -TaskName $Nome -Action $acao -Trigger $gatilho -Settings $cfg -Principal $principal -Force | Out-Null
+    } else {
+        $gatilho = New-ScheduledTaskTrigger -AtStartup
+        Register-ScheduledTask -TaskName $Nome -Action $acao -Trigger $gatilho -Settings $cfg -User $usuario -Password $plana -RunLevel Limited -Force | Out-Null
+    }
     $plana = $null
     Start-ScheduledTask -TaskName $Nome
     Write-Host 'Ligando o site...' -ForegroundColor Cyan
@@ -59,7 +70,7 @@ try {
         try { $c.Connect('127.0.0.1', $porta); $ok = $true } catch { } finally { $c.Close() }
     }
     if ($ok) {
-        Write-Host ''; Write-Host 'PRONTO! O Exato Web agora liga sozinho com o Windows, sem janela preta.' -ForegroundColor Green
+        Write-Host ''; Write-Host 'PRONTO! O Exato Web agora liga sozinho, sem janela preta.' -ForegroundColor Green
         Write-Host "Abra: https://127.0.0.1:$porta   (ou o endereco que voce ja usava)"
         Write-Host "Pasta do site: $pasta"
         Write-Host 'Para atualizar: rode PARAR_SITE.bat, troque a pasta "web" e rode LIGAR_SITE.bat.'

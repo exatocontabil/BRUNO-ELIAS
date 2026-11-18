@@ -11,6 +11,6 @@ assert (pasta / 'servidor_saida.log.1').exists() and arq.stat().st_size == 0    
 for nome in ('INSTALAR_INICIO_AUTOMATICO.bat', 'INSTALAR_INICIO_AUTOMATICO.ps1', 'PARAR_SITE.bat', 'LIGAR_SITE.bat', 'VER_REGISTRO_DO_SITE.bat', 'REMOVER_INICIO_AUTOMATICO.bat'):
     t = (RAIZ / nome).read_text(encoding='utf-8'); assert t.strip(), nome
 ps = (RAIZ / 'INSTALAR_INICIO_AUTOMATICO.ps1').read_text(encoding='utf-8')
-assert 'AtStartup' in ps and 'RestartCount' in ps and "'-m web.servico'" in ps and 'pythonw.exe' in ps and "StartsWith('\\\\')" in ps          # liga com o Windows, reinicia se cair, escondido, trata pasta de rede
+assert 'AtStartup' in ps and 'AtLogOn' in ps and 'LogonType Interactive' in ps and 'RestartCount' in ps and "'-m web.servico'" in ps and 'pythonw.exe' in ps and "StartsWith('\\\\')" in ps          # liga com o Windows, reinicia se cair, escondido, trata pasta de rede
 sys.path.insert(0, str(RAIZ)); import montar_web
 print('Exato Web (inicio automatico): OK')
