@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import auditoria as aud, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -331,6 +331,112 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
             return PlainTextResponse('Não foi possível gerar o PDF desta nota. O XML continua disponível para baixar.', status_code=500)
         log(u, 'PDF_ABERTO', str(doc_id)[:60])
         return FileResponse(tmp.name, media_type='application/pdf', headers={'Content-Disposition': 'inline; filename="nota.pdf"'}, background=BackgroundTask(lambda: Path(tmp.name).unlink(missing_ok=True)))
+
+    # ------------------------------------------------------------ Exatinho (assistente local: situação da busca e dúvidas de uso)
+    def exa_linhas():
+        cfg = motor.cfg; oc = motivos.ultimas(str(core.DB_PATH)); esc = cofre.info('escritorio'); esc_ok = bool(esc and not esc.get('vencido'))
+        out = situacao.linhas(str(core.DB_PATH), cfg, None, ocorrencias=oc, diagnostico={}, acessos=dict(cfg.get('nfse_acesso') or {}))
+        for l in out: l['certificado'] = cofre.info(l['cnpj']); l['cert_escritorio'] = esc_ok
+        return out
+
+    def exa_dados():
+        def certs():
+            lista = []
+            for e in empresas_lista():
+                i = e.get('certificado')
+                if i: lista.append({'nome': e['nome'], 'validade': i.get('validade'), 'vencido': bool(i.get('vencido'))})
+            i = cofre.info('escritorio')
+            if i: lista.append({'nome': 'o certificado do escritório', 'validade': i.get('validade'), 'vencido': bool(i.get('vencido'))})
+            return lista
+        def sem_evento():
+            por = {}
+            for cn, _k in (core.db_canceladas_sem_evento() or []): por[cn] = por.get(cn, 0) + 1
+            return [{'cnpj': cn, 'nome': core.db_get_company_name(cn) or cn, 'qtd': q} for cn, q in sorted(por.items(), key=lambda x: -x[1])]
+        def novas_hoje():
+            con = sqlite3.connect(str(core.DB_PATH), timeout=15)
+            try: return con.execute("SELECT COUNT(*) FROM documents WHERE first_seen_at>=? AND COALESCE(status,'')<>'Evento'", (time.strftime('%Y-%m-%dT00:00:00'),)).fetchone()[0]
+            finally: con.close()
+        def contagem(cnpj, de, ate):
+            con = sqlite3.connect(str(core.DB_PATH), timeout=30); out = {}
+            try:
+                sql = "SELECT family, status, COUNT(*) FROM documents WHERE COALESCE(status,'')<>'Evento' AND substr(COALESCE(NULLIF(issued_at,''),first_seen_at),1,10) BETWEEN ? AND ?"; args = [de, ate]
+                if cnpj: sql += ' AND cnpj=?'; args.append(re.sub(r'\D', '', str(cnpj)))
+                for fam, st, n in con.execute(sql + ' GROUP BY family, status', args):
+                    d = out.setdefault(str(fam), {'aut': 0, 'canc': 0}); d['canc' if st == 'Cancelado' else 'aut'] += n
+            finally: con.close()
+            return out
+        import datetime as _dt
+        return {'empresas': lambda: [{'cnpj': e['cnpj'], 'name': e['nome']} for e in empresas_lista()], 'linhas': exa_linhas, 'hoje': _dt.date.today, 'certs': certs, 'canceladas_sem_evento': sem_evento,
+                'novas_hoje': novas_hoje, 'auto_ligado': agendador.ligado, 'contagem': contagem}
+
+    def csrf_cabecalho(request): return csrf_ok(request, request.headers.get('x-csrf', ''))
+
+    @app.get('/exatinho/resumo')
+    async def exatinho_resumo(request: Request):
+        u, r = exigir(request)
+        if r: return Response('{}', status_code=401, media_type='application/json')
+        import json
+        resp = await run_in_threadpool(lambda: exa.resposta_resumo(exa_dados(), u.get('name', '')))
+        itens = [i for i in resp.get('lines', [])]
+        resp['badge'] = sum(1 for l in itens if l.startswith('⚠')) + sum(1 for l in itens if not l.startswith('⚠') and 'em dia' not in l)
+        resp['sugestoes'] = exa.sugestoes_iniciais()
+        return Response(json.dumps(resp, ensure_ascii=False), media_type='application/json', headers={'Cache-Control': 'no-store'})
+
+    @app.post('/exatinho/perguntar')
+    async def exatinho_perguntar(request: Request):
+        u, r = exigir(request)
+        if r: return Response('{}', status_code=401, media_type='application/json')
+        import json
+        if not csrf_cabecalho(request): return Response(json.dumps({'erro': 'A página expirou. Recarregue.'}), status_code=403, media_type='application/json')
+        try: corpo = await request.json()
+        except Exception: corpo = {}
+        q = str((corpo or {}).get('q') or '').strip()[:400]; ctx = (corpo or {}).get('ctx') if isinstance((corpo or {}).get('ctx'), dict) else {}
+        ctx = {k: ctx[k] for k in ('company', 'topic', 'period') if k in ctx and isinstance(ctx[k], (str, list)) and len(str(ctx[k])) < 200}
+        resp = await run_in_threadpool(lambda: exa.responder(q, exa_dados(), u.get('name', ''), ctx))
+        try: resp['id'] = exalog.registrar(u.get('email', ''), q, resp.get('topic', ''), 'desconhecido' if resp.get('desconhecida') else 'ok')
+        except Exception: resp['id'] = 0
+        return Response(json.dumps(resp, ensure_ascii=False, default=str), media_type='application/json', headers={'Cache-Control': 'no-store'})
+
+    @app.post('/exatinho/feedback')
+    async def exatinho_feedback(request: Request):
+        u, r = exigir(request)
+        if r: return Response('{}', status_code=401, media_type='application/json')
+        if not csrf_cabecalho(request): return Response('{}', status_code=403, media_type='application/json')
+        try: corpo = await request.json(); exalog.feedback(int(corpo.get('id') or 0), bool(corpo.get('util')))
+        except Exception: pass
+        return Response('{"ok": true}', media_type='application/json')
+
+    @app.post('/exatinho/acao')
+    async def exatinho_acao(request: Request):
+        """Executa uma ação que a pessoa CONFIRMOU no chat (só buscas; nunca apaga nada)."""
+        u, r = exigir(request)
+        if r: return Response('{}', status_code=401, media_type='application/json')
+        import json
+        if not csrf_cabecalho(request): return Response(json.dumps({'ok': False, 'msg': 'A página expirou. Recarregue.'}), status_code=403, media_type='application/json')
+        try: corpo = await request.json()
+        except Exception: corpo = {}
+        a = (corpo or {}).get('acao') or {}; kind = str(a.get('kind') or ''); msg = ''; ok = False
+        if kind == 'buscar':
+            d = re.sub(r'\D', '', str(a.get('cnpj') or '')); tipos = tuple(t for t in (a.get('tipos') or list(ROTULOS_TIPO)) if t in ROTULOS_TIPO) or tuple(ROTULOS_TIPO)
+            if len(d) != 14 or not core._is_valid_cnpj(d): msg = 'Empresa inválida.'
+            elif not motor.certificado_para(d): msg = 'Esta empresa não tem certificado A1 guardado (nem o do escritório). Envie em Certificados A1.'
+            elif agendador.disparar(only=[d], manual=True, tipos=tipos): ok = True; msg = 'Busca iniciada.'; log(u, 'BUSCA_EXATINHO', d)
+            else: msg = 'Já existe uma busca em andamento. Espere terminar.'
+        elif kind in ('buscar_pendentes', 'buscar_todas'):
+            only = None if kind == 'buscar_todas' else await run_in_threadpool(pendentes)
+            if only is not None and not only: msg = 'Não há empresas pendentes de busca.'
+            elif agendador.disparar(only=only, manual=True): ok = True; msg = 'Busca iniciada.'; log(u, 'BUSCA_EXATINHO', kind)
+            else: msg = 'Já existe uma busca em andamento. Espere terminar.'
+        else: msg = 'Ação desconhecida.'
+        return Response(json.dumps({'ok': ok, 'msg': msg}, ensure_ascii=False), media_type='application/json', headers={'Cache-Control': 'no-store'})
+
+    @app.get('/exatinho/duvidas', response_class=HTMLResponse)
+    def exatinho_duvidas(request: Request):
+        u, r = exigir(request)
+        if r: return r
+        if u.get('role') != 'admin': return RedirectResponse('/situacao', status_code=303)
+        from .exatinho_base import TOPICOS
+        return pagina(request, 'exatinho_duvidas.html', {'lista': exalog.para_ensinar(200), 'res': exalog.resumo(), 'topicos': [(t['id'], t['titulo']) for t in TOPICOS], 'tela': 'exatinho'}, user=u)
 
     # ------------------------------------------------------------ exportar XMLs em ZIP (com os eventos das notas)
     @app.get('/exportar', response_class=HTMLResponse)
