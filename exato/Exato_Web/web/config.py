@@ -1,6 +1,6 @@
 """Configuração do Exato Web (servidor). Tudo que muda de um servidor para outro vem de variáveis de ambiente.
 
-EXATO_WEB_DADOS      pasta dos dados do site (banco, usuários, cofre dos certificados, registros). Padrão: <usuário>/ExatoWebDados
+EXATO_WEB_DADOS      pasta dos dados do site (banco, usuários, cofre dos certificados, registros). Padrão: o que estiver escrito em `dados.txt` (na pasta do site, criado pelo MOVER_DADOS_PARA_OUTRO_DISCO.bat) ou <usuário>/ExatoWebDados
 EXATO_WEB_HTTPS      "1" (padrão em produção) = cookies só por HTTPS; "0" só para teste no próprio servidor
 EXATO_WEB_EXIGIR_2FA "1" (padrão) = todo usuário precisa do código do aplicativo autenticador para entrar
 EXATO_WEB_ARQUIVOS  pasta onde ficam os XMLs em arquivos organizados (Repositório). Padrão: <dados>/Arquivos. Pode ser outro disco.
@@ -10,7 +10,15 @@ import os, re, secrets, sys
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
-DADOS = Path(os.environ.get('EXATO_WEB_DADOS') or (Path.home() / 'ExatoWebDados'))
+
+
+def ler_dados_txt(arquivo):
+    """Primeira linha de `dados.txt` (pasta dos dados em outro disco) ou '' se não existe/está vazia. Sobrevive às atualizações do pacote."""
+    try: return (Path(arquivo).read_text(encoding='utf-8-sig').splitlines() or [''])[0].strip().strip('"')
+    except OSError: return ''
+
+
+DADOS = Path(os.environ.get('EXATO_WEB_DADOS') or ler_dados_txt(RAIZ / 'dados.txt') or (Path.home() / 'ExatoWebDados'))
 DADOS.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault('EXATO_DATA_DIR', str(DADOS / 'nucleo'))          # o código do Exato guarda o banco aqui (antes de importá-lo)
 HTTPS = os.environ.get('EXATO_WEB_HTTPS', '1') != '0'

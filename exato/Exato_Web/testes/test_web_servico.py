@@ -16,5 +16,9 @@ end = (RAIZ / 'INSTALAR_ENDERECO_COMERCIAL.ps1').read_text(encoding='ascii')
 assert 'tls internal' in end and 'reverse_proxy 127.0.0.1:8443' in end and 'LocalSubnet' in end and 'iniciar_caddy.vbs' in end and 'root.crt' in end and 'fiscal.exatosolucoescontabeis.com' in end          # endereço com cadeado só para a rede do escritório
 pc = (RAIZ / 'INSTALAR_CERTIFICADO_NESTE_PC.ps1').read_text(encoding='ascii'); assert 'Cert:\\CurrentUser\\Root' in pc and 'CERTIFICADO_DO_ESCRITORIO.crt' in pc
 for nome in ('INSTALAR_ENDERECO_COMERCIAL.ps1', 'INSTALAR_ENDERECO_COMERCIAL.bat', 'INSTALAR_CERTIFICADO_NESTE_PC.ps1', 'INSTALAR_CERTIFICADO_NESTE_PC.bat'): (RAIZ / nome).read_bytes().decode('ascii')          # só ASCII (o PowerShell antigo lê mal acentos)
+from web import config
+d = Path(tempfile.mkdtemp()); (d / 'dados.txt').write_text('\ufeff"D:\\ExatoWebDados"\nlixo', encoding='utf-8'); assert config.ler_dados_txt(d / 'dados.txt') == 'D:\\ExatoWebDados'          # dados em outro disco (o arquivo sobrevive às atualizações)
+assert config.ler_dados_txt(d / 'nao_existe.txt') == '' and config.ler_dados_txt(d) == ''
+mv = (RAIZ / 'MOVER_DADOS_PARA_OUTRO_DISCO.ps1').read_text(encoding='ascii'); assert 'robocopy' in mv and 'dados.txt' in mv and '_ANTIGA_apagar_depois' in mv and 'StartsWith' in mv and 'Remove-Item' not in mv          # copia, confere e NUNCA apaga a pasta antiga
 sys.path.insert(0, str(RAIZ)); import montar_web
 print('Exato Web (inicio automatico): OK')

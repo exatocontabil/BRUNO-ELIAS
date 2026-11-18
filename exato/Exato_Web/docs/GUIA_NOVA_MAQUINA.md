@@ -18,6 +18,12 @@ Siga na ordem. Em caso de erro, mande o texto da janela e o arquivo `ExatoWebDad
 - Primeiro usuário: `py -3 -m web.usuarios criar --email ... --nome "..." --admin` (senha com no mínimo 10 caracteres). Entrada exige o código de 6 números do celular: o site mostra um **QR code** para ler no aplicativo (não digite a chave à mão: a causa do "código inválido" foi chave digitada errada; os horários do celular e do computador também precisam estar certos).
 - Importar o que já existe do Central Fiscal: `py -3 -m web.importar --origem "...\Dados"` com o site parado.
 
+## 2b. Disco cheio? Dados em outro disco
+Se o C: for pequeno, rode `MOVER_DADOS_PARA_OUTRO_DISCO.bat` (não precisa ser administrador): ele desliga o site, copia `ExatoWebDados` para uma pasta de outro disco **deste computador**, confere, grava o novo caminho em `dados.txt` (na pasta do site; sobrevive às atualizações) e liga de novo. A pasta antiga fica renomeada `..._ANTIGA_apagar_depois`: apague só depois de conferir que tudo funciona. Não use pasta de rede para o banco. Em máquina nova, já instale escolhendo o disco certo.
+
+## 2b. Disco cheio? Dados em outro disco
+Se o C: for pequeno, rode `MOVER_DADOS_PARA_OUTRO_DISCO.bat` (não precisa ser administrador): ele desliga o site, copia `ExatoWebDados` para uma pasta de outro disco **deste computador**, confere, grava o novo caminho em `dados.txt` (na pasta do site; sobrevive às atualizações) e liga de novo. A pasta antiga fica renomeada `..._ANTIGA_apagar_depois`: apague só depois de conferir que tudo funciona. Não use pasta de rede para o banco.
+
 ## 3. Ligar sozinho, sem janela preta
 1. `INSTALAR_INICIO_AUTOMATICO.bat` (a partir da pasta local ou da rede: se estiver na rede ele copia para uma pasta local, padrão `C:\ExatoWeb`).
 2. Informe o usuário do Windows. **Usuário sem senha:** aperte Enter na senha; a tarefa liga quando esse usuário **entra no Windows** (use `netplwiz` para a entrada automática). **Com senha:** liga com o computador, antes do login.
