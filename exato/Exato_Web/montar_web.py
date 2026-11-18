@@ -22,7 +22,7 @@ def montar():
         for base, destino in ((AQUI / 'web', 'Exato_Web/web'), (AQUI / 'docs', 'Exato_Web/docs'), (nucleo, 'Exato_Web/nucleo')):
             for p in sorted(base.rglob('*')):
                 if p.is_file() and not (set(p.parts) & SOBRAS) and p.suffix != '.pyc': z.write(p, f'{destino}/{p.relative_to(base).as_posix()}')
-        for nome in ('README.md', 'requirements.txt', 'INICIAR_SERVIDOR.bat'): z.write(AQUI / nome, f'Exato_Web/{nome}')
+        for nome in ('README.md', 'requirements.txt', 'INICIAR_SERVIDOR.bat', 'INSTALAR_DEPENDENCIAS.bat'): z.write(AQUI / nome, f'Exato_Web/{nome}')
     print(f'Pacote: {saida} (núcleo: {nucleo.parent.name})'); return saida
 
 
