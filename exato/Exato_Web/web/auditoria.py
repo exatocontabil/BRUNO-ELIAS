@@ -3,7 +3,7 @@
 Espelha o que o programa instalado faz em `_import_sat_audit` e `_finish_sat_audit` (V190) usando as mesmas rotinas de leitura, conferência, análise e PDF.
 Cada auditoria fica numa pasta própria (`<dados>/auditorias/<AAAAMMDD_HHMMSS_CNPJ>/`) com o resumo, o PDF e uma cópia dos Excels do SAT."""
 import json, re, shutil, sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
 
@@ -68,7 +68,10 @@ def auditar(cnpj, arquivos, familias, data_ini, data_fim, enviado_por='', agora=
     try: core._audit_separar_cancelados(combined, cnpj)          # nota cancelada não é "sem correspondência"
     except Exception: pass
     combined['ai_analysis'] = core.analyze_audit_result(combined, nome, data_ini, data_fim)
-    agora = agora or datetime.now(); aid = f"{agora.strftime('%Y%m%d_%H%M%S')}_{cnpj}"; pasta = pasta_auditorias() / aid; pasta.mkdir(parents=True, exist_ok=True)
+    agora = agora or datetime.now(); aid = f"{agora.strftime('%Y%m%d_%H%M%S')}_{cnpj}"
+    while (pasta_auditorias() / aid).exists():          # duas auditorias da mesma empresa no mesmo segundo nunca dividem a pasta (a segunda ganha o segundo seguinte)
+        agora += timedelta(seconds=1); aid = f"{agora.strftime('%Y%m%d_%H%M%S')}_{cnpj}"
+    pasta = pasta_auditorias() / aid; pasta.mkdir(parents=True, exist_ok=True)
     copias = []
     for i, a in enumerate(arquivos, 1):
         dest = pasta / f'SAT_{i}.xlsx'; shutil.copyfile(a, dest); copias.append(str(dest))
