@@ -4,7 +4,7 @@ import json, os, re, secrets, sys, threading, time
 from datetime import datetime
 from pathlib import Path
 
-from . import config, nucleo
+from . import config, nucleo, pdf_docs
 
 ID_RE = re.compile(r'^[0-9a-f]{16}$')
 _trava = threading.Lock()
@@ -54,7 +54,7 @@ def _executar(job, filtros):
         periodo = (f"{filtros['de'][8:]}/{filtros['de'][5:7]}/{filtros['de'][:4]} a {filtros['ate'][8:]}/{filtros['ate'][5:7]}/{filtros['ate'][:4]}" if filtros['de'] and filtros['ate'] else 'Todo o período')
         rotulos = [x for x in (f"Tipo: {filtros['tipo']}" if filtros['tipo'] else '', f"Movimentação: {filtros['mov']}" if filtros['mov'] else '') if x]
         logo = core.LOGO_PATH if getattr(core, 'LOGO_PATH', None) and Path(core.LOGO_PATH).exists() else None
-        relpdf.gerar(linhas, str(pasta() / f"{job['id']}.pdf"), empresa, unico, periodo, rotulos, logo)
+        pdf_docs.gerar(linhas, str(pasta() / f"{job['id']}.pdf"), empresa, unico, periodo, rotulos, logo)
         job.update(estado='pronto', fim=datetime.now().isoformat(timespec='seconds'), empresa=empresa or 'Várias empresas', periodo=periodo)
     except RelatorioErro as e:
         job.update(estado='erro', erro=str(e))
