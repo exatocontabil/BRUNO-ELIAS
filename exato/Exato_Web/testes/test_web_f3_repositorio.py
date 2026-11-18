@@ -35,10 +35,10 @@ core.nfse_mod_off = True
 motor.nfse_transport = lambda url, thumb: (404, '{"StatusProcessamento":"NENHUM_DOCUMENTO_LOCALIZADO"}')
 core_nfse = __import__('exato_nfse'); core_nfse.ADN_PAUSE_SECONDS = 0
 assert motor.repo_cfg()['auto'] is False          # a cópia automática vem DESLIGADA
-motor.rodada(only=[CN]); assert len(list(ARQ.rglob('*.xml'))) == 5          # a busca não copia nada para a pasta sozinha (a nota nova fica só no banco)
+motor.rodada(only=[CN]); motor.aguardar_pos(); assert len(list(ARQ.rglob('*.xml'))) == 5          # a busca não copia nada para a pasta sozinha (a nota nova fica só no banco)
 motor.espaco_livre = lambda: 10 * 1024 * 1024; r = motor.copiar_repositorio(); assert r['motivo'] == 'disco_cheio' and len(list(ARQ.rglob('*.xml'))) == 5 and motor.estado_repo['resultado']['motivo'] == 'disco_cheio'          # disco quase cheio: nem tenta
 motor.espaco_livre = lambda: 50 * 1024 ** 3
-motor.repo_cfg()['auto'] = True; motor.rodada(only=[CN]); assert len(list(ARQ.rglob('*.xml'))) == 6 and motor.estado_repo['resultado']['restantes'] == 0          # ligada: copia depois da busca
+motor.repo_cfg()['auto'] = True; motor.rodada(only=[CN]); motor.aguardar_pos(); assert len(list(ARQ.rglob('*.xml'))) == 6 and motor.estado_repo['resultado']['restantes'] == 0          # ligada: copia depois da busca
 # ---- telas
 core.db_auth_register_user('Maria Teste', 'maria@exemplo.com.br', 'SenhaForte#2026'); config.EXIGIR_2FA = False
 c = TestClient(app, base_url='http://testserver', follow_redirects=False); c.get('/login'); tk = c.cookies.get('exato_csrf')

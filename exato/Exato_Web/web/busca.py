@@ -361,15 +361,23 @@ class Motor:
             self.reaplicar_nomes()
             if not self.cancelado():
                 self.cfg['auto_round_last'] = datetime.now().isoformat(timespec='seconds'); self.salvar_cfg()
-            if not self.cancelado():
-                for etapa in ((self.copiar_repositorio if self.repo_cfg()['auto'] else None), self.enviar_boxe, self.fechar_meses):          # depois da busca: copia os XMLs, manda as NFS-e ao Box-e e fecha os meses prontos
-                    try:
-                        if etapa: etapa()
-                    except Exception: pass
+            pos = not self.cancelado()          # copiar/Box-e/fechar rodam DEPOIS, em segundo plano: a tela da busca termina na hora
             resumo['cancelada'] = self.cancelado(); self.estado.update(ultimo=datetime.now().isoformat(timespec='seconds'), resumo=resumo)
             return resumo
         finally:
             self.and_fim(); self._plano = {'modo': 'continuar', 'volta': False, 'parcial': False, 'de': None, 'ate': None}; self.estado.update(rodando=False, empresa=''); self._trava.release()
+            if locals().get('pos'): self._pos_thread = threading.Thread(target=self._pos_rodada, daemon=True, name='pos-rodada'); self._pos_thread.start()
+
+    def aguardar_pos(self, limite=120):
+        t = getattr(self, '_pos_thread', None)
+        if t is not None: t.join(limite)
+
+    def _pos_rodada(self):
+        """Depois da busca: copia os XMLs (se ligado), manda as NFS-e ao Box-e e fecha os meses prontos. Nunca prende a tela da busca."""
+        for etapa in ((self.copiar_repositorio if self.repo_cfg()['auto'] else None), self.enviar_boxe, self.fechar_meses):
+            try:
+                if etapa and not self.estado.get('rodando'): etapa()
+            except Exception: pass
 
     def _zip_das_novas(self, cnpj, tipos, formato):
         """Busca manual com "gerar o ZIP ao terminar": ZIP (com os eventos das notas) só das notas que esta busca guardou."""
@@ -447,6 +455,8 @@ class Motor:
         """Fecha os meses prontos (encerrados, sem nota nova há alguns dias, tudo copiado, busca já passou do fim). `manual`: sem esperar os dias. Nunca sobrescreve."""
         fech = nucleo.modulo('exato_fechamento'); cfgf = self.fechamento_cfg()
         if not manual and not cfgf.get('ativo', True): return {'desligado': True}
+        livre = self.espaco_livre()
+        if livre is not None and livre < MIN_LIVRE_BYTES: return {'disco_cheio': True, 'livre': livre}          # o fechamento grava PDFs e ZIPs: disco quase cheio derruba o banco
         if not self._trava_fech.acquire(blocking=False): return {'ja_fechando': True}
         try:
             self.estado_fech.update(fechando=True); estado = self.cfg.setdefault('fechamento_estado', {})

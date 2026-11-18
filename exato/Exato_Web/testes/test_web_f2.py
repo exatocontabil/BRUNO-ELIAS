@@ -73,15 +73,15 @@ assert all(n > 0 for (_c, _t, n) in visto['nfce']) and n_docs(A, 'nfce') == 3, v
 assert (C, THUMB_ESC) not in chamadas_nfse and (B, THUMB_ESC) in chamadas_nfse
 # ---- espera da SEFAZ (cStat 117): não é erro; nada é "sem notas" falso
 modo_sefaz['cstat_nfe'] = '117'; motor.cfg.pop('nfe_sync_control', None)
-rr = motor.rodada(only=[A]); oc = nucleo.modulo('exato_busca_motivos').ultimas(str(core.DB_PATH))
+rr = motor.rodada(only=[A]); motor.aguardar_pos(); oc = nucleo.modulo('exato_busca_motivos').ultimas(str(core.DB_PATH))
 assert rr['empresas'] == 1 and oc[(A, 'nfe')]['codigo'] in ('janela', 'sem_novas', 'ok'), oc[(A, 'nfe')]
 # ---- recusa da SEFAZ: causa explicada e cobertura não avança
 modo_sefaz['cstat_nfe'] = '138'; modo_sefaz['recusa'] = '217'; hoje_antes = core.load_config()['busca_cobertura'][A]['nfe']['em']; time.sleep(1.1)
-motor.cfg.pop('nfe_sync_control', None); rr = motor.rodada(only=[A]); oc = nucleo.modulo('exato_busca_motivos').ultimas(str(core.DB_PATH))
+motor.cfg.pop('nfe_sync_control', None); rr = motor.rodada(only=[A]); motor.aguardar_pos(); oc = nucleo.modulo('exato_busca_motivos').ultimas(str(core.DB_PATH))
 assert oc[(A, 'nfe')]['resultado'] != 'ok' and oc[(A, 'nfe')]['titulo'], oc[(A, 'nfe')]; assert core.load_config()['busca_cobertura'][A]['nfe']['em'] == hoje_antes
 modo_sefaz['recusa'] = None
 # ---- empresa sem nenhum certificado
-cofre.remover('escritorio'); rr = motor.rodada(only=[B]); assert rr['sem_certificado'] == 1
+cofre.remover('escritorio'); rr = motor.rodada(only=[B]); motor.aguardar_pos(); assert rr['sem_certificado'] == 1
 assert nucleo.modulo('exato_busca_motivos').ultimas(str(core.DB_PATH))[(B, 'nfe')]['codigo'] == 'sem_a1'
 cofre.guardar('escritorio', gerar_a1(ESC, 'se', nome='ESCRITORIO CONTABIL'), 'se'); THUMB_ESC = cofre.info('escritorio')['thumbprint']
 # ---- uma rodada de cada vez e cancelamento
