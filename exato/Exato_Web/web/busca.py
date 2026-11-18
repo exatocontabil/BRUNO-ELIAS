@@ -5,7 +5,7 @@ comunicação com a SEFAZ são as mesmas (`web.nucleo.core()`); aqui só há a o
 
 Regras herdadas do programa: cada fluxo tem o seu ponto de continuação (NSU); a busca de NF-e respeita a espera da SEFAZ (nunca insiste); resposta desconhecida
 da SEFAZ não vale como "sem notas"; cobertura só é gravada se a busca terminou bem; o resultado de cada tipo é anotado com a causa explicada."""
-import os, re, sys, threading, time
+import os, re, sqlite3, sys, threading, time
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -16,6 +16,8 @@ FAMILIAS_XML = ('nfe', 'nfce', 'cte')
 ROTULO = {'nfe': 'NF-e', 'nfce': 'NFC-e', 'cte': 'CT-e', 'nfse': 'NFS-e'}
 AUTO_HORAS = 4
 ESCRITORIO = 'escritorio'
+MARGEM_DIAS = 3          # busca a partir de uma data recomeça 3 dias antes (notas atrasadas chegam depois), como no programa instalado
+_RE_DATA_XML = re.compile(rb'<(?:dhEmi|dEmi)>(\d{4}-\d{2}-\d{2})')
 
 
 def _d(x): return re.sub(r'\D', '', str(x or ''))
@@ -32,6 +34,8 @@ class Motor:
         self.cfg = core.load_config(); self._cancelar = threading.Event(); self._trava = threading.Lock(); self._trava_repo = threading.Lock(); self.estado_repo = {'copiando': False, 'ultimo': None, 'resultado': None}
         self._trava_fech = threading.Lock(); self.estado_fech = {'fechando': False, 'ultimo': None, 'resultado': None}; self._trava_boxe = threading.Lock(); self._trava_resumo = threading.Lock(); self.estado_boxe = {'enviando': False, 'ultimo': None, 'resultado': None}; self.boxe_conectar = None; self.manifestador = None
         self.estado = {'rodando': False, 'empresa': '', 'indice': 0, 'total': 0, 'inicio': None, 'ultimo': None, 'resumo': None}
+        self.andamento = {'ativo': False, 'cnpj': '', 'empresa': '', 'inicio': 0.0, 'fim': 0.0, 'modo': '', 'de': '', 'ate': '', 'tipos': {}}; self._atrava = threading.Lock()
+        self._plano = {'modo': 'continuar', 'volta': False, 'parcial': False, 'de': None, 'ate': None}          # como a busca em curso começa (busca manual)
         for cod, (t, e, a, g) in CAUSAS_WEB.items(): self.motivos.CAUSAS.setdefault(cod, (t, e, a, g))          # causas próprias do site (explicadas em linguagem simples)
 
     # ------------------------------------------------------------ anotações
@@ -46,6 +50,59 @@ class Motor:
 
     def cancelar(self): self._cancelar.set()
     def cancelado(self): return self._cancelar.is_set()
+
+    # ------------------------------------------------------------ andamento ao vivo (a tela Buscar notas mostra isto)
+    def and_iniciar(self, cnpj, nome, tipos):
+        pl = self._plano
+        with self._atrava:
+            self.andamento = {'ativo': True, 'cnpj': cnpj, 'empresa': nome, 'inicio': time.time(), 'fim': 0.0, 'modo': pl['modo'], 'de': pl['de'].isoformat() if pl['de'] else '', 'ate': pl['ate'].isoformat() if pl['ate'] else '',
+                              'tipos': {t: {'estado': 'na_fila', 'consultas': 0, 'notas': 0, 'novos': 0, 'titulo': '', 'explicacao': '', 'acao': '', 'gravidade': '', 'codigo': ''} for t in tipos}}
+
+    def and_set(self, fam, **kw):
+        with self._atrava:
+            t = self.andamento['tipos'].get(fam)
+            if t is not None: t.update(kw)
+
+    def and_add(self, fam, consultas=0, notas=0, novos=0):
+        with self._atrava:
+            t = self.andamento['tipos'].get(fam)
+            if t is not None: t['consultas'] += consultas; t['notas'] += notas; t['novos'] += novos
+
+    def and_final(self, fam, codigo, novos=None, detalhe=''):
+        """Resultado de um tipo, com a causa explicada em português (ok, sem novas, espera da SEFAZ ou falha)."""
+        c = self.motivos.explicar(codigo)
+        estado = {'ok': 'ok', 'sem_novas': 'sem_novas', 'janela': 'espera', 'sefaz_consumo': 'espera', 'cancelada_pelo_usuario': 'cancelada'}.get(c['codigo'], 'falha')
+        kw = {'estado': estado, 'codigo': c['codigo'], 'titulo': c['titulo'], 'explicacao': c['explicacao'], 'acao': c['acao'], 'gravidade': c['gravidade'], 'detalhe': str(detalhe or '')[:300]}
+        if novos is not None: kw['novos'] = int(novos)
+        self.and_set(fam, **kw)
+
+    def and_fim(self):
+        with self._atrava:
+            self.andamento['ativo'] = False; self.andamento['fim'] = time.time()
+            for t in self.andamento['tipos'].values():
+                if t['estado'] in ('na_fila', 'consultando'): t['estado'] = 'cancelada' if self.cancelado() else 'falha'
+
+    def and_foto(self):
+        with self._atrava:
+            a = {k: v for k, v in self.andamento.items() if k != 'tipos'}; a['tipos'] = {k: dict(v) for k, v in self.andamento['tipos'].items()}
+        a['decorrido'] = int(max(0, (a['fim'] or time.time()) - a['inicio'])) if a['inicio'] else 0
+        return a
+
+    def nsu_da_data(self, cnpj, familia, de, ator=''):
+        """Onde recomeçar para buscar a partir de `de`: o maior NSU de nota já guardada com data anterior a (de - 3 dias). 0 se não há nenhuma (busca desde o começo)."""
+        if not de: return 0
+        limite = (de - timedelta(days=MARGEM_DIAS)).isoformat()
+        if ator: sql = "SELECT MAX(CAST(s.source_nsu AS INTEGER)) FROM document_sources s JOIN documents d ON d.doc_id=s.doc_id WHERE s.cnpj=? AND s.family=? AND d.issued_at<>'' AND d.issued_at<? AND s.actor_code=?"          # NF-e: cada fluxo (emitente/destinatário) tem a sua numeração
+        else: sql = "SELECT MAX(CAST(source_nsu AS INTEGER)) FROM documents WHERE cnpj=? AND family=? AND issued_at<>'' AND issued_at<? AND status<>'Evento'"
+        con = sqlite3.connect(str(self.core.DB_PATH), timeout=30)
+        try: r = con.execute(sql, (_d(cnpj), familia, limite) + ((str(ator),) if ator else ())).fetchone()[0]
+        except Exception: r = 0
+        finally: con.close()
+        return int(r or 0)
+
+    def _nsu_salvo(self, cnpj, chave):
+        try: return int(((self.cfg.get('sync_state') or {}).get(self.core._sync_state_key(cnpj, chave)) or {}).get('last_saved_nsu') or 0)
+        except Exception: return 0
 
     # ------------------------------------------------------------ certificado de cada empresa
     def certificado_para(self, cnpj):
@@ -71,12 +128,16 @@ class Motor:
                 nsu_banco = core.db_max_source_nsu(cnpj, f)
                 if nsu_banco > 0: starts[f] = max(0, nsu_banco - core.NSU_FOLGA)
         if recomecar: starts = {k: 0 for k in starts}
+        pl = self._plano; de, ate = pl.get('de'), pl.get('ate'); ate_iso = ate.isoformat() if ate else ''
+        if pl['modo'] == 'data':
+            starts['nfce'] = self.nsu_da_data(cnpj, 'nfce', de); starts['nfe'] = 0; starts['cte_emitente'] = 0; starts['cte_tomador'] = 0          # CT-e e NF-e: cada fluxo tem a sua numeração (NF-e abaixo)
+        for f in fams: self.and_set(f, estado='consultando')
         run_id = core.db_start_run(cnpj); core.busca_progresso_iniciar(cnpj); results = {}; lock = threading.Lock()
 
         def execute_stream(fetch, state_key, label, stream_start, actor_code='', family=''):
-            novos = dup = 0
+            novos = dup = 0; passou = False
             def cb(evt):
-                nonlocal novos, dup
+                nonlocal novos, dup, passou
                 info_evt = evt.get('info') or {}; docs = info_evt.get('documents') or []
                 if actor_code:
                     for d in docs: d['actor_code'] = str(actor_code); d['actor_label'] = label
@@ -84,14 +145,23 @@ class Motor:
                 try:
                     a, b = core.db_upsert_documents(cnpj, docs); novos += a; dup += b
                 except Exception: return
+                self.and_add(family, consultas=1, notas=len(docs), novos=a)
+                if ate_iso and docs:          # busca "até uma data": quando o lote inteiro já é mais novo que a data final, para
+                    datas = []
+                    for dd in docs:
+                        x = dd.get('xml'); x = x if isinstance(x, (bytes, bytearray)) else str(x or '').encode('utf-8', 'ignore'); m = _RE_DATA_XML.search(bytes(x[:6000]))
+                        if m: datas.append(m.group(1).decode())
+                    if datas and min(datas) > ate_iso: passou = True
                 returned = info_evt.get('ultNSURet') or info_evt.get('ultNSU') or ''
                 if returned not in (None, ''):
                     try:
                         meta = {'nfe_actor_filter': label, 'actor_bootstrapped': True} if family == 'nfe' else {}
                         if info_evt.get('maxNSU') not in ('', None): meta['max_nsu'] = int(str(info_evt['maxNSU']))
+                        if pl['volta'] and int(str(returned)) < self._nsu_salvo(cnpj, state_key): return          # busca "desde o começo / a partir de data" nunca faz o ponto de continuação voltar
                         core.save_nsu_state(cfg, cnpj, state_key, returned, len(docs), metadata=meta)
                     except Exception: pass
-            r = core.sync_documents_automatically(fetch, thumb, cnpj, f'{family}_{actor_code}' if actor_code else family, start_nsu=stream_start, progress_cb=cb, stop_cb=self.cancelado)
+            r = core.sync_documents_automatically(fetch, thumb, cnpj, f'{family}_{actor_code}' if actor_code else family, start_nsu=stream_start, progress_cb=cb, stop_cb=lambda: self.cancelado() or passou)
+            if passou and not self.cancelado(): r['ok'] = True; r['cancelled'] = False; r['end_reason'] = 'chegou na data final pedida'; r['message'] = 'Chegou na data final.'
             r['new_count'] = novos; r['duplicate_count'] = dup; r['stream_name'] = label; r['state_key'] = state_key
             i657 = r.get('last_info') or {}
             if str(i657.get('cstat') or '').strip() == '657':
@@ -121,6 +191,7 @@ class Motor:
                             salvo = core.get_saved_nsu(cfg, cnpj, suf); amax = core.db_max_actor_source_nsu(cnpj, 'nfe', a)
                             ini = (min(salvo, amax) if amax > 0 else 0) if str(item.get('bootstrap_actor_code') or '') == '9' else (min(salvo, amax) if amax > 0 else salvo)
                             if recomecar: ini = 0
+                            elif pl['modo'] == 'data': ini = self.nsu_da_data(cnpj, 'nfe', de, a)
                             fetch = lambda th, c, n, aa=int(a): core._fetch_log('NF-e', c, n, lambda: core.test_sef_nfe_webservice(th, c, homolog, 1, n, aa))
                             r = execute_stream(fetch, chave, lab, ini, actor_code=a, family='nfe'); r['actor_code'] = a
                             cst = str((r.get('last_info') or {}).get('cstat') or '')
@@ -159,13 +230,14 @@ class Motor:
         for fam, res in results.items():
             if res.get('ok') and res.get('last_nsu') is not None:
                 try:
+                    if self._plano['volta'] and int(res['last_nsu']) < self._nsu_salvo(cnpj, fam): raise Cancelado()          # não deixa o ponto de continuação voltar
                     meta = {}; info = res.get('last_info') or {}
                     if info.get('maxNSU') not in ('', None): meta['max_nsu'] = int(str(info['maxNSU']))
                     if res.get('end_reason'): meta['end_reason'] = res['end_reason']
                     core.save_nsu_state(cfg, cnpj, fam, res['last_nsu'], len(res.get('documents') or []), metadata=meta)
                     cfg.setdefault('v028_bootstrap', {})[core._sync_state_key(cnpj, fam)] = True
                 except Exception: pass
-            if res.get('ok'):
+            if res.get('ok') and not self._plano['parcial']:          # busca só até uma data não vale como "em dia até hoje"
                 try: self.cobertura.registrar(cfg, cnpj, fam, nsu=res.get('last_nsu'))
                 except Exception: pass
             novos += int(res.get('new_count') or 0); dup += int(res.get('duplicate_count') or 0)
@@ -175,11 +247,13 @@ class Motor:
             if rr is None: continue
             info = rr.get('last_info') or {}; cst = str(info.get('cstat') or '').strip()
             texto = ' '.join(str(x or '') for x in (rr.get('message') if isinstance(rr.get('message'), str) else '', rr.get('end_reason'), info.get('motivo'))).strip()
-            if rr.get('deferred_actor'): cod = 'janela'
+            tentou = int(rr.get('batches') or 0) > 0          # "aguardando a janela" só quando de fato há espera (ou nem chegou a consultar); recusa da SEFAZ mostra a causa de verdade
+            if rr.get('deferred_actor') and ((rr.get('ok') and int(rr.get('cooldown_remaining') or 0) > 0) or not tentou): cod = 'janela'
             elif rr.get('ok'): cod = 'ok' if int(rr.get('new_count') or 0) else 'sem_novas'
             elif cancel: cod = 'cancelada_pelo_usuario'
             else: cod = self.motivos.classificar(texto, cst)
-            self.ocorrencia(cnpj, fam, cod, (f'cStat {cst}: ' if cst else '') + ((re.sub(r'\s+', ' ', str(info.get('motivo') or '')).strip() or texto) if cod in ('ok', 'sem_novas', 'janela') else texto))
+            detalhe_cod = (f'cStat {cst}: ' if cst else '') + ((re.sub(r'\s+', ' ', str(info.get('motivo') or '')).strip() or texto) if cod in ('ok', 'sem_novas', 'janela') else texto)
+            self.ocorrencia(cnpj, fam, cod, detalhe_cod); self.and_final(fam, cod, novos=int(rr.get('new_count') or 0), detalhe=detalhe_cod)
             if rr.get('ok'):
                 try:
                     n = len(core.db_canceladas_sem_evento(cnpj, fam))
@@ -203,16 +277,18 @@ class Motor:
 
     def buscar_nfse(self, cnpj, thumb, modo, recomecar=False):
         """`modo`: 'proprio' (A1 da empresa) ou 'procuracao' (A1 do escritório). Devolve dict com o resultado; levanta nfse_mod.NfseError se o Emissor Nacional recusar."""
-        core, cfg = self.core, self.cfg; cnpj = _d(cnpj); run_id = core.db_start_run(cnpj); last = 0 if recomecar else self.cursor_nfse(cnpj)
+        core, cfg = self.core, self.cfg; cnpj = _d(cnpj); run_id = core.db_start_run(cnpj); pl = self._plano
+        last = 0 if recomecar else (self.nsu_da_data(cnpj, 'nfse', pl['de']) if pl['modo'] == 'data' else self.cursor_nfse(cnpj))
+        self.and_set('nfse', estado='consultando')
         kw = {'transport': self.nfse_transport} if self.nfse_transport else {}
         try:
-            items, new_last, info = self.nfse_mod.fetch_all_new(thumb, last, self.homologacao, cnpj, cancelled=self.cancelado, **kw)
+            items, new_last, info = self.nfse_mod.fetch_all_new(thumb, last, self.homologacao, cnpj, cancelled=self.cancelado, progress=lambda n, b: self.and_set('nfse', notas=n, consultas=b), **kw)
             res = core.db_upsert_nfse_items(cnpj, items)
-            core.save_nsu_state(cfg, cnpj, 'nfse', new_last, len(items), metadata={'environment': 'homologacao' if self.homologacao else 'producao'})
+            if not (pl['volta'] and int(new_last) < self._nsu_salvo(cnpj, 'nfse')): core.save_nsu_state(cfg, cnpj, 'nfse', new_last, len(items), metadata={'environment': 'homologacao' if self.homologacao else 'producao'})
             cancelada = bool(info.get('cancelled'))
-            if not cancelada: self.cobertura.registrar(cfg, cnpj, 'nfse', nsu=new_last)
+            if not cancelada and not pl['parcial']: self.cobertura.registrar(cfg, cnpj, 'nfse', nsu=new_last)
             if modo == 'procuracao' and not cancelada: self.proc.registrar(cfg, cnpj, 'procuracao', True, 'consulta aceita pelo Emissor Nacional')
-            self.ocorrencia(cnpj, 'nfse', 'cancelada_pelo_usuario' if cancelada else ('ok' if res['new'] else 'sem_novas'))
+            cod_n = 'cancelada_pelo_usuario' if cancelada else ('ok' if res['new'] else 'sem_novas'); self.ocorrencia(cnpj, 'nfse', cod_n); self.and_final('nfse', cod_n, novos=res['new'])
             try:
                 n = len(core.db_canceladas_sem_evento(cnpj, 'nfse'))
                 if n: self.ocorrencia(cnpj, 'nfse', 'cancelada_sem_evento', f'{n} nota(s) cancelada(s) sem o XML do evento')
@@ -222,8 +298,9 @@ class Motor:
         except self.nfse_mod.NfseError as exc:
             msg = self.proc.mensagem(modo, exc)
             if modo == 'procuracao': self.proc.registrar(cfg, cnpj, 'procuracao', False, str(exc))
-            if modo == 'procuracao' and self.proc.parece_recusa(exc): self.ocorrencia(cnpj, 'nfse', self.proc.CODIGO_RECUSA, str(exc))
-            else: self.ocorrencia(cnpj, 'nfse', self.motivos.classificar(str(exc), '', 'nfse'), str(exc))
+            if modo == 'procuracao' and self.proc.parece_recusa(exc): cod_e = self.proc.CODIGO_RECUSA
+            else: cod_e = self.motivos.classificar(str(exc), '', 'nfse')
+            self.ocorrencia(cnpj, 'nfse', cod_e, str(exc)); self.and_final('nfse', cod_e, novos=0, detalhe=str(exc))
             core.db_update_run(run_id, 'Não concluído', finished=True, error_text=msg); self.salvar_cfg()
             return {'ok': False, 'erro': msg, 'novos': 0}
 
@@ -233,10 +310,10 @@ class Motor:
         if not self._trava.acquire(blocking=False): return False
         self.estado['rodando'] = True; return True
 
-    def rodada(self, only=None, manual=False, reservado=False, tipos=None, recomecar=False):
+    def rodada(self, only=None, manual=False, reservado=False, tipos=None, recomecar=False, de=None, ate=None):
         """Percorre as empresas: NF-e/NFC-e/CT-e e NFS-e. Uma de cada vez, nunca duas rodadas ao mesmo tempo. Devolve o resumo."""
         if not reservado and not self.reservar(): return {'ja_rodando': True}
-        self._cancelar.clear(); core = self.core; tipos = tuple(tipos or (FAMILIAS_XML + ('nfse',))); fam_xml = tuple(f for f in FAMILIAS_XML if f in tipos); quer_nfse = 'nfse' in tipos
+        self._cancelar.clear(); core = self.core; tipos = tuple(tipos or (FAMILIAS_XML + ('nfse',))); self._plano = {'modo': 'data' if de else ('recomecar' if recomecar else 'continuar'), 'volta': bool(recomecar or de), 'parcial': bool(ate), 'de': de, 'ate': ate}; fam_xml = tuple(f for f in FAMILIAS_XML if f in tipos); quer_nfse = 'nfse' in tipos
         try:
             empresas = [c for c in core.db_list_companies(5000) if core._is_valid_cnpj(_d(c.get('cnpj')))]
             if only:
@@ -245,10 +322,11 @@ class Motor:
             resumo = {'empresas': len(empresas), 'xml_ok': 0, 'xml_obs': 0, 'xml_novos': 0, 'nfse_novos': 0, 'nfse_problemas': 0, 'sem_certificado': 0, 'manual': manual}
             for i, comp in enumerate(empresas, 1):
                 if self.cancelado(): break
-                cnpj = _d(comp.get('cnpj')); self.estado.update(empresa=comp.get('name') or cnpj, indice=i)
+                cnpj = _d(comp.get('cnpj')); self.estado.update(empresa=comp.get('name') or cnpj, indice=i); self.and_iniciar(cnpj, comp.get('name') or cnpj, tipos)
                 cid = self.certificado_para(cnpj)
                 if cid is None:
                     resumo['sem_certificado'] += 1; self.ocorrencia(cnpj, tipos, 'sem_a1', '')
+                    for t in tipos: self.and_final(t, 'sem_a1')
                     continue
                 try:
                     with self.cofre.usar(cid) as thumb:
@@ -265,11 +343,14 @@ class Motor:
                                 if not n['ok'] and not (modo == 'procuracao' and not manual): resumo['nfse_problemas'] += 1
                 except CofreErro as exc:
                     self.ocorrencia(cnpj, tipos, 'sem_a1', str(exc)); resumo['sem_certificado'] += 1
+                    for t in tipos: self.and_final(t, 'sem_a1', detalhe=str(exc))
                 except Exception:
                     if os.environ.get('EXATO_WEB_DEBUG'): import traceback; traceback.print_exc()
                     try: self.core.log_exception(f'Web: busca da empresa {cnpj}', sys.exc_info())
                     except Exception: pass
                     self.ocorrencia(cnpj, tuple(fam_xml) or ('nfse',), 'erro_desconhecido', 'erro inesperado'); resumo['xml_obs'] += 1
+                    for t in tipos:
+                        if self.andamento['tipos'].get(t, {}).get('estado') in ('na_fila', 'consultando'): self.and_final(t, 'erro_desconhecido', detalhe='erro inesperado')
             if not self.cancelado():
                 self.cfg['auto_round_last'] = datetime.now().isoformat(timespec='seconds'); self.salvar_cfg()
             if not self.cancelado():
@@ -279,7 +360,7 @@ class Motor:
             resumo['cancelada'] = self.cancelado(); self.estado.update(ultimo=datetime.now().isoformat(timespec='seconds'), resumo=resumo)
             return resumo
         finally:
-            self.estado.update(rodando=False, empresa=''); self._trava.release()
+            self.and_fim(); self._plano = {'modo': 'continuar', 'volta': False, 'parcial': False, 'de': None, 'ate': None}; self.estado.update(rodando=False, empresa=''); self._trava.release()
 
     # ------------------------------------------------------------ Repositório (XMLs em arquivos organizados, guardados para sempre)
     def copiar_repositorio(self, ignorar_pausa=False):

@@ -216,3 +216,17 @@ tr.linha-emp{cursor:pointer}
 @media(max-width:560px){.kpis{grid-template-columns:1fr 1fr}.kpi{padding:12px;gap:10px}.kpi .ico{display:none}.kpi b{font-size:22px}h1{font-size:21px}.chip span.txt{display:none}}
 @media print{.menu,.topo{display:none}.conteudo{padding:0}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- andamento da busca ---------- */
+.andamento{border-color:color-mix(in srgb,var(--blue) 28%,var(--line))}
+.and-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}.and-cab h2{margin:0 0 2px}
+.and-l{display:grid;grid-template-columns:190px 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--line2);align-items:start}
+.and-t{display:flex;flex-direction:column;gap:6px;align-items:flex-start}.and-t b{font-size:15px}
+.and-i{display:flex;flex-direction:column;gap:4px;min-width:0}
+.and-m{font-size:13px;line-height:1.4;color:var(--red-tx)}.and-m.g-aviso{color:var(--amber-tx)}.and-m.g-espera,.and-m.g-info{color:var(--blue-tx)}.and-m b{font-weight:650}
+.pill.busy::before{animation:pulsa 1.2s ease-in-out infinite;background:var(--blue)}
+.causa{color:var(--red-tx)}.causa.g-aviso{color:var(--amber-tx)}.causa.g-espera,.causa.g-info{color:var(--blue-tx)}
+.datas{display:none;gap:12px;flex-wrap:wrap;margin:2px 0 8px 26px}
+form:has(input[name=modo][value=data]:checked) .datas{display:flex}
+.datas>div>label{margin-top:0}
+@media(max-width:700px){.and-l{grid-template-columns:1fr}}

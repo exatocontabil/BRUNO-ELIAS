@@ -29,10 +29,10 @@ class Agendador:
         if not self.ligado() or not self.motor.vencida() or not self.motor.reservar(): return False
         threading.Thread(target=self.motor.rodada, kwargs={'reservado': True}, daemon=True, name='rodada-automatica').start(); return True
 
-    def disparar(self, only=None, manual=True, tipos=None, recomecar=False):
+    def disparar(self, only=None, manual=True, tipos=None, recomecar=False, de=None, ate=None):
         """Pedido de uma pessoa (botão): começa já, em segundo plano. False se já há rodada."""
         if not self.motor.reservar(): return False
-        threading.Thread(target=self.motor.rodada, kwargs={'only': only, 'manual': manual, 'reservado': True, 'tipos': tipos, 'recomecar': recomecar}, daemon=True, name='rodada-manual').start(); return True
+        threading.Thread(target=self.motor.rodada, kwargs={'only': only, 'manual': manual, 'reservado': True, 'tipos': tipos, 'recomecar': recomecar, 'de': de, 'ate': ate}, daemon=True, name='rodada-manual').start(); return True
 
     def iniciar(self):
         def laco():

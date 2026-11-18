@@ -34,3 +34,6 @@
 
 ## Buscar notas (manual)
 Tela "Buscar notas": uma empresa, tipos escolhidos (NF-e, NFC-e, CT-e, NFS-e) e como começar: "só o que veio depois" (continua do ponto salvo) ou "refazer desde o começo" (com confirmação; ponto de partida 0). Usa a mesma rotina da rodada automática (`Motor.rodada(only, tipos, recomecar)`), uma busca por vez, com o andamento ao vivo e a situação da empresa embaixo.
+
+## Andamento ao vivo e busca a partir de uma data
+`Motor.andamento` guarda, por tipo de nota (NF-e, NFC-e, CT-e, NFS-e): estado (na fila, consultando, concluído, sem notas novas, aguardando a SEFAZ, não concluído, cancelada), consultas, notas recebidas e guardadas e a causa em português com o que fazer. A tela Buscar notas lê isso de `/busca/estado` (campo `andamento`, atualizado a cada 1,5 s) e mostra o resultado final em destaque. "A partir de uma data": recomeça no maior NSU de nota já guardada com data anterior a (data - 3 dias); "até" para quando o lote inteiro é mais novo que a data final; o ponto de continuação nunca volta e busca só até uma data não vale como "em dia até hoje". "Aguardando a janela" só aparece quando há espera de verdade; recusa da SEFAZ mostra a causa.

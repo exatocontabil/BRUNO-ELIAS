@@ -78,6 +78,31 @@ r = cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfse'], 'csrf': tk})
 visto['nfce'].clear(); cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfce'], 'csrf': tk}); esperar(); assert visto['nfce'] and all(v[2] > 0 for v in visto['nfce']), visto['nfce']          # continuou do ponto salvo
 visto['nfe'].clear(); visto['nfce'].clear(); n0 = len(chamadas_nfse); cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfe', 'nfce', 'nfse'], 'modo': 'recomecar', 'confirmo': '1', 'csrf': tk}); esperar()
 assert visto['nfe'] and visto['nfe'][0][2] == 0 and visto['nfce'] and visto['nfce'][0][2] == 0 and len(chamadas_nfse) > n0          # recomeçou do zero
+# ---- andamento ao vivo e resultado por tipo
+import json as _json
+ex = _json.loads(cl.get('/busca/estado').content)['andamento']; assert ex['tipos'] and not ex['ativo'] and ex['empresa'], ex
+cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfce', 'nfse'], 'csrf': tk}); esperar(); ex = motor.and_foto()
+assert set(ex['tipos']) == {'nfce', 'nfse'} and not ex['ativo'] and ex['tipos']['nfce']['estado'] in ('ok', 'sem_novas') and ex['tipos']['nfse']['estado'] in ('ok', 'sem_novas'), ex
+assert ex['tipos']['nfce']['consultas'] >= 1 and ex['decorrido'] >= 0
+pg = cl.get(f'/buscar?empresa={A}').text; assert 'id="andamento"' in pg and 'andamento.js' in pg
+# espera da SEFAZ vira "aguardando" (azul), nunca falha
+modo_sefaz['cstat_nfe'] = '117'; cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfe'], 'csrf': tk}); esperar(); ex = motor.and_foto(); modo_sefaz['cstat_nfe'] = '138'
+assert ex['tipos']['nfe']['estado'] in ('espera', 'ok', 'sem_novas') and ex['tipos']['nfe']['estado'] != 'falha', ex['tipos']['nfe']
+# recusa da SEFAZ: falha com a causa em português
+motor.cfg.get('nfe_sync_control', {}).pop(A, None); modo_sefaz['recusa'] = '999'; cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfe'], 'csrf': tk}); esperar(); ex = motor.and_foto(); modo_sefaz['recusa'] = None
+assert ex['tipos']['nfe']['estado'] == 'falha' and ex['tipos']['nfe']['titulo'] and ex['tipos']['nfe']['acao'] is not None, ex['tipos']['nfe']
+# ---- busca a partir de uma data
+for ruim in ({'modo': 'data'}, {'modo': 'data', 'de': '2999-01-01'}, {'modo': 'data', 'de': '2026-10-10', 'ate': '2026-10-01'}, {'modo': 'data', 'de': 'abc'}):
+    assert 'erro=' in cl.post('/buscar/manual', data=dict({'empresa': A, 'tipo': ['nfce'], 'csrf': tk}, **ruim)).headers['location'], ruim
+ponto = core.get_saved_nsu(motor.cfg, A, 'nfce'); assert ponto == 3, ponto
+visto['nfce'].clear(); cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfce'], 'modo': 'data', 'de': '2026-11-01', 'csrf': tk}); esperar()
+assert visto['nfce'] and visto['nfce'][0][2] == 3, visto['nfce']          # notas até 28/10 já guardadas: recomeça do NSU 3
+visto['nfce'].clear(); cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfce'], 'modo': 'data', 'de': '2026-10-10', 'csrf': tk}); esperar()
+assert visto['nfce'] and visto['nfce'][0][2] == 0 and core.get_saved_nsu(motor.cfg, A, 'nfce') == 3          # nada antes de 07/10: começa do início; o ponto salvo não volta
+cob = _json.dumps(motor.cfg.get('busca_cobertura', {}).get(A, {}).get('nfce')); visto['nfce'].clear()
+cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfce'], 'modo': 'data', 'de': '2026-09-01', 'ate': '2026-10-01', 'csrf': tk}); esperar(); ex = motor.and_foto()
+assert ex['modo'] == 'data' and ex['de'] == '2026-09-01' and ex['ate'] == '2026-10-01' and ex['tipos']['nfce']['estado'] in ('ok', 'sem_novas'), ex          # parou ao passar da data final, sem falha
+assert _json.dumps(motor.cfg.get('busca_cobertura', {}).get(A, {}).get('nfce')) == cob          # busca só até uma data não vira "em dia até hoje"
 # duas buscas ao mesmo tempo: a segunda é recusada
 assert motor.reservar(); r = cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfe'], 'csrf': tk}); assert 'erro=' in r.headers['location'] and 'andamento' in r.headers['location'].replace('%20', ' ')
 motor._trava.release(); motor.estado['rodando'] = False

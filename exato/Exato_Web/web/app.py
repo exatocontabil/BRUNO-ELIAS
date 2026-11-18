@@ -282,7 +282,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         u, r = exigir(request)
         if r: return Response('{}', status_code=401, media_type='application/json')
         import json
-        e = dict(motor.estado); e['progresso'] = core.busca_progresso_texto() if e.get('rodando') else ''; e['auto'] = agendador.ligado(); e['proxima'] = agendador.proxima()
+        e = dict(motor.estado); e['progresso'] = core.busca_progresso_texto() if e.get('rodando') else ''; e['auto'] = agendador.ligado(); e['proxima'] = agendador.proxima(); e['andamento'] = motor.and_foto()
         return Response(json.dumps(e, ensure_ascii=False), media_type='application/json', headers={'Cache-Control': 'no-store'})
 
     # ------------------------------------------------------------ busca manual (uma empresa, tipos escolhidos)
@@ -298,7 +298,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
             for l in situacao.linhas(str(core.DB_PATH), cfg, None, ocorrencias=oc, diagnostico={}, acessos=dict(cfg.get('nfse_acesso') or {})):
                 if l['cnpj'] == d: linha = l; l['cnpj_fmt'] = core._format_cnpj(d); l['certificado'] = cofre.info(d) or cofre.info('escritorio'); l['cert_proprio'] = bool(cofre.info(d))
         resumo = motor.estado.get('resumo') if not motor.estado.get('rodando') else None
-        return pagina(request, 'buscar.html', {'empresas': empresas_lista(), 'sel': d, 'l': linha, 'tipos': situacao.TIPOS, 'tipos_busca': TIPOS_BUSCA, 'resumo': resumo, 'rodando': bool(motor.estado['rodando']), 'erro': erro, 'ok': ok, 'tela': 'buscar'}, user=u)
+        return pagina(request, 'buscar.html', {'empresas': empresas_lista(), 'sel': d, 'l': linha, 'tipos': situacao.TIPOS, 'tipos_busca': TIPOS_BUSCA, 'resumo': resumo, 'rodando': bool(motor.estado['rodando']), 'erro': erro, 'ok': ok, 'hoje': time.strftime('%Y-%m-%d'), 'tela': 'buscar'}, user=u)
 
     @app.post('/buscar/manual')
     async def buscar_manual(request: Request):
@@ -310,11 +310,19 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if len(d) != 14 or not core._is_valid_cnpj(d): return RedirectResponse(_msg('/buscar', 'erro', 'Escolha a empresa.'), status_code=303)
         tipos = tuple(t for t, _ in TIPOS_BUSCA if t in f.getlist('tipo'))
         if not tipos: return RedirectResponse(_msg('/buscar', 'erro', 'Marque pelo menos um tipo de nota.') + '&empresa=' + d, status_code=303)
-        recomecar = str(f.get('modo') or '') == 'recomecar'
+        modo = str(f.get('modo') or 'continuar'); recomecar = modo == 'recomecar'; de = ate = None
+        if modo == 'data':
+            import datetime as _dt
+            try: de = _dt.date.fromisoformat(str(f.get('de') or ''))
+            except ValueError: return RedirectResponse(_msg('/buscar', 'erro', 'Informe a data inicial (a partir de quando buscar).') + '&empresa=' + d, status_code=303)
+            try: ate = _dt.date.fromisoformat(str(f.get('ate'))) if str(f.get('ate') or '').strip() else None
+            except ValueError: return RedirectResponse(_msg('/buscar', 'erro', 'A data final não é válida.') + '&empresa=' + d, status_code=303)
+            if de > _dt.date.today(): return RedirectResponse(_msg('/buscar', 'erro', 'A data inicial não pode ser no futuro.') + '&empresa=' + d, status_code=303)
+            if ate and ate < de: return RedirectResponse(_msg('/buscar', 'erro', 'A data final não pode ser antes da inicial.') + '&empresa=' + d, status_code=303)
         if recomecar and not f.get('confirmo'): return RedirectResponse(_msg('/buscar', 'erro', 'Para buscar desde o começo, marque a confirmação: pode demorar bastante.') + '&empresa=' + d, status_code=303)
         if not motor.certificado_para(d) and not cofre.info('escritorio'): return RedirectResponse(_msg('/buscar', 'erro', 'Esta empresa não tem certificado A1 guardado (nem o do escritório). Envie em Certificados A1.') + '&empresa=' + d, status_code=303)
-        if not agendador.disparar(only=[d], manual=True, tipos=tipos, recomecar=recomecar): return RedirectResponse(_msg('/buscar', 'erro', 'Já existe uma busca em andamento. Espere terminar ou cancele.') + '&empresa=' + d, status_code=303)
-        log(u, 'BUSCA_MANUAL', f"{d} {','.join(tipos)} {'recomecar' if recomecar else 'continuar'}")
+        if not agendador.disparar(only=[d], manual=True, tipos=tipos, recomecar=recomecar, de=de, ate=ate): return RedirectResponse(_msg('/buscar', 'erro', 'Já existe uma busca em andamento. Espere terminar ou cancele.') + '&empresa=' + d, status_code=303)
+        log(u, 'BUSCA_MANUAL', f"{d} {','.join(tipos)} {modo}" + (f" {de}..{ate or ''}" if de else ''))
         return RedirectResponse(_msg('/buscar', 'ok', 'Busca iniciada. O andamento aparece abaixo.') + '&empresa=' + d, status_code=303)
 
     # ------------------------------------------------------------ auditoria
