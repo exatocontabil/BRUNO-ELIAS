@@ -95,9 +95,13 @@ def ler_pfx(pfx, senha):
 # ------------------------------------------------------------------ importadores (repositório de certificados do Windows)
 _PS_IMPORTAR = r'''$ErrorActionPreference='Stop'
 $b=[Convert]::FromBase64String($env:EXATO_PFX); $s=$env:EXATO_PFX_SENHA
+$e=New-Object Security.Cryptography.X509Certificates.X509Certificate2($b,$s,[Security.Cryptography.X509Certificates.X509KeyStorageFlags]::EphemeralKeySet)
+$t=$e.Thumbprint
+$st=New-Object Security.Cryptography.X509Certificates.X509Store('My','CurrentUser'); $st.Open('ReadWrite')
+if($st.Certificates.Find('FindByThumbprint',$t,$false).Count -gt 0){ $st.Close(); Write-Output $t; Write-Output 'JA_INSTALADO'; exit 0 }
 $f=[Security.Cryptography.X509Certificates.X509KeyStorageFlags]::UserKeySet -bor [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet
 $c=New-Object Security.Cryptography.X509Certificates.X509Certificate2($b,$s,$f)
-$st=New-Object Security.Cryptography.X509Certificates.X509Store('My','CurrentUser'); $st.Open('ReadWrite'); $st.Add($c); $st.Close()
+$st.Add($c); $st.Close()
 Write-Output $c.Thumbprint'''
 _PS_REMOVER = r'''$ErrorActionPreference='SilentlyContinue'
 $st=New-Object Security.Cryptography.X509Certificates.X509Store('My','CurrentUser'); $st.Open('ReadWrite')
@@ -109,7 +113,10 @@ $st.Close()'''
 
 
 class ImportadorWindows:
-    """Coloca o A1 no repositório do usuário do Windows que roda o site (chave não exportável pelo programa) e o retira depois."""
+    """Coloca o A1 no repositório do usuário do Windows que roda o site (chave não exportável pelo programa) e o retira depois.
+    Se o mesmo certificado já estiver instalado nesse usuário, usa o que está lá e NÃO o retira (antes retirava, e apagava a chave da pessoa)."""
+    def __init__(self): self._ja_instalados = set()
+
     def _ps(self, script, env_extra, timeout=60):
         env = dict(os.environ); env.update(env_extra)
         p = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', script], capture_output=True, text=True, timeout=timeout, env=env, encoding='utf-8', errors='replace')
@@ -118,9 +125,14 @@ class ImportadorWindows:
     def importar(self, pfx, senha):
         rc, out, err = self._ps(_PS_IMPORTAR, {'EXATO_PFX': base64.b64encode(pfx).decode('ascii'), 'EXATO_PFX_SENHA': senha})
         if rc != 0 or not out: raise CofreErro('O Windows não aceitou o certificado para a consulta. ' + (err.splitlines()[0][:160] if err else ''))
-        return out.splitlines()[-1].strip().upper()
+        linhas = [x.strip() for x in out.splitlines() if x.strip()]; thumb = linhas[0].upper()
+        if 'JA_INSTALADO' in linhas: self._ja_instalados.add(thumb)          # o certificado JÁ era do Windows (instalado pela pessoa): o site NUNCA o retira depois
+        else: self._ja_instalados.discard(thumb)
+        return thumb
 
     def remover(self, thumbprint):
+        """Retira do Windows só o que o site colocou. Certificado que já estava instalado (do usuário, do Central Fiscal...) nunca é removido."""
+        if str(thumbprint or '').upper() in self._ja_instalados: return
         try: self._ps(_PS_REMOVER, {'EXATO_THUMB': thumbprint})
         except Exception: pass
 
