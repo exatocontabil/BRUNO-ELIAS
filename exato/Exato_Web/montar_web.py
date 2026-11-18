@@ -17,7 +17,7 @@ def versao_mais_nova():
 
 
 def montar():
-    nucleo = versao_mais_nova(); saida = AQUI.parent / f'Exato_Web_{date.today():%Y%m%d}.zip'
+    nucleo = versao_mais_nova(); saida = AQUI.parent / f'Exato_Web_{date.today():%Y%m%d}{sys.argv[1] if len(sys.argv) > 1 else ""}.zip'
     with zipfile.ZipFile(saida, 'w', zipfile.ZIP_DEFLATED) as z:
         for base, destino in ((AQUI / 'web', 'Exato_Web/web'), (AQUI / 'docs', 'Exato_Web/docs'), (nucleo, 'Exato_Web/nucleo')):
             for p in sorted(base.rglob('*')):
