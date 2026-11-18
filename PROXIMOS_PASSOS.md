@@ -336,3 +336,4 @@ Layout refeito (inspirado em sistemas como o SIEG): menu lateral agrupado com í
 
 ## Exato Web: mudanças pedidas (registradas em 18/11/2026, para fazer depois)
 - **Buscar notas com data:** poder informar o período (De/Até) na busca manual, como no Central Fiscal (período todo x só o novo). Hoje só há "só o que veio depois" e "refazer desde o começo".
+- **Acompanhar a busca manual (print de 18/11):** na tela Buscar notas só aparece "Busca iniciada" e "Buscando: empresa (1 de 1)"; não dá para saber se está dando certo. Fazer: painel de andamento ao vivo por tipo (NF-e, NFC-e, CT-e, NFS-e: consultando / quantas consultas / notas recebidas / tempo), resultado final em destaque por tipo (verde = ok, azul = aguardando janela, vermelho = falha com a causa em português e o que fazer) e a lista das últimas linhas do que a busca fez. A busca já funciona (NFS-e dessa empresa: 962 notas, em dia; NF-e: "aguardando a próxima janela"), só falta mostrar.
