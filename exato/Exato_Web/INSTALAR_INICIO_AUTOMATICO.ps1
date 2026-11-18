@@ -71,7 +71,7 @@ try {
     }
     if ($ok) {
         Write-Host ''; Write-Host 'PRONTO! O Exato Web agora liga sozinho, sem janela preta.' -ForegroundColor Green
-        Write-Host "Abra: https://127.0.0.1:$porta   (ou o endereco que voce ja usava)"
+        Write-Host "Abra: http://127.0.0.1:$porta (com http, sem o s)   (ou o endereco que voce ja usava)"
         Write-Host "Pasta do site: $pasta"
         Write-Host 'Para atualizar: rode PARAR_SITE.bat, troque a pasta "web" e rode LIGAR_SITE.bat.'
     } else {

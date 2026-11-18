@@ -374,3 +374,5 @@ Layout refeito (inspirado em sistemas como o SIEG): menu lateral agrupado com í
 
 - Pacote u (2026-11-18): usuário do Windows (AUXILIAR2\Usuario) SEM senha: o Agendador não liga tarefa "estando ou não conectado" sem senha. O instalador agora aceita senha em branco e cria a tarefa "ao entrar no Windows" (AtLogOn, Interactive, escondida). Sugerir entrada automática (netplwiz) ou criar senha para ligar sozinho após reinício. O computador é uma estação (AUXILIAR2), não um servidor dedicado.
 - Também no pacote u: causa provável do teste que falhava às vezes (`test_web_f3_faltantes`): duas auditorias da mesma empresa no mesmo segundo usavam a mesma pasta; agora a segunda ganha o segundo seguinte.
+
+- Pacote v (2026-11-18): o site responde em HTTP puro (http://127.0.0.1:8443); o instalador dizia https e o navegador dava ERR_SSL_PROTOCOL_ERROR. Texto corrigido. Início automático (AtLogOn, usuário sem senha) funcionou no AUXILIAR2.
