@@ -22,6 +22,10 @@ for cn, nm in (("{A}", "ALFA LTDA"), ("{B}", "BETA LTDA")):
     m.db_register_company(cn, nm)
     m.db_upsert_documents(cn, [{{"xml": nfe(cn, i), "tipo": "nfeProc", "nsu": str(i), "family": "nfe", "actor_code": "1", "actor_label": "Emitente / Saída"}} for i in range(1, 41)])
 cfg = m.load_config(); m.save_nsu_state(cfg, "{A}", "nfce", 900); m.save_nsu_state(cfg, "{A}", "nfe_emitente", 40)
+import sqlite3 as _s, json as _j
+cfg.setdefault("nfse_prefs", {{}})["procuracao"] = True
+_c = _s.connect(m.DB_PATH); _c.execute("CREATE TABLE IF NOT EXISTS boxe_envios(chave TEXT PRIMARY KEY, enviado_em TEXT)"); _c.execute("INSERT OR IGNORE INTO boxe_envios VALUES('CHAVE1','2026-11-01T10:00:00')")
+_c.execute("CREATE TABLE IF NOT EXISTS busca_ocorrencias(id INTEGER PRIMARY KEY AUTOINCREMENT, cnpj TEXT, tipo TEXT, quando TEXT, resultado TEXT, codigo TEXT, detalhe TEXT)"); _c.execute("INSERT INTO busca_ocorrencias(cnpj,tipo,quando,resultado,codigo,detalhe) VALUES('{A}','nfe','2026-11-02T09:00:00','ok','','')"); _c.commit(); _c.close()
 import exato_cobertura as C; C.registrar(cfg, "{A}", "nfe", ate=datetime.date(2026, 11, 3)); cfg.setdefault("v028_bootstrap", {{}})["{A}:nfce"] = True; m.save_config(cfg)
 '''
 subprocess.run([sys.executable, '-c', codigo], env=dict(os.environ, EXATO_DATA_DIR=str(ORIGEM)), check=True)
@@ -42,8 +46,10 @@ assert core.get_saved_nsu(cfg, A, 'nfce') == 900                          # o do
 assert core.get_saved_nsu(cfg, A, 'nfe_emitente') == 77                   # o do site estava na frente: fica
 assert cfg['busca_cobertura'][A]['nfe']['ate'] == '2026-11-08'            # cobertura mais nova do site fica
 assert cfg['v028_bootstrap'].get(f'{A}:nfce') is True
+c = sqlite3.connect(str(core.DB_PATH)); assert c.execute("SELECT COUNT(*) FROM boxe_envios").fetchone()[0] == 1 and c.execute("SELECT COUNT(*) FROM busca_ocorrencias").fetchone()[0] == 1; c.close()          # histórico veio
+assert core.load_config().get('nfse_prefs', {}).get('procuracao') is True
 # ---- importar de novo (ou de outro computador): nada duplica
-r = importar.importar(ORIGEM, core, progresso=lambda *_: None); assert r['documents']['novos'] == 0 and r['companies']['novos'] == 0 and contar() == 80, r
+r = importar.importar(ORIGEM, core, progresso=lambda *_: None); assert r['documents']['novos'] == 0 and r['companies']['novos'] == 0 and contar() == 80 and contar('busca_ocorrencias') == 1 and contar('boxe_envios') == 1, r
 # ---- as notas importadas aparecem na tela de documentos (via código do Exato) e o XML veio inteiro
 rows = core.db_list_documents(cnpj=A, family='nfe', limit=100, with_xml=True); assert len(rows) == 40 and all(b'<nfeProc' in (bytes(x['xml']) if not isinstance(x['xml'], bytes) else x['xml']) for x in rows[:5])
 # ---- backup .zip

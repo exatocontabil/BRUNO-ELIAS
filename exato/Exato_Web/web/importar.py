@@ -10,6 +10,10 @@ from pathlib import Path
 
 LOTE = 500
 TABELAS = ('companies', 'documents', 'document_sources')
+# Histórico do programa instalado que também vem: marcas de exportação, caixa do Box-e (para NUNCA reenviar), empresas removidas, histórico de buscas e de auditorias.
+EXTRAS_CHAVE = ('document_exports', 'boxe_envios', 'empresas_removidas')          # têm chave própria: INSERT OR IGNORE basta e pode repetir
+EXTRAS_HISTORICO = ('sync_runs', 'busca_ocorrencias', 'audit_runs')          # numeração própria: só entram se o histórico do site ainda está vazio (não repete nem colide)
+# Nunca importados: usuários e senhas, registro de atividade, filas da Central e cópias do Repositório (caminhos do outro computador; o site refaz a sua).
 
 
 def _achar(pasta):
@@ -52,6 +56,20 @@ def _importar_tabela(con, tabela, progresso):
     return inseridos, total
 
 
+def _garantir_tabela(con, tabela):
+    """Cria no site a tabela do programa instalado, com o mesmo desenho, se o site ainda não a tem. False se a origem não a tem."""
+    if con.execute("SELECT 1 FROM o.sqlite_master WHERE type='table' AND name=?", (tabela,)).fetchone() is None: return False
+    if con.execute("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name=?", (tabela,)).fetchone() is None:
+        con.execute(con.execute("SELECT sql FROM o.sqlite_master WHERE type='table' AND name=?", (tabela,)).fetchone()[0]); con.commit()
+    return True
+
+
+def _importar_extra(con, tabela, so_vazia):
+    if not _garantir_tabela(con, tabela): return {'novos': 0, 'total': 0}
+    if so_vazia and con.execute(f'SELECT 1 FROM main.{tabela} LIMIT 1').fetchone(): return {'novos': 0, 'total': con.execute(f'SELECT COUNT(*) FROM o.{tabela}').fetchone()[0]}
+    novos, total = _importar_tabela(con, tabela, lambda *_: None); return {'novos': novos, 'total': total}
+
+
 def _mesclar_config(dest, orig):
     """Junta a configuração do programa instalado à do site sem nunca voltar um ponto de busca. Devolve quantos itens mudaram."""
     n = 0
@@ -64,6 +82,9 @@ def _mesclar_config(dest, orig):
         for fam, item in (fams or {}).items():
             atual = ((dest.setdefault('busca_cobertura', {})).setdefault(cnpj, {})).get(fam)
             if atual is None or str(item.get('ate') or '') > str(atual.get('ate') or ''): dest['busca_cobertura'][cnpj][fam] = item; n += 1
+    for chave in ('nfse_prefs', 'company_names', 'fechamento', 'zip_importacao'):          # preferências: só entram se o site ainda não tem
+        v = orig.get(chave)
+        if v and chave not in dest: dest[chave] = v; n += 1
     for chave in ('nfe_sync_control', 'nfse_acesso'):
         for k, item in (orig.get(chave) or {}).items():
             if k not in dest.setdefault(chave, {}): dest[chave][k] = item; n += 1
@@ -81,6 +102,9 @@ def importar(origem, core, progresso=print):
             con.execute("ATTACH DATABASE ? AS o", ((pasta / 'central_fiscal.db').resolve().as_uri() + '?mode=ro',))          # só leitura: o banco do programa instalado nunca é alterado
             for t in TABELAS:
                 novos, total = _importar_tabela(con, t, progresso); resumo[t] = {'novos': novos, 'total': total}
+            for t in EXTRAS_CHAVE + EXTRAS_HISTORICO:
+                try: resumo[t] = _importar_extra(con, t, so_vazia=t in EXTRAS_HISTORICO)
+                except Exception as exc: resumo[t] = {'novos': 0, 'total': 0, 'erro': str(exc)[:120]}          # um histórico que não vem nunca derruba a importação
             con.execute('DETACH DATABASE o')
         finally:
             con.close()
@@ -105,6 +129,9 @@ def main(argv=None):
     except ValueError as exc: sys.exit(str(exc))
     print(f"Empresas: {r['companies']['novos']} nova(s) de {r['companies']['total']}.")
     print(f"Notas: {r['documents']['novos']} nova(s) de {r['documents']['total']} (as demais já existiam).")
+    extras = {'document_exports': 'marcas de exportação', 'boxe_envios': 'envios do Box-e', 'sync_runs': 'histórico de buscas', 'busca_ocorrencias': 'ocorrências da busca', 'audit_runs': 'auditorias', 'empresas_removidas': 'empresas removidas'}
+    for t, nome in extras.items():
+        if t in r and r[t]['total']: print(f"{nome.capitalize()}: {r[t]['novos']} novo(s) de {r[t]['total']}." + (f" (não importado: {r[t]['erro']})" if r[t].get('erro') else ''))
     print(f"Pontos de busca e configuração: {r['configuracao']} item(ns) atualizado(s).")
 
 
