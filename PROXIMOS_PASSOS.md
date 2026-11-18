@@ -333,3 +333,6 @@ Tela NFS-e (conferência) + relatório mensal em PDF no site. Falta só o teste 
 
 ## Exato Web: novo visual (18/11/2026)
 Layout refeito (inspirado em sistemas como o SIEG): menu lateral agrupado com ícones, barra de topo com aviso de busca e botão claro/escuro, painel de saúde da carteira, filtros e busca nas tabelas, login em duas colunas, celular com menu recolhido. Sem fontes nem scripts de fora (`web/static/estilo.css`, `app.js`, `tema.js`, `templates/_ui.html`). Falta conferir no servidor real e ajustar com o que você achar.
+
+## Exato Web: mudanças pedidas (registradas em 18/11/2026, para fazer depois)
+- **Buscar notas com data:** poder informar o período (De/Até) na busca manual, como no Central Fiscal (período todo x só o novo). Hoje só há "só o que veio depois" e "refazer desde o começo".
