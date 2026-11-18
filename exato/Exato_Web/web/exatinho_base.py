@@ -87,10 +87,13 @@ TOPICOS = [
   'resposta': ['Documentos lista as 300 notas mais recentes do filtro (empresa, tipo, movimentação, número ou chave). Em cada linha: XML (baixa) e PDF (abre a nota).', 'Para baixar muitas notas de uma vez, use "Baixar ZIP deste filtro".'], 'tela': '/documentos', 'botao': 'Abrir Documentos'},
  {'id': 'exatinho', 'titulo': 'Sobre o Exatinho', 'chaves': ['exatinho', 'o que voce faz', 'quem e voce', 'o que voce sabe', 'como funciona o exatinho'],
   'resposta': ['Eu sou o Exatinho, o assistente do Exato Web. Respondo no próprio servidor, sem inteligência artificial de fora: nenhum dado fiscal sai daqui.', 'Sei dizer quais empresas ainda não buscaram notas e por quê, o que está pendente hoje, os certificados que vencem e tirar dúvidas de uso. Para buscar, sempre peço a sua confirmação.'], 'tela': '', 'botao': ''},
+ {'id': 'exatinho_passear', 'titulo': 'Exatinho passeando pela tela', 'chaves': ['exatinho passear', 'fazer o exatinho passear', 'exatinho andar', 'exatinho parado', 'exatinho dormindo', 'exatinho mexer', 'movimentos do exatinho', 'parar o passeio'],
+  'resposta': ['Abra a conversa com o Exatinho e clique no botão com as setinhas (no alto, ao lado da lixeira): ele passa a passear pelo rodapé da tela. Clique de novo para ele ficar quietinho.', 'Ele também pisca, olha para o mouse, comemora quando uma busca termina bem, balança a cabeça se algum tipo não concluiu e dorme se ninguém mexe por 2 minutos.', 'Se o Windows estiver com as animações desligadas, ele fica parado.'], 'tela': '', 'botao': ''},
 ]
 
 # Perguntas de exemplo por tópico (usadas no teste e como sugestões na conversa).
 EXEMPLOS = {
+ 'exatinho_passear': ['como faco o exatinho passear?', 'o exatinho esta dormindo', 'quero o exatinho parado'],
  'entrar': ['como eu entro no site?', 'esqueci minha senha'],
  'dois_fatores': ['o codigo de 6 numeros esta invalido', 'como funciona o autenticador'],
  'perdi_celular': ['perdi meu celular, e agora?'],

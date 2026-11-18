@@ -52,7 +52,7 @@ def perguntar(q, ctx=None, token=None):
 assert cl.get('/exatinho/resumo').status_code == 401 and cl.post('/exatinho/perguntar', json={'q': 'oi'}).status_code == 401
 cl.post('/login', data={'email': 'maria@exemplo.com.br', 'senha': 'SenhaForte#2026', 'csrf': tk})
 assert cl.post('/exatinho/perguntar', json={'q': 'oi'}).status_code == 403 and cl.post('/exatinho/perguntar', json={'q': 'oi'}, headers={'X-CSRF': 'falso'}).status_code == 403
-pg = cl.get('/situacao').text; assert 'id="exatinho"' in pg and '/static/exatinho.js' in pg and '/static/exatinho.css' in pg and 'Dúvidas do Exatinho' in pg
+pg = cl.get('/situacao').text; assert 'id="exatinho"' in pg and '/static/exatinho.js' in pg and '/static/exatinho.css' in pg and '/static/exatinho_vida.js' in pg and 'Dúvidas do Exatinho' in pg
 # ---- quem não buscou, por quê, de quais tipos
 d = perguntar('quais empresas não buscaram notas e por quê?'); assert d['topic'] == 'sem_busca' and d['mood'] in ('alerta', 'dica') and len(d['cards']) == 3, d['text']
 nomes = [x['nome'] for x in d['cards']]; assert EMP['padaria'][1] not in nomes and EMP['oficina'][1] in nomes and EMP['mercado'][1] in nomes and EMP['clinica'][1] in nomes
