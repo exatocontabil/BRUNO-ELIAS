@@ -284,6 +284,38 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         e = dict(motor.estado); e['progresso'] = core.busca_progresso_texto() if e.get('rodando') else ''; e['auto'] = agendador.ligado(); e['proxima'] = agendador.proxima()
         return Response(json.dumps(e, ensure_ascii=False), media_type='application/json', headers={'Cache-Control': 'no-store'})
 
+    # ------------------------------------------------------------ busca manual (uma empresa, tipos escolhidos)
+    TIPOS_BUSCA = (('nfe', 'NF-e'), ('nfce', 'NFC-e'), ('cte', 'CT-e'), ('nfse', 'NFS-e'))
+
+    @app.get('/buscar', response_class=HTMLResponse)
+    def buscar_tela(request: Request, empresa: str = '', erro: str = '', ok: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        d = re.sub(r'\D', '', empresa); linha = None; resumo = None
+        if len(d) == 14:
+            cfg = motor.cfg; oc = motivos.ultimas(str(core.DB_PATH))
+            for l in situacao.linhas(str(core.DB_PATH), cfg, None, ocorrencias=oc, diagnostico={}, acessos=dict(cfg.get('nfse_acesso') or {})):
+                if l['cnpj'] == d: linha = l; l['cnpj_fmt'] = core._format_cnpj(d); l['certificado'] = cofre.info(d) or cofre.info('escritorio'); l['cert_proprio'] = bool(cofre.info(d))
+        resumo = motor.estado.get('resumo') if not motor.estado.get('rodando') else None
+        return pagina(request, 'buscar.html', {'empresas': empresas_lista(), 'sel': d, 'l': linha, 'tipos': situacao.TIPOS, 'tipos_busca': TIPOS_BUSCA, 'resumo': resumo, 'rodando': bool(motor.estado['rodando']), 'erro': erro, 'ok': ok, 'tela': 'buscar'}, user=u)
+
+    @app.post('/buscar/manual')
+    async def buscar_manual(request: Request):
+        u, r = exigir(request)
+        if r: return r
+        f = await request.form(); csrf = str(f.get('csrf') or '')
+        if not csrf_ok(request, csrf): return RedirectResponse('/buscar', status_code=303)
+        d = re.sub(r'\D', '', str(f.get('empresa') or ''))
+        if len(d) != 14 or not core._is_valid_cnpj(d): return RedirectResponse(_msg('/buscar', 'erro', 'Escolha a empresa.'), status_code=303)
+        tipos = tuple(t for t, _ in TIPOS_BUSCA if t in f.getlist('tipo'))
+        if not tipos: return RedirectResponse(_msg('/buscar', 'erro', 'Marque pelo menos um tipo de nota.') + '&empresa=' + d, status_code=303)
+        recomecar = str(f.get('modo') or '') == 'recomecar'
+        if recomecar and not f.get('confirmo'): return RedirectResponse(_msg('/buscar', 'erro', 'Para buscar desde o começo, marque a confirmação: pode demorar bastante.') + '&empresa=' + d, status_code=303)
+        if not motor.certificado_para(d) and not cofre.info('escritorio'): return RedirectResponse(_msg('/buscar', 'erro', 'Esta empresa não tem certificado A1 guardado (nem o do escritório). Envie em Certificados A1.') + '&empresa=' + d, status_code=303)
+        if not agendador.disparar(only=[d], manual=True, tipos=tipos, recomecar=recomecar): return RedirectResponse(_msg('/buscar', 'erro', 'Já existe uma busca em andamento. Espere terminar ou cancele.') + '&empresa=' + d, status_code=303)
+        log(u, 'BUSCA_MANUAL', f"{d} {','.join(tipos)} {'recomecar' if recomecar else 'continuar'}")
+        return RedirectResponse(_msg('/buscar', 'ok', 'Busca iniciada. O andamento aparece abaixo.') + '&empresa=' + d, status_code=303)
+
     # ------------------------------------------------------------ auditoria
     def _msg(url, tipo, texto):
         from urllib.parse import quote

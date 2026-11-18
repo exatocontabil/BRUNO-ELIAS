@@ -57,8 +57,9 @@ class Motor:
         return None
 
     # ------------------------------------------------------------ NF-e, NFC-e e CT-e (espelha _run_sync_all)
-    def buscar_xml(self, cnpj, thumb):
-        core, cfg = self.core, self.cfg; cnpj = _d(cnpj); homolog = self.homologacao
+    def buscar_xml(self, cnpj, thumb, familias=None, recomecar=False):
+        """`familias`: quais tipos buscar (padrão: NF-e, NFC-e e CT-e). `recomecar`: busca manual 'desde o começo' (ponto de partida 0), como no programa instalado."""
+        core, cfg = self.core, self.cfg; cnpj = _d(cnpj); homolog = self.homologacao; fams = tuple(f for f in FAMILIAS_XML if f in (familias or FAMILIAS_XML))
         boot = cfg.setdefault('v028_bootstrap', {}); starts = {}
         for f in ('nfe', 'nfce'):
             key = core._sync_state_key(cnpj, f)
@@ -69,6 +70,7 @@ class Motor:
             if str(starts.get(f) or '0') in ('0', '') and f != 'nfe':
                 nsu_banco = core.db_max_source_nsu(cnpj, f)
                 if nsu_banco > 0: starts[f] = max(0, nsu_banco - core.NSU_FOLGA)
+        if recomecar: starts = {k: 0 for k in starts}
         run_id = core.db_start_run(cnpj); core.busca_progresso_iniciar(cnpj); results = {}; lock = threading.Lock()
 
         def execute_stream(fetch, state_key, label, stream_start, actor_code='', family=''):
@@ -118,6 +120,7 @@ class Motor:
                             lab, suf = core.nfe_actor_meta(a); chave = core._sync_state_key(cnpj, suf); item = core.get_sync_state_item(cfg, cnpj, suf)
                             salvo = core.get_saved_nsu(cfg, cnpj, suf); amax = core.db_max_actor_source_nsu(cnpj, 'nfe', a)
                             ini = (min(salvo, amax) if amax > 0 else 0) if str(item.get('bootstrap_actor_code') or '') == '9' else (min(salvo, amax) if amax > 0 else salvo)
+                            if recomecar: ini = 0
                             fetch = lambda th, c, n, aa=int(a): core._fetch_log('NF-e', c, n, lambda: core.test_sef_nfe_webservice(th, c, homolog, 1, n, aa))
                             r = execute_stream(fetch, chave, lab, ini, actor_code=a, family='nfe'); r['actor_code'] = a
                             cst = str((r.get('last_info') or {}).get('cstat') or '')
@@ -144,7 +147,7 @@ class Motor:
                 res = {'ok': False, 'documents': [], 'batches': 0, 'last_nsu': None, 'message': str(exc), 'last_info': {}, 'new_count': 0, 'duplicate_count': 0}
             with lock: results[family] = res
 
-        ths = [threading.Thread(target=familia, args=(f,), daemon=True) for f in FAMILIAS_XML]
+        ths = [threading.Thread(target=familia, args=(f,), daemon=True) for f in fams]
         for t in ths: t.start()
         for t in ths: t.join()
         core.busca_progresso_fim()
@@ -182,7 +185,7 @@ class Motor:
                     n = len(core.db_canceladas_sem_evento(cnpj, fam))
                     if n: self.ocorrencia(cnpj, fam, 'cancelada_sem_evento', f'{n} nota(s) cancelada(s) sem o XML completo do cancelamento')
                 except Exception: pass
-        todos_ok = (not cancel) and len(results) == 3 and all((results.get(f) or {}).get('ok') for f in FAMILIAS_XML) and not adiado
+        todos_ok = (not cancel) and len(results) >= 1 and all((r or {}).get('ok') for r in results.values()) and not adiado
         estado = 'Concluído' if todos_ok else ('Cancelado' if cancel else ('Aguardando próxima janela' if adiado else 'Concluído com observações'))
         try: core.db_update_run(run_id, estado, finished=True, total_found=sum(len((r or {}).get('documents') or []) for r in results.values()), new_count=novos, duplicate_count=dup,
                                 error_text='Cancelado' if cancel else ('' if todos_ok or adiado else 'Uma ou mais fontes não foram concluídas.'))
@@ -198,9 +201,9 @@ class Motor:
         except Exception: no_banco = 0
         return max(0, no_banco - self.core.NSU_FOLGA) if no_banco > 0 else 0
 
-    def buscar_nfse(self, cnpj, thumb, modo):
+    def buscar_nfse(self, cnpj, thumb, modo, recomecar=False):
         """`modo`: 'proprio' (A1 da empresa) ou 'procuracao' (A1 do escritório). Devolve dict com o resultado; levanta nfse_mod.NfseError se o Emissor Nacional recusar."""
-        core, cfg = self.core, self.cfg; cnpj = _d(cnpj); run_id = core.db_start_run(cnpj); last = self.cursor_nfse(cnpj)
+        core, cfg = self.core, self.cfg; cnpj = _d(cnpj); run_id = core.db_start_run(cnpj); last = 0 if recomecar else self.cursor_nfse(cnpj)
         kw = {'transport': self.nfse_transport} if self.nfse_transport else {}
         try:
             items, new_last, info = self.nfse_mod.fetch_all_new(thumb, last, self.homologacao, cnpj, cancelled=self.cancelado, **kw)
@@ -230,10 +233,10 @@ class Motor:
         if not self._trava.acquire(blocking=False): return False
         self.estado['rodando'] = True; return True
 
-    def rodada(self, only=None, manual=False, reservado=False):
+    def rodada(self, only=None, manual=False, reservado=False, tipos=None, recomecar=False):
         """Percorre as empresas: NF-e/NFC-e/CT-e e NFS-e. Uma de cada vez, nunca duas rodadas ao mesmo tempo. Devolve o resumo."""
         if not reservado and not self.reservar(): return {'ja_rodando': True}
-        self._cancelar.clear(); core = self.core
+        self._cancelar.clear(); core = self.core; tipos = tuple(tipos or (FAMILIAS_XML + ('nfse',))); fam_xml = tuple(f for f in FAMILIAS_XML if f in tipos); quer_nfse = 'nfse' in tipos
         try:
             empresas = [c for c in core.db_list_companies(5000) if core._is_valid_cnpj(_d(c.get('cnpj')))]
             if only:
@@ -245,27 +248,28 @@ class Motor:
                 cnpj = _d(comp.get('cnpj')); self.estado.update(empresa=comp.get('name') or cnpj, indice=i)
                 cid = self.certificado_para(cnpj)
                 if cid is None:
-                    resumo['sem_certificado'] += 1; self.ocorrencia(cnpj, FAMILIAS_XML + ('nfse',), 'sem_a1', '')
+                    resumo['sem_certificado'] += 1; self.ocorrencia(cnpj, tipos, 'sem_a1', '')
                     continue
                 try:
                     with self.cofre.usar(cid) as thumb:
-                        r = self.buscar_xml(cnpj, thumb)
-                        resumo['xml_ok' if r['ok'] or r['adiado'] else 'xml_obs'] += 1; resumo['xml_novos'] += r['novos']
-                        if self.manif_cfg()['auto'].get(cnpj) and not self.cancelado():          # só as empresas ligadas de propósito: a próxima busca traz o XML completo
+                        if fam_xml:
+                            r = self.buscar_xml(cnpj, thumb, fam_xml, recomecar)
+                            resumo['xml_ok' if r['ok'] or r['adiado'] else 'xml_obs'] += 1; resumo['xml_novos'] += r['novos']
+                        if fam_xml and not manual and self.manif_cfg()['auto'].get(cnpj) and not self.cancelado():          # só as empresas ligadas de propósito: a próxima busca traz o XML completo
                             try: m = self.manifestar(cnpj, limite=100, por='automático'); resumo['manifestadas'] = resumo.get('manifestadas', 0) + m['registradas']
                             except Exception: pass
-                        if not self.cancelado():
+                        if quer_nfse and not self.cancelado():
                             modo = self.proc.modo_para(self._doc_do_certificado(cid), cnpj) if cid == ESCRITORIO else 'proprio'
                             if modo != 'procuracao' or not self.proc.ligada(self.cfg) or self.proc.tentar_agora(self.cfg, cnpj, manual=manual):
-                                n = self.buscar_nfse(cnpj, thumb, modo); resumo['nfse_novos'] += n.get('novos', 0)
+                                n = self.buscar_nfse(cnpj, thumb, modo, recomecar); resumo['nfse_novos'] += n.get('novos', 0)
                                 if not n['ok'] and not (modo == 'procuracao' and not manual): resumo['nfse_problemas'] += 1
                 except CofreErro as exc:
-                    self.ocorrencia(cnpj, FAMILIAS_XML + ('nfse',), 'sem_a1', str(exc)); resumo['sem_certificado'] += 1
+                    self.ocorrencia(cnpj, tipos, 'sem_a1', str(exc)); resumo['sem_certificado'] += 1
                 except Exception:
                     if os.environ.get('EXATO_WEB_DEBUG'): import traceback; traceback.print_exc()
                     try: self.core.log_exception(f'Web: busca da empresa {cnpj}', sys.exc_info())
                     except Exception: pass
-                    self.ocorrencia(cnpj, FAMILIAS_XML, 'erro_desconhecido', 'erro inesperado'); resumo['xml_obs'] += 1
+                    self.ocorrencia(cnpj, tuple(fam_xml) or ('nfse',), 'erro_desconhecido', 'erro inesperado'); resumo['xml_obs'] += 1
             if not self.cancelado():
                 self.cfg['auto_round_last'] = datetime.now().isoformat(timespec='seconds'); self.salvar_cfg()
             if not self.cancelado():

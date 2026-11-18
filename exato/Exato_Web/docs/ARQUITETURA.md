@@ -31,3 +31,6 @@
 
 ## NFS-e no site
 `web/nfse_conferencia.py` + tela "NFS-e": por empresa e período mostra prestadas x tomadas (autorizadas e canceladas separadas), ISS retido, ISS devido a outro município, cancelada sem o XML do cancelamento e numeração de prestadas faltando; "Gerar relatório mensal em PDF" usa o mesmo `generate_monthly_report_pdf` do programa instalado (`relatorios.pedir_nfse`, em segundo plano). Só lê o banco; nunca cria nota nem evento.
+
+## Buscar notas (manual)
+Tela "Buscar notas": uma empresa, tipos escolhidos (NF-e, NFC-e, CT-e, NFS-e) e como começar: "só o que veio depois" (continua do ponto salvo) ou "refazer desde o começo" (com confirmação; ponto de partida 0). Usa a mesma rotina da rodada automática (`Motor.rodada(only, tipos, recomecar)`), uma busca por vez, com o andamento ao vivo e a situação da empresa embaixo.
