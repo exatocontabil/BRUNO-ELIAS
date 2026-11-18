@@ -58,4 +58,15 @@ motor.espaco_livre = lambda: 5 * 1024 * 1024; assert 'menos de 1 GB' not in c.ge
 c.post('/repositorio/auto', data={'ligar': '1', 'csrf': tk}); assert motor.repo_cfg()['auto'] is True
 assert c.post('/repositorio/copiar', data={'csrf': 'falso'}).status_code == 303
 c.post('/repositorio/copiar', data={'csrf': tk}); time.sleep(.5); assert 'Copiando' in c.get('/repositorio').text or 'XMLs na pasta' in c.get('/repositorio').text
+# ---- disco cheio / erro inesperado: nunca "Internal Server Error" cru
+import sqlite3 as _sq, web.app as _wa
+repo_mod = __import__('web.nucleo', fromlist=['x']).modulo('exato_repositorio'); orig = repo_mod.resumo
+def cheio(db): raise _sq.OperationalError('database or disk is full')
+repo_mod.resumo = cheio; r = c.get('/repositorio'); assert r.status_code == 200 and 'disco do servidor estiver cheio' in r.text and 'Internal Server Error' not in r.text; repo_mod.resumo = orig
+c2 = TestClient(app, base_url='http://testserver', follow_redirects=False, raise_server_exceptions=False); c2.get('/login'); tk2 = c2.cookies.get('exato_csrf'); c2.post('/login', data={'email': 'maria@exemplo.com.br', 'senha': 'SenhaForte#2026', 'csrf': tk2})
+def quebra(*a, **k): raise RuntimeError('falha de teste')
+motor_cfg = motor.repo_cfg; motor.repo_cfg = quebra; r = c2.get('/repositorio'); motor.repo_cfg = motor_cfg
+assert r.status_code == 500 and 'Algo deu errado' in r.text and 'Internal Server Error' not in r.text and 'falha de teste' not in r.text          # mensagem em português, sem vazar o erro técnico
+def cheio2(*a, **k): raise OSError(28, 'No space left on device')
+motor.repo_cfg = cheio2; r = c2.get('/repositorio'); motor.repo_cfg = motor_cfg; assert r.status_code == 500 and 'disco do servidor parece estar cheio' in r.text
 print('Exato Web fase 3 (repositório): OK')

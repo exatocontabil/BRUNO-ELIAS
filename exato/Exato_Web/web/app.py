@@ -20,6 +20,18 @@ ROTULOS_TIPO = {'nfe': 'NF-e', 'nfce': 'NFC-e', 'cte': 'CT-e', 'nfse': 'NFS-e'}
 def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, manif_transporte=None):
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)          # sem página de documentação técnica exposta na internet
     app.mount('/static', StaticFiles(directory=str(AQUI / 'static')), name='static')
+
+    @app.exception_handler(Exception)
+    async def erro_inesperado(request: Request, exc: Exception):
+        """Nenhuma tela mostra "Internal Server Error": mensagem em português, com a causa mais provável, e o detalhe vai para o registro de erros."""
+        try: nucleo.core().log_exception(f'Web: erro em {request.url.path}', (type(exc), exc, exc.__traceback__))
+        except Exception: pass
+        disco = isinstance(exc, (sqlite3.OperationalError, OSError)) and any(k in str(exc).lower() for k in ('full', 'space', 'espaco', 'no space', 'disk'))
+        causa = 'O disco do servidor parece estar cheio. Libere espaço no C: e tente de novo.' if disco else 'Algo deu errado do nosso lado. Tente de novo; se continuar, avise quem cuida do site e diga o que você estava fazendo.'
+        corpo = ('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Algo deu errado — Exato</title>'
+                 '<body style="font-family:system-ui,Segoe UI,Arial;background:#f3f5fa;color:#0f172a;display:grid;place-items:center;min-height:100vh;margin:0"><div style="max-width:460px;background:#fff;border:1px solid #e2e8f2;border-radius:16px;padding:28px;box-shadow:0 8px 24px rgba(15,23,42,.08)">'
+                 '<h1 style="margin:0 0 8px;font-size:22px">Algo deu errado</h1><p style="margin:0 0 16px;color:#334155;line-height:1.5">' + causa + '</p><a href="/situacao" style="display:inline-block;background:#e11d2e;color:#fff;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:600">Voltar ao início</a></div></body></html>')
+        return HTMLResponse(corpo, status_code=500)
     tpl = Jinja2Templates(directory=str(AQUI / 'templates'))
     core = nucleo.core()
     pasta_cofre = config.DADOS / 'cofre'
@@ -655,10 +667,17 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
     def repositorio_tela(request: Request, ok: str = ''):
         u, r = exigir(request)
         if r: return r
-        db = str(core.DB_PATH); res = repo.resumo(db); linhas = []
-        for cnpj, nome, mes, docs, copiados in repo.por_empresa_mes(db)[:300]:
+        db = str(core.DB_PATH); linhas = []; falha_banco = ''
+        try:
+            res = repo.resumo(db); lista_mes = repo.por_empresa_mes(db)[:300]
+        except (sqlite3.Error, OSError) as exc:          # disco cheio ou banco ocupado: a tela abre mesmo assim e explica
+            res = {'total': 0, 'copiados': 0, 'fila': 0, 'diferentes': 0, 'erros': 0, 'ultima_copia': '', 'motivos': [], 'proxima_tentativa': ''}; lista_mes = []
+            falha_banco = 'O banco não respondeu. Se o disco do servidor estiver cheio, libere espaço no C: e abra de novo.'
+            try: core.log_exception('Web: tela do Repositório', __import__('sys').exc_info())
+            except Exception: pass
+        for cnpj, nome, mes, docs, copiados in lista_mes:
             linhas.append({'cnpj': cnpj, 'cnpj_fmt': core._format_cnpj(cnpj), 'nome': nome or cnpj, 'mes': mes, 'docs': docs, 'copiados': copiados, 'zip': bool(re.fullmatch(r'\d{4}-\d{2}', mes))})
-        return pagina(request, 'repositorio.html', {'res': res, 'linhas': linhas, 'pasta': str(config.ARQUIVOS), 'copiando': bool(motor.estado_repo['copiando']), 'ultimo': motor.estado_repo.get('ultimo'), 'auto': motor.repo_cfg()['auto'], 'livre': motor.espaco_livre(), 'motivo': (motor.estado_repo.get('resultado') or {}).get('motivo') if isinstance(motor.estado_repo.get('resultado'), dict) else '', 'ok': ok, 'tela': 'repositorio'}, user=u)
+        return pagina(request, 'repositorio.html', {'res': res, 'linhas': linhas, 'pasta': str(config.ARQUIVOS), 'copiando': bool(motor.estado_repo['copiando']), 'ultimo': motor.estado_repo.get('ultimo'), 'auto': motor.repo_cfg()['auto'], 'livre': motor.espaco_livre(), 'falha_banco': falha_banco, 'motivo': (motor.estado_repo.get('resultado') or {}).get('motivo') if isinstance(motor.estado_repo.get('resultado'), dict) else '', 'ok': ok, 'tela': 'repositorio'}, user=u)
 
     @app.post('/repositorio/copiar')
     def repositorio_copiar(request: Request, csrf: str = Form('')):
