@@ -34,7 +34,11 @@ core.test_sef_cte_webservice = core.test_sef_nfce_webservice
 core.nfse_mod_off = True
 motor.nfse_transport = lambda url, thumb: (404, '{"StatusProcessamento":"NENHUM_DOCUMENTO_LOCALIZADO"}')
 core_nfse = __import__('exato_nfse'); core_nfse.ADN_PAUSE_SECONDS = 0
-motor.rodada(only=[CN]); assert len(list(ARQ.rglob('*.xml'))) == 6 and motor.estado_repo['resultado']['restantes'] == 0
+assert motor.repo_cfg()['auto'] is False          # a cópia automática vem DESLIGADA
+motor.rodada(only=[CN]); assert len(list(ARQ.rglob('*.xml'))) == 5          # a busca não copia nada para a pasta sozinha (a nota nova fica só no banco)
+motor.espaco_livre = lambda: 10 * 1024 * 1024; r = motor.copiar_repositorio(); assert r['motivo'] == 'disco_cheio' and len(list(ARQ.rglob('*.xml'))) == 5 and motor.estado_repo['resultado']['motivo'] == 'disco_cheio'          # disco quase cheio: nem tenta
+motor.espaco_livre = lambda: 50 * 1024 ** 3
+motor.repo_cfg()['auto'] = True; motor.rodada(only=[CN]); assert len(list(ARQ.rglob('*.xml'))) == 6 and motor.estado_repo['resultado']['restantes'] == 0          # ligada: copia depois da busca
 # ---- telas
 core.db_auth_register_user('Maria Teste', 'maria@exemplo.com.br', 'SenhaForte#2026'); config.EXIGIR_2FA = False
 c = TestClient(app, base_url='http://testserver', follow_redirects=False); c.get('/login'); tk = c.cookies.get('exato_csrf')
@@ -48,6 +52,10 @@ z = zipfile.ZipFile(_exp.caminho_zip(j['id'])); nomes = [n for n in z.namelist()
 j = _exp.pedir(CN, '2026-10-01', '2026-10-31', ['nfe'], '', 'organizado', '', 'teste', em_segundo_plano=False); j = _exp.ler(j['id']); assert j['estado'] == 'pronto' and j['notas'] == 1          # outubro: só a nota 20
 assert c.get('/repositorio/zip?empresa=12&mes=2026-09').status_code == 400 and c.get(f'/repositorio/zip?empresa={CN}&mes=..%2f..').status_code == 400
 assert not list(Path(config.DADOS).glob('exato_zip_*'))          # sem sobras
+assert c.post('/repositorio/auto', data={'ligar': '0', 'csrf': 'falso'}).status_code == 303 and motor.repo_cfg()['auto'] is True          # sem o token, nada muda
+r = c.post('/repositorio/auto', data={'ligar': '0', 'csrf': tk}); assert r.status_code == 303 and motor.repo_cfg()['auto'] is False and 'Desligada' in c.get('/repositorio').text and 'Ligar' in c.get('/repositorio').text
+motor.espaco_livre = lambda: 5 * 1024 * 1024; assert 'menos de 1 GB' not in c.get('/repositorio').text; motor.copiar_repositorio(); assert 'menos de 1 GB' in c.get('/repositorio').text; motor.espaco_livre = lambda: 50 * 1024 ** 3
+c.post('/repositorio/auto', data={'ligar': '1', 'csrf': tk}); assert motor.repo_cfg()['auto'] is True
 assert c.post('/repositorio/copiar', data={'csrf': 'falso'}).status_code == 303
 c.post('/repositorio/copiar', data={'csrf': tk}); time.sleep(.5); assert 'Copiando' in c.get('/repositorio').text or 'XMLs na pasta' in c.get('/repositorio').text
 print('Exato Web fase 3 (repositório): OK')

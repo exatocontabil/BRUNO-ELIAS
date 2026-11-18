@@ -5,7 +5,7 @@ comunicação com a SEFAZ são as mesmas (`web.nucleo.core()`); aqui só há a o
 
 Regras herdadas do programa: cada fluxo tem o seu ponto de continuação (NSU); a busca de NF-e respeita a espera da SEFAZ (nunca insiste); resposta desconhecida
 da SEFAZ não vale como "sem notas"; cobertura só é gravada se a busca terminou bem; o resultado de cada tipo é anotado com a causa explicada."""
-import os, re, sqlite3, sys, threading, time
+import os, re, shutil, sqlite3, sys, threading, time
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -16,6 +16,7 @@ FAMILIAS_XML = ('nfe', 'nfce', 'cte')
 ROTULO = {'nfe': 'NF-e', 'nfce': 'NFC-e', 'cte': 'CT-e', 'nfse': 'NFS-e'}
 AUTO_HORAS = 4
 ESCRITORIO = 'escritorio'
+MIN_LIVRE_BYTES = 1024 ** 3          # abaixo de 1 GB livres na pasta de arquivos a cópia não roda (disco cheio derruba o banco)
 MARGEM_DIAS = 3          # busca a partir de uma data recomeça 3 dias antes (notas atrasadas chegam depois), como no programa instalado
 _RE_DATA_XML = re.compile(rb'<(?:dhEmi|dEmi)>(\d{4}-\d{2}-\d{2})')
 
@@ -361,8 +362,9 @@ class Motor:
             if not self.cancelado():
                 self.cfg['auto_round_last'] = datetime.now().isoformat(timespec='seconds'); self.salvar_cfg()
             if not self.cancelado():
-                for etapa in (self.copiar_repositorio, self.enviar_boxe, self.fechar_meses):          # depois da busca: copia os XMLs, manda as NFS-e ao Box-e e fecha os meses prontos
-                    try: etapa()
+                for etapa in ((self.copiar_repositorio if self.repo_cfg()['auto'] else None), self.enviar_boxe, self.fechar_meses):          # depois da busca: copia os XMLs, manda as NFS-e ao Box-e e fecha os meses prontos
+                    try:
+                        if etapa: etapa()
                     except Exception: pass
             resumo['cancelada'] = self.cancelado(); self.estado.update(ultimo=datetime.now().isoformat(timespec='seconds'), resumo=resumo)
             return resumo
@@ -385,9 +387,20 @@ class Motor:
         self.and_extra(etapa='')
 
     # ------------------------------------------------------------ Repositório (XMLs em arquivos organizados, guardados para sempre)
+    def repo_cfg(self):
+        """Cópia automática dos XMLs para a pasta de arquivos: DESLIGADA por padrão (a pessoa liga quando quiser). 'Copiar agora' continua funcionando."""
+        c = self.cfg.setdefault('repositorio_web', {}); c.setdefault('auto', False); return c
+
+    def espaco_livre(self):
+        try: return shutil.disk_usage(str(config.ARQUIVOS)).free
+        except OSError: return None
+
     def copiar_repositorio(self, ignorar_pausa=False):
         """Copia para a pasta de arquivos os XMLs que ainda não estão lá (Empresa - CNPJ / Ano / Mês / Tipo). Nunca sobrescreve e nunca apaga."""
         repo = nucleo.modulo('exato_repositorio')
+        livre = self.espaco_livre()
+        if livre is not None and livre < MIN_LIVRE_BYTES:
+            r = {'ok': False, 'motivo': 'disco_cheio', 'livre': livre}; self.estado_repo.update(ultimo=datetime.now().isoformat(timespec='seconds'), resultado=r); return r
         if not self._trava_repo.acquire(blocking=False): return {'ja_copiando': True}
         try:
             self.estado_repo.update(copiando=True)

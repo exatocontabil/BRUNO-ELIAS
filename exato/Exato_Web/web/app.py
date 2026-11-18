@@ -215,9 +215,9 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if not core.db_set_company_name(d, novo): return RedirectResponse(_msg('/empresas', 'erro', 'Esse nome não pode ser usado.'), status_code=303)
         motor.cfg.setdefault('nomes_manuais', {})[d] = {'nome': novo, 'em': time.strftime('%Y-%m-%dT%H:%M:%S'), 'por': u.get('email', '')}; motor.salvar_cfg()
         log(u, 'EMPRESA_EDITADA', f'{d}: {antigo} -> {novo}'[:200])
-        if not motor.estado_repo['copiando']:          # a pasta do servidor é renomeada (ou unida à antiga) na próxima cópia; nada é apagado
+        if motor.repo_cfg()['auto'] and not motor.estado_repo['copiando']:          # a pasta do servidor é renomeada (ou unida à antiga) na próxima cópia; nada é apagado
             import threading; threading.Thread(target=motor.copiar_repositorio, kwargs={'ignorar_pausa': True}, daemon=True, name='repositorio').start()
-        return RedirectResponse(_msg('/empresas', 'ok', 'Nome atualizado. A pasta da empresa no servidor acompanha o nome novo.'), status_code=303)
+        return RedirectResponse(_msg('/empresas', 'ok', 'Nome atualizado. A pasta da empresa no servidor acompanha o nome novo na próxima cópia para a pasta de arquivos.'), status_code=303)
 
     @app.post('/empresas/restaurar-nome')
     def empresas_restaurar(request: Request, cnpj: str = Form(''), csrf: str = Form('')):
@@ -658,7 +658,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         db = str(core.DB_PATH); res = repo.resumo(db); linhas = []
         for cnpj, nome, mes, docs, copiados in repo.por_empresa_mes(db)[:300]:
             linhas.append({'cnpj': cnpj, 'cnpj_fmt': core._format_cnpj(cnpj), 'nome': nome or cnpj, 'mes': mes, 'docs': docs, 'copiados': copiados, 'zip': bool(re.fullmatch(r'\d{4}-\d{2}', mes))})
-        return pagina(request, 'repositorio.html', {'res': res, 'linhas': linhas, 'pasta': str(config.ARQUIVOS), 'copiando': bool(motor.estado_repo['copiando']), 'ultimo': motor.estado_repo.get('ultimo'), 'ok': ok, 'tela': 'repositorio'}, user=u)
+        return pagina(request, 'repositorio.html', {'res': res, 'linhas': linhas, 'pasta': str(config.ARQUIVOS), 'copiando': bool(motor.estado_repo['copiando']), 'ultimo': motor.estado_repo.get('ultimo'), 'auto': motor.repo_cfg()['auto'], 'livre': motor.espaco_livre(), 'motivo': (motor.estado_repo.get('resultado') or {}).get('motivo') if isinstance(motor.estado_repo.get('resultado'), dict) else '', 'ok': ok, 'tela': 'repositorio'}, user=u)
 
     @app.post('/repositorio/copiar')
     def repositorio_copiar(request: Request, csrf: str = Form('')):
@@ -667,6 +667,14 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if csrf_ok(request, csrf) and not motor.estado_repo['copiando']:
             import threading; threading.Thread(target=motor.copiar_repositorio, kwargs={'ignorar_pausa': True}, daemon=True, name='repositorio').start(); log(u, 'REPOSITORIO_COPIAR', '')
         return RedirectResponse('/repositorio?ok=Copiando+os+XMLs+para+a+pasta+de+arquivos...', status_code=303)
+
+    @app.post('/repositorio/auto')
+    def repositorio_auto(request: Request, ligar: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        if csrf_ok(request, csrf):
+            motor.repo_cfg()['auto'] = (ligar == '1'); motor.salvar_cfg(); log(u, 'REPOSITORIO_AUTO', 'ligada' if ligar == '1' else 'desligada')
+        return RedirectResponse(_msg('/repositorio', 'ok', 'Cópia automática ligada.' if ligar == '1' else 'Cópia automática desligada. Os XMLs ficam só no banco; use "Copiar agora" quando quiser.').replace('/repositorio?ok=', '/repositorio?ok='), status_code=303)
 
     @app.get('/repositorio/zip')
     def repositorio_zip(request: Request, empresa: str = '', mes: str = '', tipo: str = ''):

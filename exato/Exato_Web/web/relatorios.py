@@ -1,6 +1,6 @@
 """Relatório de documentos em PDF no Exato Web (o mesmo relatório do programa instalado: uma seção por tipo e movimentação, autorizadas e canceladas separadas).
 Gerado em segundo plano (pode levar minutos com muitas notas); cada pedido vira um "trabalho" com situação e o PDF para baixar."""
-import json, re, secrets, sys, threading, time
+import json, os, re, secrets, sys, threading, time
 from datetime import datetime
 from pathlib import Path
 
@@ -17,7 +17,8 @@ def pasta(): p = config.DADOS / 'relatorios'; p.mkdir(parents=True, exist_ok=Tru
 
 
 def _salvar(job):
-    with _trava: (pasta() / f"{job['id']}.json").write_text(json.dumps(job, ensure_ascii=False), encoding='utf-8')
+    with _trava:          # gravação atômica: quem lê a lista nunca pega um arquivo pela metade
+        alvo = pasta() / f"{job['id']}.json"; tmp = alvo.with_suffix('.tmp'); tmp.write_text(json.dumps(job, ensure_ascii=False), encoding='utf-8'); os.replace(tmp, alvo)
 
 
 def ler(jid):

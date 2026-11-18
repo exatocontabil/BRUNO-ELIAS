@@ -7,7 +7,7 @@ Regras (pedido do usuário, iguais às do Exato Central Fiscal):
     soltos junto, no mesmo padrão do ZIP de importação da Domínio, tudo dentro de um ZIP só);
   - gerado em segundo plano, lendo o banco em lotes (nunca carrega tudo na memória), nunca grava nada fora da pasta de exportações do site.
 """
-import json, re, secrets, sqlite3, sys, tempfile, threading, time, zipfile
+import json, os, re, secrets, sqlite3, sys, tempfile, threading, time, zipfile
 from datetime import datetime
 from pathlib import Path
 
@@ -28,7 +28,8 @@ def pasta():
 
 
 def _salvar(job):
-    with _trava: (pasta() / f"{job['id']}.json").write_text(json.dumps(job, ensure_ascii=False), encoding='utf-8')
+    with _trava:          # gravação atômica: quem lê a lista nunca pega um arquivo pela metade
+        alvo = pasta() / f"{job['id']}.json"; tmp = alvo.with_suffix('.tmp'); tmp.write_text(json.dumps(job, ensure_ascii=False), encoding='utf-8'); os.replace(tmp, alvo)
 
 
 def ler(jid):
