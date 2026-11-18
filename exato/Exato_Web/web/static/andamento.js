@@ -24,7 +24,7 @@
     ids.forEach(function(k){
       var x=tipos[k],est=EST[x.estado]||EST.na_fila,l=el('div','and-l and-'+x.estado);
       var esq=el('div','and-t');esq.appendChild(el('b','',NOMES[k]||k));esq.appendChild(el('span','pill '+est[1],est[0]));l.appendChild(esq);
-      var nums=[];if(x.consultas)nums.push(num(x.consultas)+' consulta(s)');if(x.notas)nums.push(num(x.notas)+' nota(s) recebida(s)');if(x.novos)nums.push(num(x.novos)+' nova(s) guardada(s)');
+      var nums=[];if(x.consultas)nums.push(num(x.consultas)+' consulta(s)');if(x.notas)nums.push(num(x.notas)+' nota(s) recebida(s)');if(x.novos)nums.push(num(x.novos)+' nova(s) guardada(s)');if(x.duplicados)nums.push(num(x.duplicados)+' já estava(m) guardada(s)');if(x.eventos)nums.push(num(x.eventos)+' evento(s) (cancelamento etc.)');if(x.ignorados)nums.push(num(x.ignorados)+' ignorada(s)');
       var dir=el('div','and-i');dir.appendChild(el('div','mu',nums.length?nums.join(' • '):(x.estado==='na_fila'?'Esperando a vez':(x.estado==='consultando'?'Consultando a SEFAZ...':''))));
       if(x.titulo&&x.estado!=='ok'&&x.estado!=='sem_novas'){var m=el('div','and-m g-'+(x.estado==='espera'?'espera':(x.gravidade||'erro')));m.appendChild(el('b','',x.titulo));if(x.acao)m.appendChild(el('span','',' — '+x.acao));dir.appendChild(m);}
       if(x.estado==='falha'&&x.detalhe)dir.appendChild(el('small','mu',x.detalhe));

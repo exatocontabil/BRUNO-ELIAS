@@ -292,6 +292,9 @@ class Motor:
         try:
             items, new_last, info = self.nfse_mod.fetch_all_new(thumb, last, self.homologacao, cnpj, cancelled=self.cancelado, progress=lambda n, b: self.and_set('nfse', notas=n, consultas=b), **kw)
             res = core.db_upsert_nfse_items(cnpj, items)
+            self.and_set('nfse', duplicados=int(res.get('duplicate') or 0), eventos=int(res.get('events') or 0), ignorados=int(res.get('ignored') or 0))          # a tela explica o que aconteceu com cada nota recebida
+            try: core.setup_logging().info(f"Web: NFS-e {cnpj}: {len(items)} item(ns) recebido(s) = {res['new']} nova(s), {res['duplicate']} já guardada(s), {res['events']} evento(s), {res['ignored']} ignorado(s)")
+            except Exception: pass
             if not (pl['volta'] and int(new_last) < self._nsu_salvo(cnpj, 'nfse')): core.save_nsu_state(cfg, cnpj, 'nfse', new_last, len(items), metadata={'environment': 'homologacao' if self.homologacao else 'producao'})
             cancelada = bool(info.get('cancelled'))
             if not cancelada and not pl['parcial']: self.cobertura.registrar(cfg, cnpj, 'nfse', nsu=new_last)
