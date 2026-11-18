@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import auditoria as aud, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -165,10 +165,10 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
 
     # ------------------------------------------------------------ empresas e certificados
     def empresas_lista():
-        out = []
+        motor.reaplicar_nomes(); out = []
         for c in core.db_list_companies(5000):
-            cid = re.sub(r'\D', '', str(c['cnpj'])); info = cofre.info(cid)
-            out.append({'cnpj': cid, 'cnpj_fmt': core._format_cnpj(cid), 'nome': c.get('name') or cid, 'documentos': c.get('documents') or 0, 'certificado': info})
+            cid = re.sub(r'\D', '', str(c['cnpj'])); info = cofre.info(cid); man = motor.nome_manual(cid)
+            out.append({'cnpj': cid, 'cnpj_fmt': core._format_cnpj(cid), 'nome': man or c.get('name') or cid, 'documentos': c.get('documents') or 0, 'certificado': info, 'manual': bool(man)})
         return out
 
     @app.get('/empresas', response_class=HTMLResponse)
@@ -186,6 +186,50 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if len(d) != 14 or not core._is_valid_cnpj(d): return RedirectResponse('/empresas?erro=CNPJ+inválido.+Confira+os+14+dígitos.', status_code=303)
         core.db_register_company(d, nome.strip()); log(u, 'EMPRESA_CADASTRADA', d)
         return RedirectResponse('/empresas?ok=Empresa+cadastrada.', status_code=303)
+
+    @app.get('/empresas/editar', response_class=HTMLResponse)
+    def empresas_editar_tela(request: Request, cnpj: str = '', erro: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        d = re.sub(r'\D', '', cnpj); e = next((x for x in empresas_lista() if x['cnpj'] == d), None)
+        if not e: return RedirectResponse(_msg('/empresas', 'erro', 'Empresa não encontrada.'), status_code=303)
+        try: nome_notas, verificado = core.db_company_verified_name(d)
+        except Exception: nome_notas, verificado = '', False
+        motor.reaplicar_nomes()
+        return pagina(request, 'empresa_editar.html', {'e': e, 'nome_notas': nome_notas if verificado else '', 'erro': erro, 'tela': 'empresas'}, user=u)
+
+    @app.post('/empresas/editar')
+    def empresas_editar(request: Request, cnpj: str = Form(''), nome: str = Form(''), confirmo: str = Form(''), csrf: str = Form('')):
+        """Muda o nome da empresa (o CNPJ nunca muda). O nome que as notas trazem só é trocado com confirmação; a pasta do Repositório acompanha o nome novo."""
+        u, r = exigir(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/empresas?erro=A+página+expirou.', status_code=303)
+        d = re.sub(r'\D', '', cnpj); novo = re.sub(r'\s+', ' ', re.sub(r'[\x00-\x1f]', ' ', nome)).strip()
+        if len(d) != 14 or d not in {re.sub(r'\D', '', str(c['cnpj'])) for c in core.db_list_companies(5000)}: return RedirectResponse(_msg('/empresas', 'erro', 'Empresa não encontrada.'), status_code=303)
+        if len(novo) < 3 or len(novo) > 120: return RedirectResponse(_msg('/empresas', 'erro', 'O nome precisa ter de 3 a 120 letras.'), status_code=303)
+        antigo = motor.nome_manual(d) or core.db_get_company_name(d) or ''
+        try: do_xml, verificado = core.db_company_verified_name(d)
+        except Exception: do_xml, verificado = '', False
+        if verificado and do_xml and do_xml.casefold() != novo.casefold() and not motor.nome_manual(d) and not confirmo:
+            return RedirectResponse(_msg('/empresas', 'erro', f'As notas desta empresa trazem o nome "{do_xml}". Para usar "{novo}" mesmo assim (a empresa mudou de nome), marque a confirmação e salve de novo.'), status_code=303)
+        if not core.db_set_company_name(d, novo): return RedirectResponse(_msg('/empresas', 'erro', 'Esse nome não pode ser usado.'), status_code=303)
+        motor.cfg.setdefault('nomes_manuais', {})[d] = {'nome': novo, 'em': time.strftime('%Y-%m-%dT%H:%M:%S'), 'por': u.get('email', '')}; motor.salvar_cfg()
+        log(u, 'EMPRESA_EDITADA', f'{d}: {antigo} -> {novo}'[:200])
+        if not motor.estado_repo['copiando']:          # a pasta do servidor é renomeada (ou unida à antiga) na próxima cópia; nada é apagado
+            import threading; threading.Thread(target=motor.copiar_repositorio, kwargs={'ignorar_pausa': True}, daemon=True, name='repositorio').start()
+        return RedirectResponse(_msg('/empresas', 'ok', 'Nome atualizado. A pasta da empresa no servidor acompanha o nome novo.'), status_code=303)
+
+    @app.post('/empresas/restaurar-nome')
+    def empresas_restaurar(request: Request, cnpj: str = Form(''), csrf: str = Form('')):
+        u, r = exigir(request)
+        if r: return r
+        d = re.sub(r'\D', '', cnpj)
+        if csrf_ok(request, csrf) and len(d) == 14 and (motor.cfg.get('nomes_manuais') or {}).pop(d, None) is not None:
+            motor.salvar_cfg()
+            try: core.db_company_verified_name(d)          # volta ao nome que as notas trazem
+            except Exception: pass
+            log(u, 'EMPRESA_NOME_RESTAURADO', d)
+        return RedirectResponse(_msg('/empresas', 'ok', 'Voltou ao nome que as notas trazem.'), status_code=303)
 
     @app.get('/certificados', response_class=HTMLResponse)
     def certificados(request: Request, ok: str = '', erro: str = ''):
@@ -228,14 +272,24 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         return pagina(request, 'situacao.html', {'linhas': linhas, 'totais': situacao.totais(linhas), 'tipos': situacao.TIPOS, 'tela': 'situacao', 'rodando': bool(motor.estado['rodando']), 'auto': agendador.ligado(), 'proxima': agendador.proxima()}, user=u)
 
     @app.get('/documentos', response_class=HTMLResponse)
-    def documentos(request: Request, empresa: str = '', tipo: str = '', mov: str = '', q: str = ''):
+    def documentos(request: Request, empresa: str = '', tipo: str = '', mov: str = '', q: str = '', desde: str = ''):
         u, r = exigir(request)
         if r: return r
-        rows = core.db_list_documents(cnpj=empresa, family=tipo, direction=mov, query=q, limit=300, with_xml=False)
-        rows = [x for x in rows if x.get('status') != 'Evento']
+        if re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}', desde or ''):          # "as notas novas desta busca": guardadas a partir de um instante
+            d14 = re.sub(r'\D', '', empresa); con = sqlite3.connect(str(core.DB_PATH), timeout=30); con.row_factory = sqlite3.Row
+            try:
+                sql = "SELECT d.doc_id, d.family, d.doc_type, d.number, d.cnpj, COALESCE(c.name,d.cnpj) AS company_name, d.direction, d.issued_at, d.value, d.status FROM documents d LEFT JOIN companies c ON c.cnpj=d.cnpj WHERE d.first_seen_at>=? AND COALESCE(d.status,'')<>'Evento'"; args = [desde]
+                if len(d14) == 14: sql += ' AND d.cnpj=?'; args.append(d14)
+                if tipo in ROTULOS_TIPO: sql += ' AND d.family=?'; args.append(tipo)
+                if mov in ('Entrada', 'Saída'): sql += ' AND d.direction=?'; args.append(mov)
+                rows = [dict(x) for x in con.execute(sql + ' ORDER BY d.issued_at DESC LIMIT 300', args)]
+            finally: con.close()
+        else:
+            desde = ''; rows = core.db_list_documents(cnpj=empresa, family=tipo, direction=mov, query=q, limit=300, with_xml=False)
+            rows = [x for x in rows if x.get('status') != 'Evento']
         docs = [{'id': x['doc_id'], 'tipo': ROTULOS_TIPO.get(str(x.get('family') or '').lower(), x.get('doc_type') or ''), 'numero': x.get('number') or '', 'empresa': x.get('company_name') or x.get('cnpj'),
-                 'mov': x.get('direction') or '', 'data': str(x.get('issued_at') or '')[:10], 'valor': x.get('value') or '', 'situacao': x.get('status') or ''} for x in rows]
-        return pagina(request, 'documentos.html', {'docs': docs, 'empresas': empresas_lista(), 'f': {'empresa': empresa, 'tipo': tipo, 'mov': mov, 'q': q}, 'tela': 'documentos'}, user=u)
+                 'mov': x.get('direction') or '', 'data': str(x.get('issued_at') or '')[:10], 'valor': x.get('value') or '', 'situacao': x.get('status') or '', 'pdf': str(x.get('family') or '').lower() in ROTULOS_TIPO} for x in rows]
+        return pagina(request, 'documentos.html', {'docs': docs, 'empresas': empresas_lista(), 'f': {'empresa': empresa, 'tipo': tipo, 'mov': mov, 'q': q, 'desde': desde}, 'tela': 'documentos'}, user=u)
 
     @app.get('/documentos/{doc_id}/xml')
     def documento_xml(request: Request, doc_id: str):
@@ -247,6 +301,75 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if not row or not row[0]: return PlainTextResponse('Documento não encontrado.', status_code=404)
         xml = row[0] if isinstance(row[0], bytes) else str(row[0]).encode('utf-8'); log(u, 'XML_BAIXADO', str(doc_id)[:60])
         return Response(xml, media_type='application/xml', headers={'Content-Disposition': f'attachment; filename="{re.sub(r"[^0-9A-Za-z_.-]", "_", str(doc_id))[:80]}.xml"'})
+
+    @app.get('/documentos/{doc_id}/pdf')
+    def documento_pdf(request: Request, doc_id: str):
+        """Abre a nota em PDF (DANFE/DACTE/NFS-e) gerado na hora a partir do XML guardado. Nada é gravado: o arquivo temporário some depois de enviado."""
+        u, r = exigir(request)
+        if r: return r
+        con = sqlite3.connect(str(core.DB_PATH), timeout=15)
+        try: row = con.execute('SELECT xml, family, status, cnpj FROM documents WHERE doc_id=?', (doc_id,)).fetchone()
+        finally: con.close()
+        if not row or not row[0]: return PlainTextResponse('Documento não encontrado.', status_code=404)
+        xml = row[0] if isinstance(row[0], bytes) else str(row[0]).encode('utf-8'); fam = str(row[1] or '').lower(); status = str(row[2] or ''); cnpj = str(row[3] or '')
+        if status == 'Evento': return PlainTextResponse('Evento não tem PDF: baixe o XML.', status_code=400)
+        if fam not in ROTULOS_TIPO: return PlainTextResponse('Este tipo de documento não tem PDF.', status_code=400)
+        if len(xml) > 8 * 1024 * 1024: return PlainTextResponse('O XML é grande demais para gerar o PDF aqui.', status_code=413)
+        import tempfile
+        from starlette.background import BackgroundTask
+        tmp = tempfile.NamedTemporaryFile(prefix='exato_pdf_', suffix='.pdf', dir=str(config.DADOS), delete=False); tmp.close()
+        try:
+            logo = core.LOGO_PATH if getattr(core, 'LOGO_PATH', None) and Path(core.LOGO_PATH).exists() else None
+            if fam == 'nfse':
+                nucleo.modulo('exato_nfse_pdf').generate_nfse_pdf([{'xml': xml, 'cnpj': cnpj, 'situacao': 'Cancelada' if status == 'Cancelado' else 'Autorizada'}], tmp.name, core.db_get_company_name(cnpj) or '', logo)
+            else:
+                core.generate_fiscal_representation_pdf([{'xml': xml, 'family': fam}], tmp.name, fam)
+        except Exception:
+            Path(tmp.name).unlink(missing_ok=True)
+            try: core.log_exception('Web: PDF da nota', __import__('sys').exc_info())
+            except Exception: pass
+            return PlainTextResponse('Não foi possível gerar o PDF desta nota. O XML continua disponível para baixar.', status_code=500)
+        log(u, 'PDF_ABERTO', str(doc_id)[:60])
+        return FileResponse(tmp.name, media_type='application/pdf', headers={'Content-Disposition': 'inline; filename="nota.pdf"'}, background=BackgroundTask(lambda: Path(tmp.name).unlink(missing_ok=True)))
+
+    # ------------------------------------------------------------ exportar XMLs em ZIP (com os eventos das notas)
+    @app.get('/exportar', response_class=HTMLResponse)
+    def exportar_tela(request: Request, empresa: str = '', de: str = '', ate: str = '', tipo: str = '', mov: str = '', desde: str = '', erro: str = '', ok: str = ''):
+        u, r = exigir(request)
+        if r: return r
+        return pagina(request, 'exportar.html', {'empresas': empresas_lista(), 'jobs': exp.recentes(20), 'f': {'empresa': re.sub(r'\D', '', empresa), 'de': de, 'ate': ate, 'tipo': tipo if tipo in ROTULOS_TIPO else '', 'mov': mov, 'desde': desde},
+                                                 'tipos_exp': list(ROTULOS_TIPO.items()), 'erro': erro, 'ok': ok, 'tela': 'exportar'}, user=u)
+
+    @app.post('/exportar')
+    async def exportar_pedir(request: Request):
+        u, r = exigir(request)
+        if r: return r
+        f = await request.form()
+        if not csrf_ok(request, str(f.get('csrf') or '')): return RedirectResponse('/exportar', status_code=303)
+        tipos = [t for t in f.getlist('tipo') if t in ROTULOS_TIPO] or None
+        try: j = exp.pedir(str(f.get('empresa') or ''), str(f.get('de') or ''), str(f.get('ate') or ''), tipos, str(f.get('mov') or ''), str(f.get('formato') or 'organizado'), str(f.get('desde') or ''), u.get('email', ''))
+        except exp.ExportarErro as e:
+            return RedirectResponse(_msg('/exportar', 'erro', str(e)) + '&empresa=' + re.sub(r'\D', '', str(f.get('empresa') or '')), status_code=303)
+        log(u, 'EXPORTAR_PEDIDO', f"{j['filtros']['empresa']} {j['filtros']['formato']} {j['id']}")
+        return RedirectResponse(_msg('/exportar', 'ok', 'Gerando o ZIP. Quando ficar pronto, o botão Baixar aparece na lista.'), status_code=303)
+
+    @app.get('/exportar/{jid}/zip')
+    def exportar_zip(request: Request, jid: str):
+        u, r = exigir(request)
+        if r: return r
+        p = exp.caminho_zip(jid); j = exp.ler(jid)
+        if not p or not j: return PlainTextResponse('Arquivo não encontrado (ZIPs ficam disponíveis por 7 dias).', status_code=404)
+        log(u, 'ZIP_BAIXADO', jid)
+        fi = j['filtros']; nome = f"Exato_XML_{fi['empresa']}_{(fi['de'] or 'inicio')}_{(fi['ate'] or 'hoje')}.zip" if not fi.get('desde') else f"Exato_XML_{fi['empresa']}_notas_novas.zip"
+        return FileResponse(str(p), media_type='application/zip', filename=nome)
+
+    @app.get('/exportar/estado')
+    def exportar_estado(request: Request, jid: str = ''):
+        u, r = exigir(request)
+        if r: return Response('{}', status_code=401, media_type='application/json')
+        import json
+        j = exp.ler(jid) or {}
+        return Response(json.dumps({k: j.get(k) for k in ('estado', 'total', 'feito', 'notas', 'eventos', 'canceladas', 'sem_evento', 'erro')}, ensure_ascii=False), media_type='application/json', headers={'Cache-Control': 'no-store'})
 
     # ------------------------------------------------------------ busca
     def pendentes():
@@ -321,8 +444,10 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
             if ate and ate < de: return RedirectResponse(_msg('/buscar', 'erro', 'A data final não pode ser antes da inicial.') + '&empresa=' + d, status_code=303)
         if recomecar and not f.get('confirmo'): return RedirectResponse(_msg('/buscar', 'erro', 'Para buscar desde o começo, marque a confirmação: pode demorar bastante.') + '&empresa=' + d, status_code=303)
         if not motor.certificado_para(d) and not cofre.info('escritorio'): return RedirectResponse(_msg('/buscar', 'erro', 'Esta empresa não tem certificado A1 guardado (nem o do escritório). Envie em Certificados A1.') + '&empresa=' + d, status_code=303)
-        if not agendador.disparar(only=[d], manual=True, tipos=tipos, recomecar=recomecar, de=de, ate=ate): return RedirectResponse(_msg('/buscar', 'erro', 'Já existe uma busca em andamento. Espere terminar ou cancele.') + '&empresa=' + d, status_code=303)
-        log(u, 'BUSCA_MANUAL', f"{d} {','.join(tipos)} {modo}" + (f" {de}..{ate or ''}" if de else ''))
+        zip_formato = (str(f.get('zip_formato') or 'organizado') if str(f.get('zip_auto') or '') == '1' else None)
+        if zip_formato not in (None, 'organizado', 'dominio'): zip_formato = 'organizado'
+        if not agendador.disparar(only=[d], manual=True, tipos=tipos, recomecar=recomecar, de=de, ate=ate, zip_formato=zip_formato): return RedirectResponse(_msg('/buscar', 'erro', 'Já existe uma busca em andamento. Espere terminar ou cancele.') + '&empresa=' + d, status_code=303)
+        log(u, 'BUSCA_MANUAL', f"{d} {','.join(tipos)} {modo}" + (f" {de}..{ate or ''}" if de else '') + (f' zip={zip_formato}' if zip_formato else ''))
         return RedirectResponse(_msg('/buscar', 'ok', 'Busca iniciada. O andamento aparece abaixo.') + '&empresa=' + d, status_code=303)
 
     # ------------------------------------------------------------ auditoria
@@ -439,28 +564,15 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
 
     @app.get('/repositorio/zip')
     def repositorio_zip(request: Request, empresa: str = '', mes: str = '', tipo: str = ''):
+        """Antigo ZIP do mês: agora é o formulário de exportação já preenchido (período do mês), com os eventos das notas e o resumo do que foi gerado."""
         u, r = exigir(request)
         if r: return r
         d = re.sub(r'\D', '', empresa)
-        if len(d) != 14 or not re.fullmatch(r'\d{4}-\d{2}', mes) or (tipo and tipo not in ROTULOS_TIPO): return PlainTextResponse('Pedido inválido.', status_code=400)
-        import tempfile, zipfile
-        from starlette.background import BackgroundTask
-        tmp = tempfile.NamedTemporaryFile(prefix='exato_zip_', suffix='.zip', dir=str(config.DADOS), delete=False); tmp.close()
-        con = sqlite3.connect(str(core.DB_PATH), timeout=30); n = 0
-        try:
-            sql = ("SELECT family, direction, number, access_key, status, xml, doc_id FROM documents WHERE cnpj=? AND substr(COALESCE(NULLIF(issued_at,''),first_seen_at),1,7)=?" + (' AND family=?' if tipo else ''))
-            with zipfile.ZipFile(tmp.name, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
-                for fam, direc, num, chave, status, xml, doc_id in con.execute(sql, (d, mes) + ((tipo,) if tipo else ())):
-                    if not xml: continue
-                    pasta = 'Eventos' if status == 'Evento' else f"{ROTULOS_TIPO.get(str(fam).lower(), fam)}/{'Entrada' if str(direc).lower().startswith('e') else 'Saida'}"
-                    nome = re.sub(r'[^0-9A-Za-z_.-]', '_', f'{num or "s-n"}_{chave or doc_id}')[:90] + '.xml'
-                    z.writestr(f'{pasta}/{nome}', bytes(xml)); n += 1
-        finally:
-            con.close()
-        if not n:
-            Path(tmp.name).unlink(missing_ok=True); return PlainTextResponse('Nenhum XML neste mês.', status_code=404)
-        log(u, 'ZIP_BAIXADO', f'{d} {mes} {n}')
-        return FileResponse(tmp.name, media_type='application/zip', filename=f'XML_{d}_{mes}.zip', background=BackgroundTask(lambda: Path(tmp.name).unlink(missing_ok=True)))
+        if len(d) != 14 or not re.fullmatch(r'\d{4}-\d{2}', mes): return PlainTextResponse('Pedido inválido.', status_code=400)
+        import calendar
+        ano, m = int(mes[:4]), int(mes[5:])
+        return RedirectResponse(f'/exportar?empresa={d}&de={mes}-01&ate={mes}-{calendar.monthrange(ano, m)[1]:02d}' + (f'&tipo={tipo}' if tipo in ROTULOS_TIPO else ''), status_code=303)
+
 
     # ------------------------------------------------------------ conferência e relatório mensal de NFS-e
     @app.get('/nfse', response_class=HTMLResponse)

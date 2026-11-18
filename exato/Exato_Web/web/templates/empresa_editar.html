@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% from "_ui.html" import ic, iniciais %}{% block titulo %}Editar empresa — Exato{% endblock %}
+{% block corpo %}<div class="cab"><div class="t"><h1>Editar empresa</h1><p class="sub">Mude o nome da empresa quando ela trocar de razão social. O CNPJ não muda.</p></div></div>
+{% if erro %}<div class="aviso erro">{{ ic('alert') }}<span>{{ erro }}</span></div>{% endif %}
+<form method="post" action="/empresas/editar" class="card" style="max-width:640px"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="cnpj" value="{{ e.cnpj }}">
+<div class="avatar-nome" style="margin-bottom:6px"><span class="av" style="--h:{{ (e.cnpj[-5:]|int) % 360 }}">{{ iniciais(e.nome) }}</span><div><b>{{ e.nome }}</b><small>{{ e.cnpj_fmt }}</small></div></div>
+<label>Nome da empresa</label><input name="nome" value="{{ e.nome }}" required minlength="3" maxlength="120" style="width:100%" autofocus>
+{% if nome_notas %}<div class="aviso" style="margin-top:12px">{{ ic('info') }}<span>As notas desta empresa trazem o nome <b>{{ nome_notas }}</b>. Para usar um nome diferente, marque a confirmação abaixo.</span></div>
+<label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" name="confirmo" value="1"><span style="font-weight:500;color:var(--tx2)">Sei que as notas trazem outro nome: a empresa mudou e quero usar o nome que escrevi.</span></label>{% endif %}
+<div class="dica">{{ ic('database') }}<span>A pasta da empresa no servidor passa a ter o nome novo (ou é unida à antiga, se as duas existirem). Nada é apagado. Quem alterou e quando fica no registro de atividade.</span></div>
+<div class="linha" style="margin-top:16px"><button>{{ ic('check-circle') }}Salvar</button><a class="botao sec" href="/empresas">Cancelar</a></div></form>
+{% if e.manual %}<form method="post" action="/empresas/restaurar-nome" class="card" style="max-width:640px"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="cnpj" value="{{ e.cnpj }}"><h2>Nome editado à mão</h2><p class="mu" style="margin-top:0">Este nome foi escrito por uma pessoa e vale mais que o das notas. Quer voltar ao nome que as notas trazem?</p><button class="sec">Voltar ao nome das notas</button></form>{% endif %}{% endblock %}

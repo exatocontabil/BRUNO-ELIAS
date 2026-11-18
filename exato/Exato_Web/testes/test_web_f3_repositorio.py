@@ -41,10 +41,12 @@ c = TestClient(app, base_url='http://testserver', follow_redirects=False); c.get
 for rota in ('/repositorio', f'/repositorio/zip?empresa={CN}&mes=2026-09'): assert c.get(rota).status_code == 303          # só logado
 c.post('/login', data={'email': 'maria@exemplo.com.br', 'senha': 'SenhaForte#2026', 'csrf': tk})
 pg = c.get('/repositorio').text; assert 'XMLs na pasta de arquivos' in pg and 'PADARIA' in pg and f'/repositorio/zip?empresa={CN}&amp;mes=2026-09' in pg.replace('&mes', '&amp;mes') or f'mes=2026-09' in pg
-r = c.get(f'/repositorio/zip?empresa={CN}&mes=2026-09'); assert r.status_code == 200 and r.content[:2] == b'PK'
-z = zipfile.ZipFile(io.BytesIO(r.content)); nomes = z.namelist(); assert len(nomes) == 5 and any(n.startswith('NF-e/Saida/') for n in nomes) and any(n.startswith('NF-e/Entrada/') for n in nomes) and all(z.read(n).startswith(b'<?xml') for n in nomes), nomes
-r = c.get(f'/repositorio/zip?empresa={CN}&mes=2026-10&tipo=nfe'); assert r.status_code == 200 and len(zipfile.ZipFile(io.BytesIO(r.content)).namelist()) == 1          # outubro: só a nota 20
-assert c.get(f'/repositorio/zip?empresa={CN}&mes=2025-01').status_code == 404 and c.get('/repositorio/zip?empresa=12&mes=2026-09').status_code == 400 and c.get(f'/repositorio/zip?empresa={CN}&mes=..%2f..').status_code == 400
+r = c.get(f'/repositorio/zip?empresa={CN}&mes=2026-09'); assert r.status_code == 303 and r.headers['location'] == f'/exportar?empresa={CN}&de=2026-09-01&ate=2026-09-30', r.headers['location']          # agora abre o formulário de exportação (ZIP com eventos)
+from web import exportar as _exp
+j = _exp.pedir(CN, '2026-09-01', '2026-09-30', None, '', 'organizado', '', 'teste', em_segundo_plano=False); j = _exp.ler(j['id']); assert j['estado'] == 'pronto', j
+z = zipfile.ZipFile(_exp.caminho_zip(j['id'])); nomes = [n for n in z.namelist() if n.endswith('.xml')]; assert len(nomes) == 5 and any(n.startswith('NF-e/Saída/') for n in nomes) and any(n.startswith('NF-e/Entrada/') for n in nomes) and all(z.read(n).startswith(b'<?xml') for n in nomes), z.namelist()
+j = _exp.pedir(CN, '2026-10-01', '2026-10-31', ['nfe'], '', 'organizado', '', 'teste', em_segundo_plano=False); j = _exp.ler(j['id']); assert j['estado'] == 'pronto' and j['notas'] == 1          # outubro: só a nota 20
+assert c.get('/repositorio/zip?empresa=12&mes=2026-09').status_code == 400 and c.get(f'/repositorio/zip?empresa={CN}&mes=..%2f..').status_code == 400
 assert not list(Path(config.DADOS).glob('exato_zip_*'))          # sem sobras
 assert c.post('/repositorio/copiar', data={'csrf': 'falso'}).status_code == 303
 c.post('/repositorio/copiar', data={'csrf': tk}); time.sleep(.5); assert 'Copiando' in c.get('/repositorio').text or 'XMLs na pasta' in c.get('/repositorio').text

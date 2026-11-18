@@ -106,6 +106,17 @@ assert _json.dumps(motor.cfg.get('busca_cobertura', {}).get(A, {}).get('nfce')) 
 # duas buscas ao mesmo tempo: a segunda é recusada
 assert motor.reservar(); r = cl.post('/buscar/manual', data={'empresa': A, 'tipo': ['nfe'], 'csrf': tk}); assert 'erro=' in r.headers['location'] and 'andamento' in r.headers['location'].replace('%20', ' ')
 motor._trava.release(); motor.estado['rodando'] = False
+# ---- "gerar o ZIP das notas novas ao terminar" (empresa B usa o A1 do escritório; NFC-e nova)
+assert not n_docs(B, 'nfce')
+cl.post('/buscar/manual', data={'empresa': B, 'tipo': ['nfce'], 'zip_auto': '1', 'zip_formato': 'organizado', 'csrf': tk}); esperar(); ex = motor.and_foto()
+assert ex['zip'] and ex['zip']['estado'] == 'pronto' and ex['zip']['notas'] == 3 and ex['zip']['id'] and ex['desde'] and ex['cnpj'] == B, ex
+rz = cl.get(f"/exportar/{ex['zip']['id']}/zip"); assert rz.status_code == 200 and rz.content[:2] == b'PK'
+import zipfile as _zf, io as _io
+assert len([n for n in _zf.ZipFile(_io.BytesIO(rz.content)).namelist() if n.endswith('.xml')]) == 3
+pg = cl.get('/documentos?empresa=' + B + '&desde=' + ex['desde']).text; assert 'notas novas guardadas pela busca' in pg
+time.sleep(1.2); cl.post('/buscar/manual', data={'empresa': B, 'tipo': ['nfce'], 'zip_auto': '1', 'zip_formato': 'dominio', 'csrf': tk}); esperar(); ex = motor.and_foto()
+assert ex['zip']['estado'] == 'sem_notas', ex['zip']          # nada novo nesta busca: sem ZIP, e avisa
+cl.post('/buscar/manual', data={'empresa': B, 'tipo': ['nfce'], 'csrf': tk}); esperar(); assert motor.and_foto()['zip'] is None          # sem marcar a opção: nenhum ZIP
 # empresa sem certificado nenhum
 cofre.remover('escritorio'); r = cl.post('/buscar/manual', data={'empresa': C, 'tipo': ['nfe'], 'csrf': tk}); assert 'erro=' in r.headers['location']
 print('Exato Web fase 3 (busca manual): OK')

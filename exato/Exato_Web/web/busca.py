@@ -9,7 +9,7 @@ import os, re, sqlite3, sys, threading, time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from . import config, nucleo
+from . import config, exportar, nucleo
 from .cofre import CofreErro
 
 FAMILIAS_XML = ('nfe', 'nfce', 'cte')
@@ -36,6 +36,8 @@ class Motor:
         self.estado = {'rodando': False, 'empresa': '', 'indice': 0, 'total': 0, 'inicio': None, 'ultimo': None, 'resumo': None}
         self.andamento = {'ativo': False, 'cnpj': '', 'empresa': '', 'inicio': 0.0, 'fim': 0.0, 'modo': '', 'de': '', 'ate': '', 'tipos': {}}; self._atrava = threading.Lock()
         self._plano = {'modo': 'continuar', 'volta': False, 'parcial': False, 'de': None, 'ate': None}          # como a busca em curso começa (busca manual)
+        try: from . import fechamento_eventos; fechamento_eventos.instalar(core, nucleo.modulo('exato_fechamento'))          # ZIP do Fechamento com os eventos das notas (e sem os resumos)
+        except Exception: pass
         for cod, (t, e, a, g) in CAUSAS_WEB.items(): self.motivos.CAUSAS.setdefault(cod, (t, e, a, g))          # causas próprias do site (explicadas em linguagem simples)
 
     # ------------------------------------------------------------ anotações
@@ -55,7 +57,7 @@ class Motor:
     def and_iniciar(self, cnpj, nome, tipos):
         pl = self._plano
         with self._atrava:
-            self.andamento = {'ativo': True, 'cnpj': cnpj, 'empresa': nome, 'inicio': time.time(), 'fim': 0.0, 'modo': pl['modo'], 'de': pl['de'].isoformat() if pl['de'] else '', 'ate': pl['ate'].isoformat() if pl['ate'] else '',
+            self.andamento = {'ativo': True, 'cnpj': cnpj, 'empresa': nome, 'inicio': time.time(), 'fim': 0.0, 'modo': pl['modo'], 'de': pl['de'].isoformat() if pl['de'] else '', 'ate': pl['ate'].isoformat() if pl['ate'] else '', 'desde': datetime.now().isoformat(timespec='seconds'), 'etapa': '', 'zip': None,
                               'tipos': {t: {'estado': 'na_fila', 'consultas': 0, 'notas': 0, 'novos': 0, 'titulo': '', 'explicacao': '', 'acao': '', 'gravidade': '', 'codigo': ''} for t in tipos}}
 
     def and_set(self, fam, **kw):
@@ -67,6 +69,9 @@ class Motor:
         with self._atrava:
             t = self.andamento['tipos'].get(fam)
             if t is not None: t['consultas'] += consultas; t['notas'] += notas; t['novos'] += novos
+
+    def and_extra(self, **kw):
+        with self._atrava: self.andamento.update(kw)
 
     def and_final(self, fam, codigo, novos=None, detalhe=''):
         """Resultado de um tipo, com a causa explicada em português (ok, sem novas, espera da SEFAZ ou falha)."""
@@ -310,7 +315,7 @@ class Motor:
         if not self._trava.acquire(blocking=False): return False
         self.estado['rodando'] = True; return True
 
-    def rodada(self, only=None, manual=False, reservado=False, tipos=None, recomecar=False, de=None, ate=None):
+    def rodada(self, only=None, manual=False, reservado=False, tipos=None, recomecar=False, de=None, ate=None, zip_formato=None):
         """Percorre as empresas: NF-e/NFC-e/CT-e e NFS-e. Uma de cada vez, nunca duas rodadas ao mesmo tempo. Devolve o resumo."""
         if not reservado and not self.reservar(): return {'ja_rodando': True}
         self._cancelar.clear(); core = self.core; tipos = tuple(tipos or (FAMILIAS_XML + ('nfse',))); self._plano = {'modo': 'data' if de else ('recomecar' if recomecar else 'continuar'), 'volta': bool(recomecar or de), 'parcial': bool(ate), 'de': de, 'ate': ate}; fam_xml = tuple(f for f in FAMILIAS_XML if f in tipos); quer_nfse = 'nfse' in tipos
@@ -341,6 +346,7 @@ class Motor:
                             if modo != 'procuracao' or not self.proc.ligada(self.cfg) or self.proc.tentar_agora(self.cfg, cnpj, manual=manual):
                                 n = self.buscar_nfse(cnpj, thumb, modo, recomecar); resumo['nfse_novos'] += n.get('novos', 0)
                                 if not n['ok'] and not (modo == 'procuracao' and not manual): resumo['nfse_problemas'] += 1
+                    if zip_formato and manual and not self.cancelado(): self._zip_das_novas(cnpj, tipos, zip_formato)
                 except CofreErro as exc:
                     self.ocorrencia(cnpj, tipos, 'sem_a1', str(exc)); resumo['sem_certificado'] += 1
                     for t in tipos: self.and_final(t, 'sem_a1', detalhe=str(exc))
@@ -351,6 +357,7 @@ class Motor:
                     self.ocorrencia(cnpj, tuple(fam_xml) or ('nfse',), 'erro_desconhecido', 'erro inesperado'); resumo['xml_obs'] += 1
                     for t in tipos:
                         if self.andamento['tipos'].get(t, {}).get('estado') in ('na_fila', 'consultando'): self.and_final(t, 'erro_desconhecido', detalhe='erro inesperado')
+            self.reaplicar_nomes()
             if not self.cancelado():
                 self.cfg['auto_round_last'] = datetime.now().isoformat(timespec='seconds'); self.salvar_cfg()
             if not self.cancelado():
@@ -361,6 +368,21 @@ class Motor:
             return resumo
         finally:
             self.and_fim(); self._plano = {'modo': 'continuar', 'volta': False, 'parcial': False, 'de': None, 'ate': None}; self.estado.update(rodando=False, empresa=''); self._trava.release()
+
+    def _zip_das_novas(self, cnpj, tipos, formato):
+        """Busca manual com "gerar o ZIP ao terminar": ZIP (com os eventos das notas) só das notas que esta busca guardou."""
+        desde = self.andamento.get('desde') or ''
+        self.and_extra(etapa='Gerando o ZIP das notas novas...', zip={'estado': 'gerando'})
+        try:
+            j = exportar.pedir(cnpj, tipos=list(tipos), formato=formato, desde=desde, por='busca manual', em_segundo_plano=False)
+            est = j.get('estado'); erro = j.get('erro', '')
+            if est == 'erro' and 'Não há notas' in erro: est = 'sem_notas'
+            self.and_extra(zip={'estado': est, 'id': j['id'], 'notas': j.get('notas', 0), 'eventos': j.get('eventos', 0), 'sem_evento': j.get('sem_evento', 0), 'erro': erro})
+        except exportar.ExportarErro as exc:
+            self.and_extra(zip={'estado': 'sem_notas' if 'Não há notas' in str(exc) else 'erro', 'erro': str(exc)})
+        except Exception:
+            self.and_extra(zip={'estado': 'erro', 'erro': 'Não foi possível gerar o ZIP.'})
+        self.and_extra(etapa='')
 
     # ------------------------------------------------------------ Repositório (XMLs em arquivos organizados, guardados para sempre)
     def copiar_repositorio(self, ignorar_pausa=False):
@@ -381,7 +403,19 @@ class Motor:
     def cancelado_repo(self): return False
 
     # ------------------------------------------------------------ Fechamento do mês (PDFs + ZIPs de importação da Domínio no Repositório)
+    def nome_manual(self, cnpj):
+        return ((self.cfg.get('nomes_manuais') or {}).get(_d(cnpj)) or {}).get('nome') or ''
+
+    def reaplicar_nomes(self):
+        """Nome que a pessoa escolheu ao editar a empresa vale mais que o das notas (a empresa mudou de nome): mantém o cadastro igual ao escolhido."""
+        for cnpj, item in list((self.cfg.get('nomes_manuais') or {}).items()):
+            try:
+                if item.get('nome') and self.core.db_get_company_name(cnpj) != item['nome']: self.core.db_set_company_name(cnpj, item['nome'])
+            except Exception: pass
+
     def _nome_empresa(self, cnpj, nome_banco):
+        man = self.nome_manual(cnpj)
+        if man: return man, True          # o nome editado à mão é o que vale (e a pasta do Repositório acompanha)
         try: return self.core.db_company_verified_name(cnpj)
         except Exception: return nome_banco, False
 

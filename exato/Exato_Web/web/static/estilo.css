@@ -230,3 +230,11 @@ tr.linha-emp{cursor:pointer}
 form:has(input[name=modo][value=data]:checked) .datas{display:flex}
 .datas>div>label{margin-top:0}
 @media(max-width:700px){.and-l{grid-template-columns:1fr}}
+
+/* ---------- botões em forma de link ---------- */
+a.botao{text-decoration:none}a.botao:hover{text-decoration:none}
+a.botao.sec,.botao.sec{background:var(--surface);color:var(--tx);border-color:var(--line);box-shadow:var(--sh1)}a.botao.sec:hover{background:var(--surface2)}
+a.botao.peq{padding:5px 11px;min-height:30px;font-size:13px}
+/* ---------- busca: campos que só aparecem quando fazem sentido ---------- */
+.confirma{display:none!important}form:has(input[name=modo][value=recomecar]:checked) .confirma{display:flex!important}
+.zipfmt{display:none}form:has(input[name=zip_auto]:checked) .zipfmt{display:flex}

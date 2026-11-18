@@ -19,6 +19,7 @@
     t.appendChild(el('small','mu',(sub?('Modo: '+sub+' • '):'')+(ativo?'tempo decorrido ':'durou ')+tempo(a.decorrido)));
     cab.appendChild(t);cab.appendChild(el('span','pill '+(ativo?'b busy':'n'),ativo?'Em andamento':'Terminou'));box.appendChild(cab);
     if(!ids.length)box.appendChild(el('p','mu','Preparando a busca...'));
+    if(ativo&&a.etapa)box.appendChild(el('p','mu',a.etapa));
     var novas=0,falhas=0,esperas=0;
     ids.forEach(function(k){
       var x=tipos[k],est=EST[x.estado]||EST.na_fila,l=el('div','and-l and-'+x.estado);
@@ -33,6 +34,15 @@
     if(!ativo&&ids.length){
       var cls=falhas?'erro':(esperas?'b':'ok'),msg=falhas?('Terminou com '+falhas+' tipo(s) com problema. Veja a causa e o que fazer acima.'):(esperas?('Terminou. '+novas+' nota(s) nova(s). Alguns tipos aguardam a próxima janela da SEFAZ: o Exato continua sozinho na busca automática.'):('Busca concluída: '+novas+' nota(s) nova(s) guardada(s).'));
       var r=el('div','aviso '+cls);r.appendChild(el('span','',msg));box.appendChild(r);
+      var acoes=el('div','linha'),u=encodeURIComponent;acoes.style.marginTop='6px';
+      var z=a.zip;
+      if(z&&z.estado==='pronto'){var b1=el('a','botao','Baixar o ZIP das notas novas ('+(z.notas||0)+' nota(s), '+(z.eventos||0)+' evento(s))');b1.href='/exportar/'+z.id+'/zip';acoes.appendChild(b1);}
+      else if(z&&z.estado==='gerando'){acoes.appendChild(el('span','pill b busy','Gerando o ZIP...'));}
+      else if(z&&(z.estado==='sem_notas'||z.estado==='erro')){acoes.appendChild(el('span','mu',z.estado==='sem_notas'?'Nenhuma nota nova para o ZIP.':('ZIP: '+(z.erro||'não foi possível gerar.'))));}
+      else if(a.cnpj&&a.desde){var b2=el('a','botao sec','Baixar as notas novas em ZIP');b2.href='/exportar?empresa='+u(a.cnpj)+'&desde='+u(a.desde);b2.style.background='var(--surface)';b2.style.color='var(--tx)';b2.style.border='1px solid var(--line)';acoes.appendChild(b2);}
+      if(a.cnpj&&a.desde){var b3=el('a','botao sec','Ver as notas novas');b3.href='/documentos?empresa='+u(a.cnpj)+'&desde='+u(a.desde);b3.style.background='var(--surface)';b3.style.color='var(--tx)';b3.style.border='1px solid var(--line)';acoes.appendChild(b3);}
+      if(z&&z.sem_evento)box.appendChild(el('div','aviso','No ZIP: '+z.sem_evento+' nota(s) cancelada(s) sem o XML do cancelamento. O Exato nunca inventa esse arquivo; veja o AVISOS.txt dentro do ZIP.'));
+      box.appendChild(acoes);
     }
   }
   function ciclo(){
