@@ -5,7 +5,7 @@ Faça com calma, na ordem. Cada passo tem um jeito de conferir.
 ## 1. Programas
 1. Instale o **Python 3.12 (64 bits)** de python.org. Marque "Add python.exe to PATH" e deixe o **tcl/tk** marcado (o Exato usa).
 2. Crie a pasta `C:\ExatoWeb` e extraia nela o pacote `Exato_Web_AAAAMMDD.zip` (fica `C:\ExatoWeb\Exato_Web`).
-3. No PowerShell: `cd C:\ExatoWeb\Exato_Web` e `python -m pip install -r requirements.txt`.
+3. Dê duplo clique em `INSTALAR_DEPENDENCIAS.bat` (usa o Python que estiver instalado: `python` ou, se não existir, `py -3`; serve qualquer versão 3.12 ou mais nova). Nos comandos abaixo, se `python` não funcionar no PowerShell, troque por `py -3`.
 
 ## 2. Uma conta própria para o site
 Crie um usuário do Windows só para isso (ex.: `exatoweb`), **sem** ser administrador. O site, a pasta de dados e o cofre dos certificados ficam sob essa conta. Entre com ela para os próximos passos.
