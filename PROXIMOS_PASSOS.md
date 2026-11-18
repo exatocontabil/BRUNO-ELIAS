@@ -324,3 +324,9 @@ Plano V170: (a) dois estados separados: `selected` (Buscar XML) e `nfse_selected
 
 ## Exato Web: conferência e relatório de NFS-e feitos
 Tela NFS-e (conferência) + relatório mensal em PDF no site. Falta só o teste no servidor Windows real (A1, HTTPS, firewall, e-mail, SEFAZ/Emissor Nacional, manifestação em homologação).
+
+## Exato Web: teste no servidor (18/11/2026) e pendências
+- Instalado no Windows do servidor (`C:\dominio filies\Exato Web\Exato_Web`, Python 3.15): `.bat` usam `py -3` (o `python` da Loja engana), QR code na ativação do código em duas etapas, login com verificação funcionando. Banco do site separado do Central Fiscal (`ExatoWebDados\nucleo`).
+- Pedido do usuário (guardado para a próxima versão): **melhorar o layout do Exato Web, deixando mais moderno.**
+- Falta testar no servidor: importar empresas, enviar A1, primeira busca (ImportadorWindows), Box-e/e-mail, HTTPS (Caddy)/firewall, manifestação em homologação.
+- Ideia pedida/oferecida: `.bat` de cópia diária da pasta `ExatoWebDados` (cofre incluso).
