@@ -404,6 +404,11 @@ class Motor:
         """Cópia automática dos XMLs para a pasta de arquivos: DESLIGADA por padrão (a pessoa liga quando quiser). 'Copiar agora' continua funcionando."""
         c = self.cfg.setdefault('repositorio_web', {}); c.setdefault('auto', False); return c
 
+    def fazer_backup(self, por=''):
+        """Cópia de segurança (ver `backup.py`). Roda em segundo plano; o resultado fica na configuração e aparece na tela Cópia de segurança."""
+        from . import backup
+        return backup.executar(self.cfg, self.salvar_cfg, log_erro=lambda ctx, exc: self.core.log_exception(ctx, (type(exc), exc, exc.__traceback__)))
+
     def espaco_livre(self):
         try: return shutil.disk_usage(str(config.ARQUIVOS)).free
         except OSError: return None

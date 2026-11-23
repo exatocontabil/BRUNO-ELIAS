@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import auditoria as aud, backup, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -281,7 +281,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if r: return r
         cfg = motor.cfg; oc = motivos.ultimas(str(core.DB_PATH)); linhas = situacao.linhas(str(core.DB_PATH), cfg, None, ocorrencias=oc, diagnostico={}, acessos=dict(cfg.get('nfse_acesso') or {}))
         for l in linhas: l['cnpj_fmt'] = core._format_cnpj(l['cnpj']); l['certificado'] = cofre.info(l['cnpj'])
-        return pagina(request, 'situacao.html', {'linhas': linhas, 'totais': situacao.totais(linhas), 'tipos': situacao.TIPOS, 'tela': 'situacao', 'rodando': bool(motor.estado['rodando']), 'auto': agendador.ligado(), 'proxima': agendador.proxima()}, user=u)
+        return pagina(request, 'situacao.html', {'backup_aviso': (backup.aviso(motor.cfg) if u.get('role') == 'admin' else ''), 'linhas': linhas, 'totais': situacao.totais(linhas), 'tipos': situacao.TIPOS, 'tela': 'situacao', 'rodando': bool(motor.estado['rodando']), 'auto': agendador.ligado(), 'proxima': agendador.proxima()}, user=u)
 
     @app.get('/documentos', response_class=HTMLResponse)
     def documentos(request: Request, empresa: str = '', tipo: str = '', mov: str = '', q: str = '', desde: str = ''):
@@ -449,6 +449,48 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if u.get('role') != 'admin': return RedirectResponse('/situacao', status_code=303)
         from .exatinho_base import TOPICOS
         return pagina(request, 'exatinho_duvidas.html', {'lista': exalog.para_ensinar(200), 'res': exalog.resumo(), 'topicos': [(t['id'], t['titulo']) for t in TOPICOS], 'tela': 'exatinho'}, user=u)
+
+
+    # ------------------------------------------------------------ cópia de segurança (só administrador)
+    def _so_admin(request):
+        u, r = exigir(request)
+        if r: return None, r
+        if u.get('role') != 'admin': return None, RedirectResponse('/situacao', status_code=303)
+        return u, None
+
+    @app.get('/backup', response_class=HTMLResponse)
+    def backup_tela(request: Request, ok: str = '', erro: str = ''):
+        u, r = _so_admin(request)
+        if r: return r
+        c = backup.cfg_de(motor.cfg); aviso_disco = ''; lista = []
+        if str(c.get('destino') or '').strip():
+            try: aviso_disco = backup.validar_destino(c['destino'])[1]
+            except backup.BackupErro as e: aviso_disco = str(e)
+            lista = backup.listar(c['destino'])
+        return pagina(request, 'backup.html', {'c': c, 'lista': lista, 'aviso_disco': aviso_disco, 'rodando': backup.andamento['rodando'], 'etapa': backup.andamento['etapa'], 'ok': ok, 'erro': erro, 'dados': str(config.DADOS), 'tela': 'backup'}, user=u)
+
+    @app.post('/backup/salvar')
+    def backup_salvar(request: Request, destino: str = Form(''), hora: str = Form('02:00'), manter: int = Form(7), ativo: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/backup', status_code=303)
+        c = backup.cfg_de(motor.cfg)
+        if not re.fullmatch(r'([01]\d|2[0-3]):[0-5]\d', hora or ''): return RedirectResponse(_msg('/backup', 'erro', 'Hora inválida. Use o formato 02:00.'), status_code=303)
+        try: pasta, _a = backup.validar_destino(destino)
+        except backup.BackupErro as e: return RedirectResponse(_msg('/backup', 'erro', str(e)), status_code=303)
+        c.update(destino=str(pasta), hora=hora, manter=max(2, min(60, int(manter or 7))), ativo=(ativo == '1')); motor.salvar_cfg(); log(u, 'BACKUP_CONFIG', f"{'ligado' if c['ativo'] else 'desligado'} {c['destino']}")
+        return RedirectResponse(_msg('/backup', 'ok', 'Configuração salva.' + (' A cópia diária está ligada.' if c['ativo'] else ' A cópia diária está desligada.')), status_code=303)
+
+    @app.post('/backup/agora')
+    def backup_agora(request: Request, csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/backup', status_code=303)
+        if backup.andamento['rodando']: return RedirectResponse(_msg('/backup', 'erro', 'Já existe uma cópia em andamento.'), status_code=303)
+        if not str(backup.cfg_de(motor.cfg).get('destino') or '').strip(): return RedirectResponse(_msg('/backup', 'erro', 'Salve primeiro a pasta de destino.'), status_code=303)
+        import threading
+        threading.Thread(target=motor.fazer_backup, kwargs={'por': u.get('email', '')}, daemon=True, name='backup-manual').start(); log(u, 'BACKUP_AGORA', '')
+        return RedirectResponse(_msg('/backup', 'ok', 'Cópia iniciada. Esta página se atualiza sozinha.'), status_code=303)
 
     # ------------------------------------------------------------ exportar XMLs em ZIP (com os eventos das notas)
     @app.get('/exportar', response_class=HTMLResponse)

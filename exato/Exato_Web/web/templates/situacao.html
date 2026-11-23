@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% from "_ui.html" import ic, iniciais %}{% block titulo %}Situação da busca — Exato{% endblock %}
-{% block corpo %}
+{% block corpo %}{% if backup_aviso %}<div class="aviso" style="margin-bottom:12px">{{ ic('alert') }}<span>{{ backup_aviso }} <a href="/backup">Abrir</a></span></div>{% endif %}
 {% set sem_a1 = linhas|rejectattr('certificado')|list|length %}
 {% set pct = ((totais.em_dia * 100 / totais.empresas)|round|int) if totais.empresas else 0 %}
 <div class="cab"><div class="t"><h1>Situação da busca</h1><p class="sub">Para cada empresa, o que o Exato já buscou. Atrasado = última busca há mais de 3 dias.</p></div></div>

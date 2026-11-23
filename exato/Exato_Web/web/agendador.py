@@ -26,6 +26,10 @@ class Agendador:
         try:
             if not self.motor.estado['rodando'] and self.motor.resumo_cfg().get('ativo'): threading.Thread(target=self.motor.enviar_resumo, daemon=True, name='resumo-diario').start()          # 1 vez por dia, depois das 7h
         except Exception: pass
+        try:
+            from . import backup
+            if backup.devida(self.motor.cfg) and not self.motor.estado['rodando']: threading.Thread(target=self.motor.fazer_backup, daemon=True, name='backup-diario').start()          # 1 vez por dia, fora de rodada de busca
+        except Exception: pass
         if not self.ligado() or not self.motor.vencida() or not self.motor.reservar(): return False
         threading.Thread(target=self.motor.rodada, kwargs={'reservado': True}, daemon=True, name='rodada-automatica').start(); return True
 
