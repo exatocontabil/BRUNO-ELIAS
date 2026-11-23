@@ -54,6 +54,8 @@ pg = c.get('/auditoria/' + res['id']).text; assert 'Busca do que faltava' in pg 
 # ---- sem certificado: mensagem clara, sem travar a trava de busca
 cofre.remover(CN); chamadas.clear(); c.post('/auditoria/' + nova['id'] + '/buscar-faltantes', data={'csrf': tk}); fim = time.time() + 10
 while time.time() < fim and not aud.ler(nova['id']).get('busca'): time.sleep(.05)
+fim = time.time() + 5
+while motor.estado['rodando'] and time.time() < fim: time.sleep(.05)          # a trava é devolvida logo depois de gravar o resultado
 assert 'não tem certificado A1' in aud.ler(nova['id'])['busca']['mensagem'] and not chamadas and not motor.estado['rodando'] and motor.reservar(); motor._trava.release(); motor.estado['rodando'] = False
 # ---- SEFAZ pede para esperar (117): explica em vez de insistir
 cofre.guardar(CN, gerar_a1(CN, 'sa'), 'sa')
