@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% from "_ui.html" import ic %}{% block titulo %}Configurar — Exato{% endblock %}
+{% block solo %}<div class="entrada"><section class="vitrine"><div class="marca"><img src="/static/logo.png" alt="">exato</div>
+<div><h2>Bem-vindo! Vamos deixar o Exato pronto em poucos minutos.</h2><p>Primeiro, crie a conta da pessoa que vai administrar o Exato neste escritório. Depois você cadastra os certificados, as empresas e as outras pessoas.</p>
+<ul><li>{{ ic('user') }}<span><b>1. Administrador</b><br><small>Nome, e-mail e uma senha só sua.</small></span></li><li>{{ ic('lock') }}<span><b>2. Código do celular</b><br><small>Um aplicativo de autenticação protege o acesso.</small></span></li><li>{{ ic('key') }}<span><b>3. Certificados e empresas</b><br><small>Guardados com proteção neste computador.</small></span></li></ul></div>
+<small>Exato Web</small></section>
+<section class="lado"><div class="caixa"><div class="mini-logo"><img src="/static/logo.png" alt="">exato</div><h1>Criar o administrador</h1>
+{% if not local %}<p class="sub">Esta etapa só pode ser feita <b>no computador onde o Exato está instalado</b>, por segurança.</p><div class="aviso erro">{{ ic('alert') }}<span>Abra o Exato nesse computador para criar o primeiro administrador. Depois, qualquer pessoa autorizada entra daqui normalmente.</span></div>
+{% else %}<p class="sub">Esta conta tem acesso a tudo, inclusive aos certificados. Escolha uma senha forte.</p>
+<form method="post" action="/configurar" class="card">{% if erro %}<div class="aviso erro">{{ ic('alert') }}<span>{{ erro }}</span></div>{% endif %}<input type="hidden" name="csrf" value="{{ csrf }}">
+<label for="c-nome">Seu nome</label><input id="c-nome" name="nome" required autofocus maxlength="80" value="{{ v.nome or '' }}"><label for="c-email" style="margin-top:10px">Seu e-mail</label><input id="c-email" name="email" type="email" autocomplete="username" required maxlength="120" value="{{ v.email or '' }}" placeholder="voce@escritorio.com.br">
+<label for="c-senha" style="margin-top:10px">Senha</label><input id="c-senha" name="senha" type="password" autocomplete="new-password" required minlength="10"><label for="c-rep" style="margin-top:10px">Repita a senha</label><input id="c-rep" name="repita" type="password" autocomplete="new-password" required minlength="10">
+<small class="mu" style="display:block;margin:8px 0">Pelo menos 10 caracteres, misturando letras e números.</small><button>Criar e continuar</button></form>{% endif %}
+<div class="selo-seguro">{{ ic('lock') }}Conexão protegida • verificação em duas etapas</div></div></section></div>{% endblock %}

@@ -105,10 +105,37 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
     def saude(): return PlainTextResponse('ok')
 
     @app.get('/login', response_class=HTMLResponse)
-    def login_tela(request: Request): return pagina(request, 'login.html', {'erro': ''})
+    def login_tela(request: Request):
+        if contas.sem_usuarios(core): return RedirectResponse('/configurar', status_code=303)          # instalação nova: primeiro administrador
+        return pagina(request, 'login.html', {'erro': ''})
+
+    _trava_config = __import__('threading').Lock()
+
+    @app.get('/configurar', response_class=HTMLResponse)
+    def configurar_tela(request: Request):
+        if not contas.sem_usuarios(core): return RedirectResponse('/login', status_code=303)
+        if not contas.eh_local(ip(request)): return pagina(request, 'configurar.html', {'erro': '', 'local': False, 'v': {}}, 403)
+        return pagina(request, 'configurar.html', {'erro': '', 'local': True, 'v': {}})
+
+    @app.post('/configurar')
+    def configurar_envio(request: Request, nome: str = Form(''), email: str = Form(''), senha: str = Form(''), repita: str = Form(''), csrf: str = Form('')):
+        if not contas.sem_usuarios(core): return RedirectResponse('/login', status_code=303)
+        if not contas.eh_local(ip(request)): return pagina(request, 'configurar.html', {'erro': '', 'local': False, 'v': {}}, 403)
+        if not csrf_ok(request, csrf): return pagina(request, 'configurar.html', {'erro': 'A página expirou. Tente de novo.', 'local': True, 'v': {}}, 400)
+        with _trava_config:          # duas pessoas ao mesmo tempo: só a primeira vale
+            if not contas.sem_usuarios(core): return RedirectResponse('/login', status_code=303)
+            try: u = contas.criar_primeiro_admin(core, nome, email, senha, repita)
+            except ValueError as e: return pagina(request, 'configurar.html', {'erro': str(e), 'local': True, 'v': {'nome': nome, 'email': email}}, 400)
+        log(u, 'PRIMEIRO_ADMINISTRADOR', 'Instalação configurada')
+        etapa = 'config' if config.EXIGIR_2FA else ''
+        resp = RedirectResponse('/conta/2fa' if etapa else '/situacao', status_code=303)
+        if etapa: cookie(resp, 'exato_pre', seguranca.assinar({'uid': u['id'], 'etapa': etapa}, 300), 300)
+        else: sessao_completa(resp, u)
+        return resp
 
     @app.post('/login')
     def login_envio(request: Request, email: str = Form(''), senha: str = Form(''), csrf: str = Form('')):
+        if contas.sem_usuarios(core): return RedirectResponse('/configurar', status_code=303)
         if not csrf_ok(request, csrf): return pagina(request, 'login.html', {'erro': 'A página expirou. Tente de novo.'}, 400)
         falta = limite.bloqueado(ip(request), email)
         if falta: return pagina(request, 'login.html', {'erro': f'Muitas tentativas. Tente de novo em {max(1, falta // 60)} minuto(s).'}, 429)

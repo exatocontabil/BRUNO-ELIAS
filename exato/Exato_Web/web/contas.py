@@ -64,3 +64,32 @@ def mudar_perfil(core, uid, perfil):
     if alvo.get('role') == 'admin' and perfil == 'user' and alvo.get('status') == 'active' and not [a for a in admins_ativos(core) if int(a['id']) != int(uid)]:
         raise ValueError('O Exato precisa de pelo menos um administrador ativo. Torne outra pessoa administradora antes.')
     _sql(core, 'UPDATE users SET role=? WHERE id=?', (perfil, int(uid)))
+
+
+def sem_usuarios(core):
+    """True numa instalação nova: ainda não existe nenhuma pessoa com senha (é a hora de criar o primeiro administrador)."""
+    con = core._auth_connect()
+    try: return con.execute("SELECT COUNT(*) FROM users WHERE COALESCE(password_hash,'')<>''").fetchone()[0] == 0
+    finally: con.close()
+
+
+def eh_local(host, locais=None):
+    """O pedido veio do próprio computador onde o Exato está instalado? (o primeiro administrador só pode ser criado dali)"""
+    import socket
+    host = str(host or '').strip().lower()
+    if host in ('127.0.0.1', '::1', 'localhost'): return True
+    if locais is None:
+        locais = set()
+        try:
+            for r in socket.getaddrinfo(socket.gethostname(), None): locais.add(str(r[4][0]).lower())
+        except OSError: pass
+    return host in locais
+
+
+def criar_primeiro_admin(core, nome, email, senha, repita):
+    """Cria o primeiro administrador (só se ainda não há ninguém). ValueError em português se não der."""
+    if not sem_usuarios(core): raise ValueError('O Exato já foi configurado. Entre com o seu e-mail e a sua senha.')
+    if str(senha or '') != str(repita or ''): raise ValueError('A senha e a repetição são diferentes.')
+    validar_senha_nova(senha, '', email)
+    u = core.db_auth_register_user(nome, email, senha)
+    _sql(core, "UPDATE users SET role='admin', must_set_password=0 WHERE id=?", (u['id'],)); return core.db_auth_get_user_by_id(u['id'])
