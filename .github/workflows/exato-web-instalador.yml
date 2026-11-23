@@ -42,6 +42,7 @@ jobs:
           python instalador/montar_instalador.py
           Get-ChildItem dist | Format-Table Name, Length
       - name: Testar instalando, atualizando por cima e desinstalando
+        timeout-minutes: 12
         shell: pwsh
         working-directory: exato/Exato_Web
         run: |
