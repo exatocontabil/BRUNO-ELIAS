@@ -20,5 +20,9 @@ from web import config
 d = Path(tempfile.mkdtemp()); (d / 'dados.txt').write_text('\ufeff"D:\\ExatoWebDados"\nlixo', encoding='utf-8'); assert config.ler_dados_txt(d / 'dados.txt') == 'D:\\ExatoWebDados'          # dados em outro disco (o arquivo sobrevive às atualizações)
 assert config.ler_dados_txt(d / 'nao_existe.txt') == '' and config.ler_dados_txt(d) == ''
 mv = (RAIZ / 'MOVER_DADOS_PARA_OUTRO_DISCO.ps1').read_text(encoding='ascii'); assert 'robocopy' in mv and 'dados.txt' in mv and '_ANTIGA_apagar_depois' in mv and 'StartsWith' in mv and 'Remove-Item' not in mv          # copia, confere e NUNCA apaga a pasta antiga
+at = (RAIZ / 'ATUALIZAR_SITE.ps1').read_text(encoding='ascii'); assert '/MIR' in at and '_versao_anterior' in at and 'Voltando para a versao anterior' in at and 'GetFullPath' in at and 'dados.txt' in at          # troca os arquivos, guarda a anterior e volta se não subir
+assert '%~dp0.' in (RAIZ / 'ATUALIZAR_SITE.bat').read_text(encoding='ascii') and 'Remove-Item $Pasta' not in at and 'Remove-Item (Join-Path $Pasta' not in at          # nunca apaga a pasta do site nem os dados
+ca = (RAIZ / 'CRIAR_ATALHOS_NA_AREA_DE_TRABALHO.ps1').read_text(encoding='ascii'); assert 'CTRL+ALT+A' in ca and 'CTRL+ALT+P' in ca and 'CTRL+ALT+L' in ca
+for nome in ('ATUALIZAR_SITE.bat', 'ATUALIZAR_SITE.ps1', 'CRIAR_ATALHOS_NA_AREA_DE_TRABALHO.bat', 'CRIAR_ATALHOS_NA_AREA_DE_TRABALHO.ps1', 'PARAR_SITE.bat', 'LIGAR_SITE.bat'): (RAIZ / nome).read_bytes().decode('ascii')
 sys.path.insert(0, str(RAIZ)); import montar_web
 print('Exato Web (inicio automatico): OK')

@@ -22,7 +22,8 @@ def montar():
         for base, destino in ((AQUI / 'web', 'Exato_Web/web'), (AQUI / 'docs', 'Exato_Web/docs'), (nucleo, 'Exato_Web/nucleo')):
             for p in sorted(base.rglob('*')):
                 if p.is_file() and not (set(p.parts) & SOBRAS) and p.suffix != '.pyc': z.write(p, f'{destino}/{p.relative_to(base).as_posix()}')
-        for nome in ('README.md', 'requirements.txt', 'INICIAR_SERVIDOR.bat', 'INSTALAR_DEPENDENCIAS.bat', 'INSTALAR_INICIO_AUTOMATICO.bat', 'INSTALAR_INICIO_AUTOMATICO.ps1', 'PARAR_SITE.bat', 'LIGAR_SITE.bat', 'VER_REGISTRO_DO_SITE.bat', 'REMOVER_INICIO_AUTOMATICO.bat', 'INSTALAR_ENDERECO_COMERCIAL.bat', 'INSTALAR_ENDERECO_COMERCIAL.ps1', 'INSTALAR_CERTIFICADO_NESTE_PC.bat', 'INSTALAR_CERTIFICADO_NESTE_PC.ps1', 'MOVER_DADOS_PARA_OUTRO_DISCO.bat', 'MOVER_DADOS_PARA_OUTRO_DISCO.ps1', 'RESTAURAR_BACKUP.bat', 'RESTAURAR_BACKUP.ps1'): z.write(AQUI / nome, f'Exato_Web/{nome}')
+        z.writestr('Exato_Web/VERSAO.txt', f'Exato Web {date.today():%Y%m%d}{sys.argv[1] if len(sys.argv) > 1 else ""}\r\n')          # o atualizador mostra "versao instalada -> versao nova"
+        for nome in ('README.md', 'requirements.txt', 'INICIAR_SERVIDOR.bat', 'INSTALAR_DEPENDENCIAS.bat', 'INSTALAR_INICIO_AUTOMATICO.bat', 'INSTALAR_INICIO_AUTOMATICO.ps1', 'PARAR_SITE.bat', 'LIGAR_SITE.bat', 'VER_REGISTRO_DO_SITE.bat', 'REMOVER_INICIO_AUTOMATICO.bat', 'INSTALAR_ENDERECO_COMERCIAL.bat', 'INSTALAR_ENDERECO_COMERCIAL.ps1', 'INSTALAR_CERTIFICADO_NESTE_PC.bat', 'INSTALAR_CERTIFICADO_NESTE_PC.ps1', 'MOVER_DADOS_PARA_OUTRO_DISCO.bat', 'MOVER_DADOS_PARA_OUTRO_DISCO.ps1', 'RESTAURAR_BACKUP.bat', 'RESTAURAR_BACKUP.ps1', 'ATUALIZAR_SITE.bat', 'ATUALIZAR_SITE.ps1', 'CRIAR_ATALHOS_NA_AREA_DE_TRABALHO.bat', 'CRIAR_ATALHOS_NA_AREA_DE_TRABALHO.ps1'): z.write(AQUI / nome, f'Exato_Web/{nome}')
     print(f'Pacote: {saida} (núcleo: {nucleo.parent.name})'); return saida
 
 

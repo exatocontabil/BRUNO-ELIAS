@@ -50,8 +50,9 @@ Se o C: for pequeno, rode `MOVER_DADOS_PARA_OUTRO_DISCO.bat` (não precisa ser a
 ## 6b. Cópia de segurança (fazer logo no começo)
 Menu **Cópia de segurança** (só administrador): escolha uma pasta em **outro disco, HD externo ou NAS**, a hora (padrão 02:00) e quantas cópias guardar (padrão 7), marque "Fazer a cópia todo dia" e **Salvar**. Use **Copiar agora** para testar. Leva o banco, usuários, cofre, auditorias e configuração; não leva `Arquivos`, ZIPs e PDFs (se refazem). Restaurar: `RESTAURAR_BACKUP.bat` (não apaga os dados atuais, deixa de lado). Teste a restauração de vez em quando. A Situação da busca avisa (só o administrador) se a cópia não está ligada ou parou há mais de 2 dias. Guarde os `.pfx` originais.
 
-## 7. Atualizar o site
-`PARAR_SITE.bat` → copiar o conteúdo do pacote novo por cima da pasta (os dados ficam fora) → `LIGAR_SITE.bat` → Ctrl+F5 no navegador. Scripts novos ficam na raiz da pasta: copiar o pacote inteiro, não só `web`.
+## 7. Atualizar o site (1 clique)
+Baixe o pacote novo (`Exato_Web_AAAAMMDD?.zip`, normalmente em Downloads) e rode **`ATUALIZAR_SITE.bat`** na pasta do site (ou o atalho **Ctrl+Alt+A** da Área de Trabalho, criado por `CRIAR_ATALHOS_NA_AREA_DE_TRABALHO.bat`). Ele acha o ZIP mais novo, mostra "versão instalada → versão nova", desliga o site, guarda a versão anterior em `_versao_anterior`, troca os arquivos (nunca mexe nos dados, no cofre, no endereço nem no `dados.txt`), instala dependências novas se precisar, religa e confere. Se o site não subir, **volta sozinho** para a versão anterior. Depois: Ctrl+F5 no navegador.
+Atalhos: **Ctrl+Alt+A** atualiza, **Ctrl+Alt+P** para, **Ctrl+Alt+L** liga (valem enquanto os atalhos ficarem na Área de Trabalho; a tecla pode ser mudada nas Propriedades do atalho).
 
 ## 8. Problemas já vistos
 | Sintoma | Causa | O que fazer |
