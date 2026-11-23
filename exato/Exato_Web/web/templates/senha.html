@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% from "_ui.html" import ic %}{% block titulo %}Minha senha — Exato{% endblock %}
+{% block corpo %}<h1>{{ 'Escolha a sua senha' if obrigatoria else 'Trocar a minha senha' }}</h1><p class="sub">{% if obrigatoria %}Você entrou com uma senha provisória. Escolha agora uma senha só sua para continuar.{% else %}Ao trocar, os seus outros acessos abertos e os computadores confiáveis são encerrados.{% endif %}</p>
+{% if erro %}<div class="aviso erro">{{ ic('alert') }}<span>{{ erro }}</span></div>{% endif %}
+<form method="post" action="/conta/senha" class="card" style="max-width:520px"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label for="s-atual">{{ 'Senha provisória (a que você recebeu)' if obrigatoria else 'Senha atual' }}</label><input id="s-atual" name="atual" type="password" autocomplete="current-password" required>
+<label for="s-nova" style="margin-top:10px">Nova senha</label><input id="s-nova" name="nova" type="password" autocomplete="new-password" required minlength="10">
+<label for="s-rep" style="margin-top:10px">Repita a nova senha</label><input id="s-rep" name="repita" type="password" autocomplete="new-password" required minlength="10">
+<small class="mu" style="display:block;margin:8px 0">Pelo menos 10 caracteres, misturando letras e números.</small><button>Salvar a nova senha</button></form>{% endblock %}

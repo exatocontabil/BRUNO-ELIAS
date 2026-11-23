@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% from "_ui.html" import ic %}{% block titulo %}Usuários — Exato{% endblock %}
+{% block corpo %}<h1>Usuários</h1><p class="sub">Quem pode entrar no Exato Web. Cada pessoa tem o seu e-mail e a sua senha, e confirma o acesso com o código do celular.</p>
+{% if ok %}<div class="aviso ok">{{ ic('check-circle') }}<span>{{ ok }}</span></div>{% endif %}{% if erro %}<div class="aviso erro">{{ ic('alert') }}<span>{{ erro }}</span></div>{% endif %}
+{% if novo %}<div class="card senha-nova"><h2>{{ novo.titulo }}</h2><p><b>{{ novo.nome }}</b> ({{ novo.email }})</p>
+<div class="linha" style="align-items:center;gap:12px"><code id="senha-prov" class="senha-prov">{{ novo.senha }}</code><button type="button" class="sec" data-copiar="senha-prov">Copiar</button></div>
+<p class="mu">Passe esta senha à pessoa agora: <b>ela não aparece de novo</b>. No primeiro acesso a pessoa escolhe uma senha só dela e configura o código do celular.</p></div>{% endif %}
+<div class="card"><h2>Novo usuário</h2><form method="post" action="/usuarios/novo"><input type="hidden" name="csrf" value="{{ csrf }}"><div class="linha" style="align-items:flex-end;gap:12px;flex-wrap:wrap">
+<div><label for="u-nome">Nome</label><input id="u-nome" name="nome" required maxlength="80" style="width:240px"></div>
+<div><label for="u-email">E-mail</label><input id="u-email" name="email" type="email" required maxlength="120" style="width:280px"></div>
+<div><label for="u-perfil">Perfil</label><select id="u-perfil" name="perfil"><option value="user">Usuário</option><option value="admin">Administrador</option></select></div>
+<button>Criar usuário</button></div><small class="mu">O Exato cria uma senha provisória para você passar à pessoa. Administrador pode ver tudo e mexer em usuários e na cópia de segurança.</small></form></div>
+<div class="card"><h2>Pessoas com acesso</h2><div class="tabela-rolavel"><table><tr><th>Pessoa</th><th>Perfil</th><th>Situação</th><th>Código do celular</th><th>Último acesso</th><th>Ação</th></tr>
+{% for p in lista %}<tr><td><b>{{ p.nome }}</b>{% if p.id == usuario.id %} <span class="pill n">você</span>{% endif %}<br><small class="mu">{{ p.email }}</small></td>
+<td>{{ p.perfil_nome }}</td><td><span class="pill {{ 'g' if p.ativo else 'r' }}">{{ 'Ativo' if p.ativo else 'Bloqueado' }}</span>{% if p.trocar %}<br><small class="mu">ainda não trocou a senha provisória</small>{% endif %}</td>
+<td>{{ 'Configurado' if p.codigo else 'Ainda não configurado' }}{% if p.computadores %}<br><small class="mu">{{ p.computadores }} computador(es) confiável(is)</small>{% endif %}</td>
+<td>{{ p.ultimo or 'nunca entrou' }}</td>
+<td><form method="post" action="/usuarios/{{ p.id }}/acao" class="linha" style="gap:6px;flex-wrap:wrap" data-confirmar="Confirma a ação para {{ p.nome }}?"><input type="hidden" name="csrf" value="{{ csrf }}">
+<select name="acao" style="max-width:210px" aria-label="Ação para {{ p.nome }}">{% for k, t in acoes.items() %}{% if not (p.id == usuario.id and k in ('bloquear', 'tornar_usuario')) and not (k == 'bloquear' and not p.ativo) and not (k == 'desbloquear' and p.ativo) and not (k == 'tornar_admin' and p.perfil == 'admin') and not (k == 'tornar_usuario' and p.perfil != 'admin') %}<option value="{{ k }}">{{ t }}</option>{% endif %}{% endfor %}</select><button class="sec">Aplicar</button></form></td></tr>
+{% else %}<tr><td colspan="6">Nenhum usuário.</td></tr>{% endfor %}</table></div></div>
+<script src="/static/usuarios.js?v={{ asset_v }}" defer></script>{% endblock %}

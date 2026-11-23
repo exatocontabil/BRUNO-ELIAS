@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, backup, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import auditoria as aud, backup, contas, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -77,6 +77,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
     def exigir(request):
         """(usuario, None) se logado; senão (None, redirecionamento para o login)."""
         u = usuario(request)
+        if u and u.get('must_set_password') and request.url.path != '/conta/senha': return None, RedirectResponse('/conta/senha', status_code=303)          # senha provisória: precisa escolher a sua
         return (u, None) if u else (None, RedirectResponse('/login', status_code=303))
 
     @app.middleware('http')
@@ -468,6 +469,83 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         from .exatinho_base import TOPICOS
         return pagina(request, 'exatinho_duvidas.html', {'lista': exalog.para_ensinar(200), 'res': exalog.resumo(), 'topicos': [(t['id'], t['titulo']) for t in TOPICOS], 'tela': 'exatinho'}, user=u)
 
+
+    # ------------------------------------------------------------ usuários (só administrador) e a minha senha
+    ACOES_USUARIO = {'bloquear': 'Bloquear o acesso', 'desbloquear': 'Liberar o acesso', 'tornar_admin': 'Tornar administrador', 'tornar_usuario': 'Tornar usuário comum', 'nova_senha': 'Nova senha provisória',
+                     'zerar_codigo': 'Zerar código do celular', 'encerrar_acessos': 'Encerrar acessos abertos'}
+
+    def _lista_usuarios():
+        saida = []; fantasmas = contas.sem_senha(core)
+        for x in core.db_auth_list_users():
+            if int(x['id']) in fantasmas: continue
+            saida.append({'id': x['id'], 'nome': x.get('name') or '', 'email': x.get('email') or '', 'perfil': x.get('role'), 'perfil_nome': contas.PERFIS.get(x.get('role'), x.get('role')), 'ativo': x.get('status') == 'active',
+                          'ultimo': str(x.get('last_login_at') or '')[:16].replace('T', ' '), 'trocar': bool(x.get('must_set_password')), 'codigo': totp.ativo(x['id']), 'computadores': dispositivos.contar(x['id'])})
+        return saida
+
+    def _pagina_usuarios(request, u, extra=None, status=200):
+        return pagina(request, 'usuarios.html', dict({'lista': _lista_usuarios(), 'acoes': ACOES_USUARIO, 'tela': 'usuarios', 'ok': '', 'erro': '', 'novo': None}, **(extra or {})), status=status, user=u)
+
+    @app.get('/usuarios', response_class=HTMLResponse)
+    def usuarios_tela(request: Request, ok: str = '', erro: str = ''):
+        u, r = _so_admin(request)
+        if r: return r
+        return _pagina_usuarios(request, u, {'ok': ok, 'erro': erro})
+
+    @app.post('/usuarios/novo', response_class=HTMLResponse)
+    def usuarios_novo(request: Request, nome: str = Form(''), email: str = Form(''), perfil: str = Form('user'), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/usuarios', status_code=303)
+        try: novo, senha = contas.criar_usuario(core, nome, email, perfil)
+        except ValueError as e: return _pagina_usuarios(request, u, {'erro': str(e)}, 400)
+        log(u, 'USUARIO_CRIADO', f"{novo['email']} ({contas.PERFIS[perfil]})")
+        return _pagina_usuarios(request, u, {'novo': {'titulo': 'Usuário criado', 'nome': novo['name'], 'email': novo['email'], 'senha': senha}})
+
+    @app.post('/usuarios/{uid}/acao', response_class=HTMLResponse)
+    def usuarios_acao(request: Request, uid: int, acao: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/usuarios', status_code=303)
+        alvo = core.db_auth_get_user_by_id(uid)
+        if not alvo or acao not in ACOES_USUARIO: return RedirectResponse(_msg('/usuarios', 'erro', 'Usuário ou ação não encontrados.'), status_code=303)
+        eu = int(alvo['id']) == int(u['id']); email = alvo['email']
+        try:
+            if acao == 'bloquear':
+                core.db_auth_set_status(uid, 'blocked', actor=u); sessoes.revogar_usuario(uid); dispositivos.revogar_usuario(uid); msg = f'Acesso de {email} bloqueado.'
+            elif acao == 'desbloquear': core.db_auth_set_status(uid, 'active', actor=u); msg = f'Acesso de {email} liberado.'
+            elif acao in ('tornar_admin', 'tornar_usuario'):
+                if eu and acao == 'tornar_usuario': raise ValueError('Você não pode tirar o seu próprio acesso de administrador. Peça a outro administrador.')
+                contas.mudar_perfil(core, uid, 'admin' if acao == 'tornar_admin' else 'user'); msg = f"{email} agora é {'administrador' if acao == 'tornar_admin' else 'usuário comum'}."
+            elif acao == 'nova_senha':
+                senha = contas.nova_provisoria(core, uid); sessoes.revogar_usuario(uid); dispositivos.revogar_usuario(uid); log(u, 'USUARIO_NOVA_SENHA', email)
+                return _pagina_usuarios(request, u, {'novo': {'titulo': 'Nova senha provisória', 'nome': alvo['name'], 'email': email, 'senha': senha}})
+            elif acao == 'zerar_codigo':
+                totp.desativar(uid); sessoes.revogar_usuario(uid); dispositivos.revogar_usuario(uid); msg = f'Código do celular de {email} zerado: no próximo acesso a pessoa configura de novo.'
+            else: sessoes.revogar_usuario(uid); dispositivos.revogar_usuario(uid); msg = f'Acessos abertos de {email} encerrados.'
+        except ValueError as e: return RedirectResponse(_msg('/usuarios', 'erro', str(e)), status_code=303)
+        log(u, 'USUARIO_' + acao.upper(), email); return RedirectResponse(_msg('/usuarios', 'ok', msg), status_code=303)
+
+    @app.get('/conta/senha', response_class=HTMLResponse)
+    def senha_tela(request: Request):
+        u = usuario(request)
+        if not u: return RedirectResponse('/login', status_code=303)
+        return pagina(request, 'senha.html', {'erro': '', 'ok': '', 'obrigatoria': bool(u.get('must_set_password')), 'tela': 'senha'}, user=u)
+
+    @app.post('/conta/senha', response_class=HTMLResponse)
+    def senha_envio(request: Request, atual: str = Form(''), nova: str = Form(''), repita: str = Form(''), csrf: str = Form('')):
+        u = usuario(request)
+        if not u or not csrf_ok(request, csrf): return RedirectResponse('/login', status_code=303)
+        def volta(msg, st=400): return pagina(request, 'senha.html', {'erro': msg, 'ok': '', 'obrigatoria': bool(u.get('must_set_password')), 'tela': 'senha'}, status=st, user=u)
+        chave = f"senha{u['id']}"; falta = limite.bloqueado(ip(request), chave)
+        if falta: return volta(f'Muitas tentativas. Tente de novo em {max(1, falta // 60)} minuto(s).', 429)
+        reg = core.db_auth_get_user_by_id(u['id'])
+        if not core._auth_verify_password(atual, reg.get('password_salt'), reg.get('password_hash'), reg.get('password_iterations')):
+            limite.falhou(ip(request), chave); log(u, 'SENHA_ATUAL_ERRADA', ''); return volta('A senha atual não confere.', 401)
+        if nova != repita: return volta('A nova senha e a repetição são diferentes.')
+        try: contas.validar_senha_nova(nova, atual, u['email'])
+        except ValueError as e: return volta(str(e))
+        limite.acertou(ip(request), chave); core.db_auth_set_password(u['id'], nova); sessoes.revogar_usuario(u['id']); dispositivos.revogar_usuario(u['id']); log(u, 'SENHA_TROCADA', 'A própria pessoa trocou a senha')
+        resp = RedirectResponse('/situacao' if totp.ativo(u['id']) or not config.EXIGIR_2FA else '/conta/2fa', status_code=303); sessao_completa(resp, u); resp.delete_cookie('exato_confiavel', path='/'); return resp
 
     # ------------------------------------------------------------ cópia de segurança (só administrador)
     def _so_admin(request):

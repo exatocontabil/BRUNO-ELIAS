@@ -179,3 +179,6 @@ class Dispositivos:
 
     def revogar_usuario(self, uid):
         c = self._con(); c.execute("DELETE FROM dispositivos WHERE user_id=?", (uid,)); c.commit(); c.close()
+
+    def contar(self, uid):
+        c = self._con(); r = c.execute("SELECT COUNT(*) FROM dispositivos WHERE user_id=? AND expira>=?", (uid, time.time())).fetchone(); c.close(); return int(r[0] or 0)

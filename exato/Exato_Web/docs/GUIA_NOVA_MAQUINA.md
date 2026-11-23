@@ -15,7 +15,7 @@ Siga na ordem. Em caso de erro, mande o texto da janela e o arquivo `ExatoWebDad
 
 ## 2. Dados e primeiro usuário
 - Pasta de dados padrão: `<pasta do usuário>\ExatoWebDados` (banco, usuários, cofre, registros). Para outro disco: variável `EXATO_WEB_DADOS`; XMLs: `EXATO_WEB_ARQUIVOS`.
-- Primeiro usuário: `py -3 -m web.usuarios criar --email ... --nome "..." --admin` (senha com no mínimo 10 caracteres). Entrada exige o código de 6 números do celular: o site mostra um **QR code** para ler no aplicativo (não digite a chave à mão: a causa do "código inválido" foi chave digitada errada; os horários do celular e do computador também precisam estar certos).
+- Primeiro usuário (administrador): `py -3 -m web.usuarios criar --email ... --nome "..." --admin` (senha com no mínimo 10 caracteres). **Os demais usuários são criados pela tela Usuários** (menu, só administrador): nome, e-mail e perfil; o Exato gera uma senha provisória que a pessoa troca no primeiro acesso. Na mesma tela: bloquear, tornar administrador, nova senha provisória, zerar o código do celular, encerrar acessos. Cada pessoa troca a própria senha em Minha senha. Entrada exige o código de 6 números do celular: o site mostra um **QR code** para ler no aplicativo (não digite a chave à mão: a causa do "código inválido" foi chave digitada errada; os horários do celular e do computador também precisam estar certos).
 - Importar o que já existe do Central Fiscal: `py -3 -m web.importar --origem "...\Dados"` com o site parado.
 
 ## 2b. Disco cheio? Dados em outro disco
