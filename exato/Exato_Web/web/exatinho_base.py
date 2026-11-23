@@ -91,10 +91,13 @@ TOPICOS = [
   'resposta': ['Abra a conversa com o Exatinho e clique no botão com as setinhas (no alto, ao lado da lixeira): ele passa a passear pelo rodapé da tela. Clique de novo para ele ficar quietinho.', 'Ele também pisca, olha para o mouse, comemora quando uma busca termina bem, balança a cabeça se algum tipo não concluiu e dorme se ninguém mexe por 2 minutos.', 'Se o Windows estiver com as animações desligadas, ele fica parado.'], 'tela': '', 'botao': ''},
  {'id': 'codigo_celular_sempre', 'titulo': 'Parar de pedir o código do celular toda hora', 'chaves': ['codigo toda hora', 'pede o codigo sempre', 'confiar neste computador', 'nao pedir o codigo', 'lembrar este computador', 'esquecer este computador', 'codigo do celular toda vez'],
   'resposta': ['Na tela do código do celular, marque "Confiar neste computador por 30 dias". Nesse computador o site passa a pedir só a senha, e a sessão dura até 7 dias.', 'Marque só em computador do escritório. Para voltar a pedir o código, use o botão do cadeado ao lado de Sair (Sair e esquecer este computador). Trocar a senha ou zerar a verificação também desfaz tudo.'], 'tela': '', 'botao': ''},
+ {'id': 'diagnostico', 'titulo': 'Enviar diagnóstico ao suporte', 'chaves': ['diagnostico', 'enviar diagnostico', 'falar com o suporte', 'deu erro', 'algo deu errado', 'suporte', 'registro do site', 'mandar o erro'],
+  'resposta': ['Abra Diagnóstico no menu (só administrador) e clique em "Baixar o diagnóstico". Envie o arquivo ao suporte e conte o que você estava fazendo, o dia e a hora do problema.', 'O arquivo não leva notas, certificados, senhas nem códigos do celular. Por padrão, CNPJ, CPF, e-mails e o nome do usuário do Windows saem escondidos.', 'Se o e-mail de envio estiver configurado em Box-e, você também pode guardar o e-mail do suporte e enviar por ali com um clique.'], 'tela': '/diagnostico', 'botao': 'Abrir Diagnóstico'},
 ]
 
 # Perguntas de exemplo por tópico (usadas no teste e como sugestões na conversa).
 EXEMPLOS = {
+ 'diagnostico': ['como envio o diagnostico para o suporte?', 'deu erro, como mando para o suporte'],
  'codigo_celular_sempre': ['o site pede o codigo do celular toda hora', 'como faco para confiar neste computador'],
  'exatinho_passear': ['como faco o exatinho passear?', 'o exatinho esta dormindo', 'quero o exatinho parado'],
  'entrar': ['como eu entro no site?', 'esqueci minha senha'],

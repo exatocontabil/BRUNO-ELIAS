@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, backup, contas, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import auditoria as aud, backup, contas, diagnostico, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -546,6 +546,41 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         except ValueError as e: return volta(str(e))
         limite.acertou(ip(request), chave); core.db_auth_set_password(u['id'], nova); sessoes.revogar_usuario(u['id']); dispositivos.revogar_usuario(u['id']); log(u, 'SENHA_TROCADA', 'A própria pessoa trocou a senha')
         resp = RedirectResponse('/situacao' if totp.ativo(u['id']) or not config.EXIGIR_2FA else '/conta/2fa', status_code=303); sessao_completa(resp, u); resp.delete_cookie('exato_confiavel', path='/'); return resp
+
+    # ------------------------------------------------------------ diagnóstico para o suporte (só administrador)
+    @app.get('/diagnostico', response_class=HTMLResponse)
+    def diagnostico_tela(request: Request, ok: str = '', erro: str = ''):
+        u, r = _so_admin(request)
+        if r: return r
+        sup = (motor.cfg.get('suporte') or {}).get('email') or ''
+        return pagina(request, 'diagnostico.html', {'suporte': sup, 'email_pronto': bool(motor.boxe_pronto()), 'ok': ok, 'erro': erro, 'tela': 'diagnostico'}, user=u)
+
+    @app.post('/diagnostico/baixar')
+    def diagnostico_baixar(request: Request, ocultar: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/diagnostico', status_code=303)
+        dados = diagnostico.montar_zip(core, motor, ocultar=(ocultar == '1')); log(u, 'DIAGNOSTICO_BAIXADO', 'dados ocultos' if ocultar == '1' else 'dados NÃO ocultos')
+        return Response(dados, media_type='application/zip', headers={'Content-Disposition': f'attachment; filename="{diagnostico.nome_arquivo()}"', 'Cache-Control': 'no-store'})
+
+    @app.post('/diagnostico/suporte')
+    def diagnostico_suporte(request: Request, email: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/diagnostico', status_code=303)
+        email = (email or '').strip()
+        if email and not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email): return RedirectResponse(_msg('/diagnostico', 'erro', 'Esse e-mail não parece válido.'), status_code=303)
+        motor.cfg.setdefault('suporte', {})['email'] = email; motor.salvar_cfg(); return RedirectResponse(_msg('/diagnostico', 'ok', 'E-mail do suporte guardado.' if email else 'E-mail do suporte removido.'), status_code=303)
+
+    @app.post('/diagnostico/enviar')
+    def diagnostico_enviar(request: Request, ocultar: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/diagnostico', status_code=303)
+        destino = (motor.cfg.get('suporte') or {}).get('email') or ''
+        try: diagnostico.enviar_por_email(motor, destino, diagnostico.montar_zip(core, motor, ocultar=(ocultar == '1')), diagnostico.nome_arquivo())
+        except diagnostico.DiagnosticoErro as e: return RedirectResponse(_msg('/diagnostico', 'erro', str(e)), status_code=303)
+        log(u, 'DIAGNOSTICO_ENVIADO', destino); return RedirectResponse(_msg('/diagnostico', 'ok', f'Diagnóstico enviado para {destino}.'), status_code=303)
 
     # ------------------------------------------------------------ cópia de segurança (só administrador)
     def _so_admin(request):

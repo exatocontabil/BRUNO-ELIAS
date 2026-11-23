@@ -14,7 +14,7 @@
 <a href="/manifestacao" class="{{ 'ativo' if tela=='manifestacao' }}">{{ ic('mail') }}Manifestação</a>
 <a href="/fechamento" class="{{ 'ativo' if tela=='fechamento' }}">{{ ic('calendar') }}Fechamento</a>
 <div class="grupo">Arquivo e envios</div>
-<a href="/repositorio" class="{{ 'ativo' if tela=='repositorio' }}">{{ ic('database') }}Repositório</a>{% if usuario.role=='admin' %}<a href="/usuarios" class="{{ 'ativo' if tela=='usuarios' }}">{{ ic('user') }}Usuários</a><a href="/backup" class="{{ 'ativo' if tela=='backup' }}">{{ ic('shield') }}Cópia de segurança</a>{% endif %}
+<a href="/repositorio" class="{{ 'ativo' if tela=='repositorio' }}">{{ ic('database') }}Repositório</a>{% if usuario.role=='admin' %}<a href="/usuarios" class="{{ 'ativo' if tela=='usuarios' }}">{{ ic('user') }}Usuários</a><a href="/backup" class="{{ 'ativo' if tela=='backup' }}">{{ ic('shield') }}Cópia de segurança</a><a href="/diagnostico" class="{{ 'ativo' if tela=='diagnostico' }}">{{ ic('activity') }}Diagnóstico</a>{% endif %}
 <a href="/boxe" class="{{ 'ativo' if tela=='boxe' }}">{{ ic('send') }}Box-e e resumo</a>
 <a href="/exportar" class="{{ 'ativo' if tela=='exportar' }}">{{ ic('layers') }}Baixar XMLs (ZIP)</a>
 <a href="/relatorios" class="{{ 'ativo' if tela=='relatorios' }}">{{ ic('bar-chart') }}Relatórios</a><a href="/conta/senha" class="{{ 'ativo' if tela=='senha' }}">{{ ic('key') }}Minha senha</a>{% if usuario.role=='admin' %}<a href="/exatinho/duvidas" class="{{ 'ativo' if tela=='exatinho' }}">{{ ic('info') }}Dúvidas do Exatinho</a>{% endif %}

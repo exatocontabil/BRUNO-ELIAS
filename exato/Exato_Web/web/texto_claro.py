@@ -3,7 +3,7 @@
 import re
 
 SUBS = [
-    (r'Manutenção\s*>\s*Abrir registro de erros e envie o arquivo exato\.log ao suporte', 'Fale com o suporte informando o dia e a hora em que aconteceu'),
+    (r'Manutenção\s*>\s*Abrir registro de erros e envie o arquivo exato\.log ao suporte', 'Fale com o suporte (menu Diagnóstico) informando o dia e a hora em que aconteceu'),
     (r'Instale o Microsoft Edge e abra o arquivo INSTALAR_COMPONENTE_NFSE\.bat na pasta ferramentas\.', 'Este computador precisa do Microsoft Edge para essa consulta. Fale com o suporte.'),
     (r'O detalhe técnico foi guardado no registro de erros', 'O detalhe foi guardado para o suporte'),
     (r'guardado no registro de erros', 'guardado para o suporte'),
