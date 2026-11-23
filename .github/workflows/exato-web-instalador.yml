@@ -1,0 +1,64 @@
+name: Instalador do Exato Web
+
+# Monta o instalador único (Exato_Web_Instalador_<versão>.exe) no Windows, testa instalando/desinstalando de verdade e guarda o resultado.
+# Roda sozinho quando a pasta do instalador muda e pode ser iniciado à mão (Actions > Instalador do Exato Web > Run workflow).
+on:
+  workflow_dispatch:
+    inputs:
+      publicar:
+        description: 'Publicar o instalador na página Releases (true/false)'
+        required: false
+        default: 'true'
+  push:
+    paths:
+      - 'exato/Exato_Web/instalador/**'
+      - '.github/workflows/exato-web-instalador.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  instalador:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Peças do site no Python que vai dentro do instalador
+        shell: pwsh
+        run: python -m pip install --no-warn-script-location -r exato/Exato_Web/requirements.txt
+      - name: Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe')) { choco install innosetup -y --no-progress }
+          Test-Path 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+      - name: Montar o instalador
+        shell: pwsh
+        working-directory: exato/Exato_Web
+        run: |
+          $env:EXATO_VERSAO = (Get-Date -Format 'yyyyMMdd') + '.' + $env:GITHUB_RUN_NUMBER
+          python instalador/montar_instalador.py
+          Get-ChildItem dist | Format-Table Name, Length
+      - name: Testar instalando, atualizando por cima e desinstalando
+        shell: pwsh
+        working-directory: exato/Exato_Web
+        run: |
+          $exe = (Get-ChildItem dist -Filter 'Exato_Web_Instalador_*.exe' | Select-Object -First 1).FullName
+          ./instalador/testar_instalador.ps1 -Instalador $exe
+      - name: Guardar o instalador
+        uses: actions/upload-artifact@v4
+        with:
+          name: Exato_Web_Instalador
+          path: exato/Exato_Web/dist/Exato_Web_Instalador_*.exe
+          retention-days: 30
+      - name: Publicar na página Releases
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publicar != 'false' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $exe = (Get-ChildItem exato/Exato_Web/dist -Filter 'Exato_Web_Instalador_*.exe' | Select-Object -First 1)
+          $tag = 'exato-web-instalador-' + $env:GITHUB_RUN_NUMBER
+          gh release create $tag $exe.FullName --title "Instalador do Exato Web ($tag)" --notes "Instalador único do Exato Web. Baixe o arquivo Exato_Web_Instalador e dê dois cliques." --repo $env:GITHUB_REPOSITORY
