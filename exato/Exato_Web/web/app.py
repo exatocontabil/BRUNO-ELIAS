@@ -38,8 +38,8 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
     chave = carregar_chave_mestra(pasta_cofre)
     cofre = Cofre(pasta_cofre, chave, importador=importador)
     totp = seguranca.Totp(config.DADOS / 'web.db', chave)
-    limite = seguranca.LimiteLogin(); sessoes = seguranca.Sessoes(config.DADOS / 'web.db')
-    app.state.cofre, app.state.totp, app.state.limite, app.state.core, app.state.sessoes = cofre, totp, limite, core, sessoes
+    limite = seguranca.LimiteLogin(); sessoes = seguranca.Sessoes(config.DADOS / 'web.db'); dispositivos = seguranca.Dispositivos(config.DADOS / 'web.db')
+    app.state.cofre, app.state.totp, app.state.limite, app.state.core, app.state.sessoes, app.state.dispositivos = cofre, totp, limite, core, sessoes, dispositivos
     motor = Motor(core, cofre, nfse_transport=nfse_transport); motor.manifestador = manif.Manifestador(core, cofre, motor.certificado_para, transporte=manif_transporte); agendador = Agendador(motor); app.state.motor, app.state.agendador = motor, agendador
     if iniciar_agendador: agendador.iniciar()
     motivos = nucleo.modulo('exato_busca_motivos'); situacao = nucleo.modulo('exato_situacao_busca')
@@ -88,10 +88,15 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if request.url.path.startswith('/static/'): resp.headers['Cache-Control'] = 'no-cache'          # o navegador confere se o arquivo mudou (depois de uma atualização do site, nada de visual antigo)
         return resp
 
-    def sessao_completa(resp, u):
-        sid = sessoes.criar(u['id'], config.SESSAO_HORAS * 3600)
-        cookie(resp, 'exato_sessao', seguranca.assinar({'uid': u['id'], 'sid': sid}, config.SESSAO_HORAS * 3600), config.SESSAO_HORAS * 3600)
+    def sessao_completa(resp, u, horas=None):
+        horas = horas or config.SESSAO_HORAS; sid = sessoes.criar(u['id'], horas * 3600)
+        cookie(resp, 'exato_sessao', seguranca.assinar({'uid': u['id'], 'sid': sid}, horas * 3600), horas * 3600)
         resp.delete_cookie('exato_pre', path='/')
+
+    def dispositivo_confiavel(request, uid):
+        """True se este navegador foi marcado como "confiar por N dias" por esta pessoa (e ainda vale no servidor)."""
+        d = seguranca.verificar(request.cookies.get('exato_confiavel', ''))
+        return bool(d and d.get('uid') == uid and dispositivos.valido(d.get('t'), uid))
 
     # ------------------------------------------------------------ acesso
     @app.get('/saude')
@@ -111,6 +116,8 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
             return pagina(request, 'login.html', {'erro': 'E-mail ou senha inválidos.'}, 401)
         limite.acertou(ip(request), email)
         etapa = 'codigo' if totp.ativo(u['id']) else ('config' if config.EXIGIR_2FA else '')
+        if etapa == 'codigo' and dispositivo_confiavel(request, u['id']):          # computador marcado como confiável: só a senha
+            resp = RedirectResponse('/situacao', status_code=303); log(u, 'LOGIN_DISPOSITIVO_CONFIAVEL', 'Entrou sem pedir o código (computador confiável)'); sessao_completa(resp, u, config.SESSAO_HORAS_CONFIAVEL); return resp
         resp = RedirectResponse('/situacao' if not etapa else ('/login/codigo' if etapa == 'codigo' else '/conta/2fa'), status_code=303)
         if etapa: cookie(resp, 'exato_pre', seguranca.assinar({'uid': u['id'], 'etapa': etapa}, 300), 300)
         else: sessao_completa(resp, u)
@@ -130,20 +137,26 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
     @app.get('/login/codigo', response_class=HTMLResponse)
     def codigo_tela(request: Request):
         if not pre(request): return RedirectResponse('/login', status_code=303)
-        return pagina(request, 'codigo.html', {'erro': ''})
+        return pagina(request, 'codigo.html', {'erro': '', 'dias': config.DISPOSITIVO_DIAS})
 
     @app.post('/login/codigo')
-    def codigo_envio(request: Request, codigo: str = Form(''), csrf: str = Form('')):
+    def codigo_envio(request: Request, codigo: str = Form(''), confiar: str = Form(''), csrf: str = Form('')):
         p = pre(request)
         if not p or p.get('etapa') != 'codigo' or not csrf_ok(request, csrf): return RedirectResponse('/login', status_code=303)
         u = core._auth_user_from_row(core.db_auth_get_user_by_id(p['uid']))
         chave_lim = f"uid{p['uid']}"
         falta = limite.bloqueado(ip(request), chave_lim)
-        if falta: return pagina(request, 'codigo.html', {'erro': f'Muitas tentativas. Tente de novo em {max(1, falta // 60)} minuto(s).'}, 429)
+        if falta: return pagina(request, 'codigo.html', {'erro': f'Muitas tentativas. Tente de novo em {max(1, falta // 60)} minuto(s).', 'dias': config.DISPOSITIVO_DIAS}, 429)
         if not totp.conferir(p['uid'], codigo):
             limite.falhou(ip(request), chave_lim); log(u, 'LOGIN_FALHA', 'Código de verificação inválido')
-            return pagina(request, 'codigo.html', {'erro': 'Código inválido ou já usado. Aguarde o próximo código do aplicativo.'}, 401)
-        limite.acertou(ip(request), chave_lim); resp = RedirectResponse('/situacao', status_code=303); sessao_completa(resp, u); return resp
+            return pagina(request, 'codigo.html', {'erro': 'Código inválido ou já usado. Aguarde o próximo código do aplicativo.', 'dias': config.DISPOSITIVO_DIAS}, 401)
+        limite.acertou(ip(request), chave_lim); resp = RedirectResponse('/situacao', status_code=303)
+        if confiar == '1':          # "confiar neste computador": guarda um identificador (só o hash fica no servidor) e a sessão dura mais
+            token = dispositivos.criar(u['id'], config.DISPOSITIVO_DIAS)
+            cookie(resp, 'exato_confiavel', seguranca.assinar({'uid': u['id'], 't': token}, config.DISPOSITIVO_DIAS * 86400), config.DISPOSITIVO_DIAS * 86400); log(u, 'DISPOSITIVO_CONFIAVEL', f'Computador marcado como confiável por {config.DISPOSITIVO_DIAS} dias')
+            sessao_completa(resp, u, config.SESSAO_HORAS_CONFIAVEL)
+        else: sessao_completa(resp, u)
+        return resp
 
     @app.get('/conta/2fa', response_class=HTMLResponse)
     def config_2fa_tela(request: Request):
@@ -167,10 +180,15 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         resp = RedirectResponse('/situacao', status_code=303); sessao_completa(resp, usr); return resp
 
     @app.post('/sair')
-    def sair(request: Request, csrf: str = Form('')):
+    def sair(request: Request, csrf: str = Form(''), esquecer: str = Form('')):
         d = seguranca.verificar(request.cookies.get('exato_sessao', ''))
         if d: sessoes.revogar(d.get('sid'))
-        resp = RedirectResponse('/login', status_code=303); resp.delete_cookie('exato_sessao', path='/'); return resp
+        resp = RedirectResponse('/login', status_code=303); resp.delete_cookie('exato_sessao', path='/')
+        if esquecer == '1':          # "sair e esquecer este computador": o código do celular volta a ser pedido aqui
+            t = seguranca.verificar(request.cookies.get('exato_confiavel', ''))
+            if t: dispositivos.revogar(t.get('t'))
+            resp.delete_cookie('exato_confiavel', path='/')
+        return resp
 
     @app.get('/')
     def raiz(): return RedirectResponse('/situacao', status_code=303)

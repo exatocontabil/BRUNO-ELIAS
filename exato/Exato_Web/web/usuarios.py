@@ -37,11 +37,11 @@ def main(argv=None):
         u = core.db_auth_get_user(a.email)
         if not u: sys.exit('Usuário não encontrado.')
         core.db_auth_set_password(u['id'], _senha())
-        seguranca.Sessoes(config.DADOS / 'web.db').revogar_usuario(u['id']); print('Senha trocada. Os acessos abertos dessa pessoa foram encerrados.')
+        seguranca.Sessoes(config.DADOS / 'web.db').revogar_usuario(u['id']); seguranca.Dispositivos(config.DADOS / 'web.db').revogar_usuario(u['id']); print('Senha trocada. Os acessos abertos e os computadores confiáveis dessa pessoa foram encerrados.')
     elif a.cmd == 'zerar-2fa':
         u = core.db_auth_get_user(a.email)
         if not u: sys.exit('Usuário não encontrado.')
-        seguranca.Totp(config.DADOS / 'web.db', carregar_chave_mestra(config.DADOS / 'cofre')).desativar(u['id']); print('Verificação zerada: no próximo acesso ele cadastra de novo.')
+        seguranca.Totp(config.DADOS / 'web.db', carregar_chave_mestra(config.DADOS / 'cofre')).desativar(u['id']); seguranca.Dispositivos(config.DADOS / 'web.db').revogar_usuario(u['id']); print('Verificação zerada: no próximo acesso ele cadastra de novo.')
 
 
 if __name__ == '__main__': main()

@@ -152,3 +152,30 @@ class Sessoes:
 
     def revogar_usuario(self, uid):
         c = self._con(); c.execute("DELETE FROM sessoes WHERE user_id=?", (uid,)); c.commit(); c.close()
+
+
+class Dispositivos:
+    """Computadores em que a pessoa marcou "confiar por N dias": nesses o site não pede o código do celular de novo (a SENHA continua sendo pedida).
+    O servidor guarda só o hash do identificador; trocar a senha, zerar a verificação ou "esquecer este computador" apaga na hora."""
+    def __init__(self, caminho):
+        self.caminho = Path(caminho)
+        c = self._con(); c.execute("CREATE TABLE IF NOT EXISTS dispositivos(id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, expira REAL NOT NULL, criado REAL NOT NULL)"); c.commit(); c.close()
+
+    def _con(self): return sqlite3.connect(self.caminho, timeout=15)
+
+    @staticmethod
+    def _h(token): return hashlib.sha256(str(token or '').encode('utf-8')).hexdigest()
+
+    def criar(self, uid, dias):
+        token = secrets.token_urlsafe(32); agora = time.time(); c = self._con()
+        c.execute("DELETE FROM dispositivos WHERE expira < ?", (agora,)); c.execute("INSERT INTO dispositivos(id, user_id, expira, criado) VALUES(?,?,?,?)", (self._h(token), uid, agora + dias * 86400, agora)); c.commit(); c.close(); return token
+
+    def valido(self, token, uid):
+        if not token: return False
+        c = self._con(); r = c.execute("SELECT 1 FROM dispositivos WHERE id=? AND user_id=? AND expira>=?", (self._h(token), uid, time.time())).fetchone(); c.close(); return bool(r)
+
+    def revogar(self, token):
+        c = self._con(); c.execute("DELETE FROM dispositivos WHERE id=?", (self._h(token),)); c.commit(); c.close()
+
+    def revogar_usuario(self, uid):
+        c = self._con(); c.execute("DELETE FROM dispositivos WHERE user_id=?", (uid,)); c.commit(); c.close()

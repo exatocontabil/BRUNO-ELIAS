@@ -21,6 +21,8 @@ Siga na ordem. Em caso de erro, mande o texto da janela e o arquivo `ExatoWebDad
 ## 2b. Disco cheio? Dados em outro disco
 Se o C: for pequeno, rode `MOVER_DADOS_PARA_OUTRO_DISCO.bat` (não precisa ser administrador): ele desliga o site, copia `ExatoWebDados` para uma pasta de outro disco **deste computador**, confere, grava o novo caminho em `dados.txt` (na pasta do site; sobrevive às atualizações) e liga de novo. A pasta antiga fica renomeada `..._ANTIGA_apagar_depois`: apague só depois de conferir que tudo funciona. Não use pasta de rede para o banco. Em máquina nova, já instale escolhendo o disco certo.
 
+Para não digitar o código do celular toda vez: na tela do código, marque **"Confiar neste computador por 30 dias"** (só em computador do escritório). Nesse computador pede só a senha e a sessão dura até 7 dias. "Sair e esquecer este computador" (cadeado ao lado de Sair), trocar a senha ou zerar a verificação desfazem isso.
+
 ## 3. Ligar sozinho, sem janela preta
 1. `INSTALAR_INICIO_AUTOMATICO.bat` (a partir da pasta local ou da rede: se estiver na rede ele copia para uma pasta local, padrão `C:\ExatoWeb`).
 2. Informe o usuário do Windows. **Usuário sem senha:** aperte Enter na senha; a tarefa liga quando esse usuário **entra no Windows** (use `netplwiz` para a entrada automática). **Com senha:** liga com o computador, antes do login.

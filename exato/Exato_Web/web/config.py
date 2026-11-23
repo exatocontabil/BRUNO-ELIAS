@@ -27,6 +27,8 @@ ARQUIVOS = Path(os.environ.get('EXATO_WEB_ARQUIVOS') or (DADOS / 'Arquivos'))
 try: ARQUIVOS.mkdir(parents=True, exist_ok=True)          # a pasta dos XMLs precisa existir para o Repositório considerá-la acessível
 except Exception: pass
 SESSAO_HORAS = 10
+DISPOSITIVO_DIAS = 30          # "confiar neste computador": quantos dias sem pedir o código do celular
+SESSAO_HORAS_CONFIAVEL = 7 * 24          # nesses computadores a sessão dura mais (a senha ainda é pedida ao entrar)
 TENTATIVAS_LOGIN = 5
 BLOQUEIO_MINUTOS = 15
 
