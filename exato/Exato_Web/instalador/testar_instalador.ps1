@@ -23,7 +23,11 @@ if (-not $ok) {
     Falha 'o Exato nao ligou depois da instalacao'
 }
 Write-Host 'Exato respondeu. Conferindo a primeira abertura...'
-$r = Invoke-WebRequest -Uri 'http://127.0.0.1:8443/login' -MaximumRedirection 0 -SkipHttpErrorCheck -UseBasicParsing
+$h = [System.Net.Http.HttpClientHandler]::new(); $h.AllowAutoRedirect = $false
+$cli = [System.Net.Http.HttpClient]::new($h); $cli.Timeout = [TimeSpan]::FromSeconds(20)
+$r = $cli.GetAsync('http://127.0.0.1:8443/login').GetAwaiter().GetResult()
+$loc = if ($r.Headers.Location) { $r.Headers.Location.ToString() } else { '' }
+$r = [pscustomobject]@{ StatusCode = [int]$r.StatusCode; Headers = @{ Location = $loc } }
 if ($r.StatusCode -ne 303 -or "$($r.Headers.Location)" -notlike '*/configurar') { Falha "o /login deveria levar a /configurar (veio $($r.StatusCode) $($r.Headers.Location))" }
 $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8443/configurar' -UseBasicParsing
 if ($r.StatusCode -ne 200 -or $r.Content -notlike '*Criar o administrador*') { Falha 'a tela de criar o administrador nao abriu' }
