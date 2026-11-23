@@ -5,7 +5,7 @@ Entra: o banco (empresas, XMLs, usuários, histórico) e `web.db` por cópia CON
 configuração. NÃO entra o que se refaz: cópias de XML (`Arquivos`), ZIPs (`exportacoes`), PDFs de relatórios (`relatorios`) e registros (`logs`).
 Segurança: o ZIP só aparece com o nome final depois de conferido; as cópias antigas só são apagadas DEPOIS de uma nova boa; só apaga arquivos com o nome deste backup,
 dentro da pasta de destino (nunca outra coisa); o destino não pode ficar dentro da pasta de dados. O cofre só abre no mesmo computador e usuário do Windows: guarde também os .pfx originais."""
-import os, shutil, sqlite3, tempfile, threading, zipfile
+import os, shutil, sqlite3, string, sys, tempfile, threading, zipfile
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -183,3 +183,32 @@ def aviso(cfg, agora=None):
     except Exception: ok = None
     if ok is None or agora - ok > timedelta(days=2): return 'A última cópia de segurança bem-sucedida foi há mais de 2 dias' + ('' if ok else ' (ou nunca foi feita)') + '. ' + (c.get('ultimo_msg') or 'Veja em Cópia de segurança.')
     return ''
+
+
+def _discos():
+    """Letras de disco que existem (Windows: sem consultar discos de rede desligados, que travariam). Fora do Windows (testes): '/'."""
+    if sys.platform != 'win32': return ['/']
+    try:
+        import ctypes
+        mascara = ctypes.windll.kernel32.GetLogicalDrives()
+        return [f'{l}:\\' for i, l in enumerate(string.ascii_uppercase) if mascara & (1 << i) and l not in 'AB']
+    except Exception: return ['C:\\']
+
+
+def listar_pastas(caminho=''):
+    """Para o botão "Procurar": as PASTAS (nunca arquivos) de um caminho do servidor. Sem caminho: os discos. Devolve {caminho, pai, pastas:[{nome, caminho}]}."""
+    texto = str(caminho or '').strip().strip('"')
+    if not texto: return {'caminho': '', 'pai': None, 'pastas': [{'nome': d, 'caminho': d} for d in _discos()]}
+    p = Path(texto)
+    if not p.is_absolute(): raise BackupErro('Use o caminho completo da pasta.')
+    if not p.is_dir(): raise BackupErro('Essa pasta não existe ou não está acessível.')
+    pastas = []
+    try:
+        for e in os.scandir(p):
+            try:
+                if e.is_dir(follow_symlinks=False) and not e.name.startswith('$') and e.name != 'System Volume Information': pastas.append({'nome': e.name, 'caminho': str(Path(e.path))})
+            except OSError: continue
+    except OSError: raise BackupErro('Não consegui ler essa pasta (sem permissão?).')
+    pastas.sort(key=lambda x: x['nome'].lower())
+    pai = str(p.parent) if p.parent != p else ''
+    return {'caminho': str(p), 'pai': pai, 'pastas': pastas[:500], 'cortado': len(pastas) > 500}

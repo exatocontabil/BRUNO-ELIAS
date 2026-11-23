@@ -77,4 +77,14 @@ for _ in range(100):
 assert cb['ultimo_estado'] == 'ok', cb          # a cópia real da pasta de dados do site de teste
 assert 'ExatoWeb_backup_' in adm.get('/backup').text
 assert 'cópia de segurança' in adm.get('/situacao').text.lower() or True
+# ---- botão Procurar: lista só pastas, só para administrador
+(destino / 'subpasta_a').mkdir(); (destino / '$oculta').mkdir(); (destino / 'arquivo.txt').write_text('x')
+l = bk.listar_pastas(str(destino)); assert [x['nome'] for x in l['pastas']] == ['subpasta_a'] and l['pai'] == str(destino.parent), l          # só pastas, sem arquivos nem $ocultas
+assert bk.listar_pastas('')['pai'] is None and bk.listar_pastas('')['pastas']
+for ruim in ('relativa', str(destino / 'nao_existe')):
+    try: bk.listar_pastas(ruim); assert False
+    except bk.BackupErro as e: assert str(e)
+rj = adm.get('/backup/pastas', params={'caminho': str(destino)}); assert rj.status_code == 200 and rj.json()['pastas'][0]['nome'] == 'subpasta_a'
+assert adm.get('/backup/pastas', params={'caminho': 'relativa'}).status_code == 400 and com.get('/backup/pastas').status_code == 403 and TestClient(app).get('/backup/pastas').status_code == 403
+assert 'id="bk-procurar"' in adm.get('/backup').text and adm.get('/static/backup.js').status_code == 200
 print('Exato Web (cópia de segurança): OK')

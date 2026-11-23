@@ -3,7 +3,7 @@ import re, secrets, sqlite3, time
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request, UploadFile, File
-from fastapi.responses import HTMLResponse, RedirectResponse, Response, PlainTextResponse, FileResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, PlainTextResponse, FileResponse
 from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -468,6 +468,13 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
             except backup.BackupErro as e: aviso_disco = str(e)
             lista = backup.listar(c['destino'])
         return pagina(request, 'backup.html', {'c': c, 'lista': lista, 'aviso_disco': aviso_disco, 'rodando': backup.andamento['rodando'], 'etapa': backup.andamento['etapa'], 'ok': ok, 'erro': erro, 'dados': str(config.DADOS), 'tela': 'backup'}, user=u)
+
+    @app.get('/backup/pastas')
+    def backup_pastas(request: Request, caminho: str = ''):
+        u, r = _so_admin(request)
+        if r: return JSONResponse({'erro': 'Entre no site como administrador.'}, status_code=403)
+        try: return JSONResponse(backup.listar_pastas(caminho), headers={'Cache-Control': 'no-store'})
+        except backup.BackupErro as e: return JSONResponse({'erro': str(e)}, status_code=400, headers={'Cache-Control': 'no-store'})
 
     @app.post('/backup/salvar')
     def backup_salvar(request: Request, destino: str = Form(''), hora: str = Form('02:00'), manter: int = Form(7), ativo: str = Form(''), csrf: str = Form('')):
