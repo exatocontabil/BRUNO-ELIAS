@@ -124,7 +124,7 @@ def executar(cfg, salvar, dados=None, agora=None, log_erro=None):
                 if not p.exists(): continue
                 if _eh_sqlite(p): copia = tmp / f'{i}.db'; _copia_sqlite(p, copia); z.write(copia, rel); copia.unlink()
                 else: z.write(p, rel)
-            z.writestr('LEIA-ME.txt', 'Cópia de segurança do Exato Web feita em ' + agora.strftime('%d/%m/%Y %H:%M') + '.\r\nPara restaurar use o programa \"Restaurar cópia de segurança\" (na pasta do Exato Web).\r\n'
+            z.writestr('LEIA-ME.txt', 'Cópia de segurança do Exato Web feita em ' + agora.strftime('%d/%m/%Y %H:%M') + '.\r\nPara restaurar abra o Exato, entre em Cópia de segurança e clique em Restaurar (ou, se o Exato não abrir, use o programa \"Restaurar cópia de segurança\").\r\n'
                        'Os certificados guardados só abrem neste computador e com este usuário do Windows: guarde também os arquivos originais dos certificados.\r\n')
         andamento['etapa'] = 'Conferindo a cópia'
         with zipfile.ZipFile(parcial) as z:

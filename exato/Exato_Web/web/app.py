@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, backup, contas, diagnostico, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import auditoria as aud, backup, contas, diagnostico, restauracao, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -39,6 +39,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
     cofre = Cofre(pasta_cofre, chave, importador=importador)
     totp = seguranca.Totp(config.DADOS / 'web.db', chave)
     limite = seguranca.LimiteLogin(); sessoes = seguranca.Sessoes(config.DADOS / 'web.db'); dispositivos = seguranca.Dispositivos(config.DADOS / 'web.db')
+    app.state.reiniciar = None
     app.state.cofre, app.state.totp, app.state.limite, app.state.core, app.state.sessoes, app.state.dispositivos = cofre, totp, limite, core, sessoes, dispositivos
     motor = Motor(core, cofre, nfse_transport=nfse_transport); motor.manifestador = manif.Manifestador(core, cofre, motor.certificado_para, transporte=manif_transporte); agendador = Agendador(motor); app.state.motor, app.state.agendador = motor, agendador
     if iniciar_agendador: agendador.iniciar()
@@ -598,7 +599,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
             try: aviso_disco = backup.validar_destino(c['destino'])[1]
             except backup.BackupErro as e: aviso_disco = str(e)
             lista = backup.listar(c['destino'])
-        return pagina(request, 'backup.html', {'c': c, 'lista': lista, 'aviso_disco': aviso_disco, 'rodando': backup.andamento['rodando'], 'etapa': backup.andamento['etapa'], 'ok': ok, 'erro': erro, 'dados': str(config.DADOS), 'tela': 'backup'}, user=u)
+        return pagina(request, 'backup.html', {'restaurou': restauracao.ultimo_resultado(config.DADOS), 'c': c, 'lista': lista, 'aviso_disco': aviso_disco, 'rodando': backup.andamento['rodando'], 'etapa': backup.andamento['etapa'], 'ok': ok, 'erro': erro, 'dados': str(config.DADOS), 'tela': 'backup'}, user=u)
 
     @app.get('/backup/pastas')
     def backup_pastas(request: Request, caminho: str = ''):
@@ -606,6 +607,36 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if r: return JSONResponse({'erro': 'Entre no site como administrador.'}, status_code=403)
         try: return JSONResponse(backup.listar_pastas(caminho), headers={'Cache-Control': 'no-store'})
         except backup.BackupErro as e: return JSONResponse({'erro': str(e)}, status_code=400, headers={'Cache-Control': 'no-store'})
+
+    @app.get('/backup/restaurar', response_class=HTMLResponse)
+    def backup_restaurar_tela(request: Request, arquivo: str = '', erro: str = ''):
+        u, r = _so_admin(request)
+        if r: return r
+        c = backup.cfg_de(motor.cfg); item = next((x for x in backup.listar(c.get('destino') or '') if x['nome'] == arquivo), None)
+        if not item: return RedirectResponse(_msg('/backup', 'erro', 'Essa cópia não foi encontrada na pasta de destino.'), status_code=303)
+        return pagina(request, 'restaurar.html', {'item': item, 'erro': erro, 'tela': 'backup'}, user=u)
+
+    @app.post('/backup/restaurar', response_class=HTMLResponse)
+    def backup_restaurar_envio(request: Request, arquivo: str = Form(''), senha: str = Form(''), entendi: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/backup', status_code=303)
+        c = backup.cfg_de(motor.cfg); item = next((x for x in backup.listar(c.get('destino') or '') if x['nome'] == arquivo), None)
+        if not item: return RedirectResponse(_msg('/backup', 'erro', 'Essa cópia não foi encontrada na pasta de destino.'), status_code=303)
+        def volta(msg, st=400): return pagina(request, 'restaurar.html', {'item': item, 'erro': msg, 'tela': 'backup'}, status=st, user=u)
+        chave = f"restaurar{u['id']}"; falta = limite.bloqueado(ip(request), chave)
+        if falta: return volta(f'Muitas tentativas. Tente de novo em {max(1, falta // 60)} minuto(s).', 429)
+        reg = core.db_auth_get_user_by_id(u['id'])
+        if not core._auth_verify_password(senha, reg.get('password_salt'), reg.get('password_hash'), reg.get('password_iterations')):
+            limite.falhou(ip(request), chave); log(u, 'RESTAURACAO_SENHA_ERRADA', ''); return volta('A senha não confere.', 401)
+        if entendi != '1': return volta('Marque a caixa confirmando que você entendeu.')
+        limite.acertou(ip(request), chave)
+        try: restauracao.pedir(config.DADOS, Path(c['destino']) / item['nome'], por=u.get('email', ''))
+        except restauracao.RestauracaoErro as e: return volta(str(e))
+        log(u, 'RESTAURACAO_PEDIDA', item['nome'])
+        reinicia = bool(app.state.reiniciar)
+        if reinicia: app.state.reiniciar()
+        return pagina(request, 'restaurando.html', {'item': item, 'reinicia': reinicia, 'tela': 'backup'}, user=u)
 
     @app.post('/backup/salvar')
     def backup_salvar(request: Request, destino: str = Form(''), hora: str = Form('02:00'), manter: int = Form(7), ativo: str = Form(''), csrf: str = Form('')):
@@ -1102,6 +1133,15 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
     return app
 
 
+def _sair_para_reiniciar():
+    """Fecha o Exato daqui a pouco com código de erro: a tarefa do Windows o abre de novo sozinha (e a restauração é aplicada na abertura)."""
+    import os, threading
+    threading.Timer(1.5, lambda: os._exit(3)).start()
+
+
 def app_producao():
-    """Fábrica usada pelo servidor: igual ao site de teste, mas com o agendador da busca automática ligado."""
-    return criar_app(iniciar_agendador=True)
+    """Fábrica usada pelo servidor: igual ao site de teste, mas com o agendador da busca automática ligado.
+    Antes de abrir qualquer arquivo de dados, aplica uma restauração de cópia de segurança que tenha sido pedida pela tela."""
+    try: restauracao.aplicar_se_pedido(config.DADOS)
+    except Exception: pass
+    app = criar_app(iniciar_agendador=True); app.state.reiniciar = _sair_para_reiniciar; return app
