@@ -61,7 +61,7 @@ def _executar(job, filtros):
     except Exception:
         try: core.log_exception('Web: relatório de documentos', sys.exc_info())
         except Exception: pass
-        job.update(estado='erro', erro='Não foi possível gerar o relatório. O detalhe foi guardado no registro de erros.')
+        job.update(estado='erro', erro='Não foi possível gerar o relatório. O detalhe foi guardado para o suporte.')
     _salvar(job)
 
 
@@ -84,7 +84,7 @@ def _executar_nfse(job, filtros):
     except Exception:
         try: core.log_exception('Web: relatório mensal de NFS-e', sys.exc_info())
         except Exception: pass
-        job.update(estado='erro', erro='Não foi possível gerar o relatório. O detalhe foi guardado no registro de erros.')
+        job.update(estado='erro', erro='Não foi possível gerar o relatório. O detalhe foi guardado para o suporte.')
     _salvar(job)
 
 

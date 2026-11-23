@@ -41,7 +41,11 @@ class Motor:
         except Exception: pass
         try: from . import pdf_nfse; pdf_nfse.instalar()          # relatório mensal de NFS-e e PDF do Fechamento no visual novo (só no site)
         except Exception: pass
-        for cod, (t, e, a, g) in CAUSAS_WEB.items(): self.motivos.CAUSAS.setdefault(cod, (t, e, a, g))          # causas próprias do site (explicadas em linguagem simples)
+        for cod, (t, e, a, g) in CAUSAS_WEB.items(): self.motivos.CAUSAS.setdefault(cod, (t, e, a, g))
+        try:          # tira termos de programação das mensagens que vêm dos módulos do Exato instalado (só aqui no site)
+            from . import texto_claro; texto_claro.limpar_causas(self.motivos.CAUSAS)
+            for mod, fn in (('exato_boxe', 'erro_amigavel'), ('exato_repositorio', 'erro_amigavel')): texto_claro.embrulhar(nucleo.modulo(mod), fn)
+        except Exception: pass          # causas próprias do site (explicadas em linguagem simples)
 
     # ------------------------------------------------------------ anotações
     def salvar_cfg(self):
@@ -605,7 +609,7 @@ class Motor:
         except Exception:
             try: core.log_exception('Web: auditoria, busca dirigida', sys.exc_info())
             except Exception: pass
-            resumo['erros'].append('Erro inesperado na busca (guardado no registro de erros).')
+            resumo['erros'].append('Erro inesperado na busca. O detalhe foi guardado para o suporte.')
         finally:
             core.busca_progresso_fim()
         feitos = set(resumo['concluidos'])

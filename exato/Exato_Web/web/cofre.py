@@ -41,7 +41,7 @@ def _dpapi(dados, proteger):
     saida = BLOB()
     fn = ctypes.windll.crypt32.CryptProtectData if proteger else ctypes.windll.crypt32.CryptUnprotectData
     args = (ctypes.byref(entrada), 'ExatoWeb' if proteger else None, None, None, None, 0, ctypes.byref(saida)) if proteger else (ctypes.byref(entrada), None, None, None, None, 0, ctypes.byref(saida))
-    if not fn(*args): raise CofreErro('O Windows não liberou a chave do cofre (a conta que roda o site mudou?).')
+    if not fn(*args): raise CofreErro('O Exato não conseguiu abrir o cofre de certificados. O usuário do Windows que roda o Exato mudou? Entre com o usuário de sempre.')
     try: return ctypes.string_at(saida.pbData, saida.cbData)
     finally: ctypes.windll.kernel32.LocalFree(saida.pbData)
 
@@ -199,7 +199,7 @@ class Cofre:
         try: bruto = self._arq(cid, 'cof').read_bytes()
         except FileNotFoundError: raise CofreErro('Esta empresa não tem certificado A1 guardado no site.')
         try: d = json.loads(self._aes.decrypt(bruto[:12], bruto[12:], cid.encode('ascii')))
-        except Exception: raise CofreErro('Não foi possível abrir o certificado guardado (a chave do cofre mudou?). Envie o certificado de novo.')
+        except Exception: raise CofreErro('Não foi possível abrir o certificado guardado (o cofre foi aberto por outro usuário do Windows?). Envie o certificado de novo.')
         return base64.b64decode(d['pfx']), d['senha']
 
     def material(self, chave):

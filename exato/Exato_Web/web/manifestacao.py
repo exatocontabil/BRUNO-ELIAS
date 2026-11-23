@@ -102,7 +102,7 @@ catch [Net.WebException] {$resp=$_.Exception.Response;if($resp){$reader=New-Obje
 
 def transporte_windows(thumb, url, corpo):
     """Envia o SOAP com o certificado do repositório do Windows. Devolve o texto da resposta."""
-    if sys.platform != 'win32': raise ManifestacaoErro('O envio ao Ambiente Nacional só funciona no servidor Windows.')
+    if sys.platform != 'win32': raise ManifestacaoErro('O envio ao Ambiente Nacional só funciona no computador Windows onde o Exato Web está instalado.')
     ps_b64 = base64.b64encode(_PS.encode('utf-8')).decode('ascii'); body_b64 = base64.b64encode(corpo.encode('utf-8')).decode('ascii')
     cmd = ("$s=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('" + ps_b64 + "'));$sb=[ScriptBlock]::Create($s);& $sb " + f"-Thumbprint '{thumb}' -Url '{url}' -SoapAction '{ACAO}' -BodyBase64 '{body_b64}'")
     try:

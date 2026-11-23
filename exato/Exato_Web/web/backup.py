@@ -38,7 +38,7 @@ def validar_destino(destino, dados=None):
     if not texto: raise BackupErro('Informe a pasta onde as cópias serão guardadas (por exemplo E:\\CopiaExato).')
     p = Path(texto)
     if not p.is_absolute(): raise BackupErro('Use o caminho completo da pasta (por exemplo E:\\CopiaExato ou \\\\SERVIDOR\\Copias).')
-    if _dentro(p, dados): raise BackupErro('A pasta das cópias não pode ficar dentro da pasta de dados do site. Escolha outro disco ou outra pasta.')
+    if _dentro(p, dados): raise BackupErro('A pasta das cópias não pode ficar dentro da pasta onde o Exato guarda os dados. Escolha outro disco ou outra pasta.')
     try: p.mkdir(parents=True, exist_ok=True)
     except OSError: raise BackupErro('Não consegui abrir essa pasta. Confira se o disco ou a pasta de rede está ligado e se você tem permissão de gravar.')
     try:
@@ -72,7 +72,7 @@ def _copia_sqlite(origem, destino):
     src = sqlite3.connect(f'file:{origem}?mode=ro', uri=True, timeout=60); dst = sqlite3.connect(str(destino))
     try:
         src.backup(dst); r = dst.execute('PRAGMA quick_check').fetchone()
-        if not r or r[0] != 'ok': raise BackupErro(f'O banco {Path(origem).name} está com problema de integridade ({(r or ["?"])[0]}). A cópia foi cancelada para não guardar um banco estragado.')
+        if not r or r[0] != 'ok': raise BackupErro(f'Um arquivo de dados do Exato ({Path(origem).name}) está com problema ({(r or ["?"])[0]}). A cópia foi cancelada para não guardar um arquivo de dados estragado.')
     finally:
         dst.close(); src.close()
 
@@ -124,8 +124,8 @@ def executar(cfg, salvar, dados=None, agora=None, log_erro=None):
                 if not p.exists(): continue
                 if _eh_sqlite(p): copia = tmp / f'{i}.db'; _copia_sqlite(p, copia); z.write(copia, rel); copia.unlink()
                 else: z.write(p, rel)
-            z.writestr('LEIA-ME.txt', 'Cópia de segurança do Exato Web feita em ' + agora.strftime('%d/%m/%Y %H:%M') + '.\r\nPara restaurar use RESTAURAR_BACKUP.bat (na pasta do site) ou veja docs\\GUIA_NOVA_MAQUINA.md.\r\n'
-                       'O cofre dos certificados só abre no mesmo computador e usuário do Windows: guarde também os arquivos .pfx originais.\r\n')
+            z.writestr('LEIA-ME.txt', 'Cópia de segurança do Exato Web feita em ' + agora.strftime('%d/%m/%Y %H:%M') + '.\r\nPara restaurar use o programa \"Restaurar cópia de segurança\" (na pasta do Exato Web).\r\n'
+                       'Os certificados guardados só abrem neste computador e com este usuário do Windows: guarde também os arquivos originais dos certificados.\r\n')
         andamento['etapa'] = 'Conferindo a cópia'
         with zipfile.ZipFile(parcial) as z:
             ruim = z.testzip()

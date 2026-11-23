@@ -163,7 +163,7 @@ def _executar(job, f):
         caminho.unlink(missing_ok=True)
         try: core.log_exception('Web: exportar XMLs', sys.exc_info())
         except Exception: pass
-        job.update(estado='erro', erro='Não foi possível gerar o ZIP. O detalhe foi guardado no registro de erros.')
+        job.update(estado='erro', erro='Não foi possível gerar o ZIP. O detalhe foi guardado para o suporte.')
     finally:
         if tmp_dir is not None:
             try: tmp_dir.cleanup()

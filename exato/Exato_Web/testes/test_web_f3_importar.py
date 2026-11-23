@@ -59,9 +59,9 @@ r = importar.importar(zpath, core, progresso=lambda *_: None); assert r['documen
 # ---- erros em linguagem simples
 for ruim in (Path(tempfile.mkdtemp()), Path(__file__)):
     try: importar.importar(ruim, core); assert False
-    except ValueError as e: assert 'Não encontrei o banco' in str(e)
+    except ValueError as e: assert 'Não encontrei os dados do Exato' in str(e)
 z2 = Path(tempfile.mkdtemp()) / 'vazio.zip'
 with zipfile.ZipFile(z2, 'w') as z: z.writestr('leia-me.txt', 'x')
 try: importar.importar(z2, core); assert False
-except ValueError as e: assert 'não tem o banco' in str(e)
+except ValueError as e: assert 'não tem os dados do Exato' in str(e)
 print('Exato Web fase 3 (importação): OK')

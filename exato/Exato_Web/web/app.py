@@ -712,7 +712,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         except Exception as exc:
             try: core.log_exception('Web: auditoria (buscar o que falta)', __import__('sys').exc_info())
             except Exception: pass
-            aud.atualizar(aid, busca={'em': time.strftime('%Y-%m-%dT%H:%M:%S'), 'mensagem': 'A busca não foi concluída. O detalhe foi guardado no registro de erros.', 'nova': ''})
+            aud.atualizar(aid, busca={'em': time.strftime('%Y-%m-%dT%H:%M:%S'), 'mensagem': 'A busca não foi concluída. O detalhe foi guardado para o suporte.', 'nova': ''})
         finally:
             motor.estado.update(rodando=False, empresa=''); motor._trava.release()
 
@@ -739,7 +739,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
             res = repo.resumo(db); lista_mes = repo.por_empresa_mes(db)[:300]
         except (sqlite3.Error, OSError) as exc:          # disco cheio ou banco ocupado: a tela abre mesmo assim e explica
             res = {'total': 0, 'copiados': 0, 'fila': 0, 'diferentes': 0, 'erros': 0, 'ultima_copia': '', 'motivos': [], 'proxima_tentativa': ''}; lista_mes = []
-            falha_banco = 'O banco não respondeu. Se o disco do servidor estiver cheio, libere espaço no C: e abra de novo.'
+            falha_banco = 'Não consegui ler os dados do Exato agora. Se o disco do computador estiver cheio, libere espaço no C: e abra de novo.'
             try: core.log_exception('Web: tela do Repositório', __import__('sys').exc_info())
             except Exception: pass
         for cnpj, nome, mes, docs, copiados in lista_mes:
@@ -760,7 +760,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if r: return r
         if csrf_ok(request, csrf):
             motor.repo_cfg()['auto'] = (ligar == '1'); motor.salvar_cfg(); log(u, 'REPOSITORIO_AUTO', 'ligada' if ligar == '1' else 'desligada')
-        return RedirectResponse(_msg('/repositorio', 'ok', 'Cópia automática ligada.' if ligar == '1' else 'Cópia automática desligada. Os XMLs ficam só no banco; use "Copiar agora" quando quiser.').replace('/repositorio?ok=', '/repositorio?ok='), status_code=303)
+        return RedirectResponse(_msg('/repositorio', 'ok', 'Cópia automática ligada.' if ligar == '1' else 'Cópia automática desligada. Os XMLs ficam guardados só no Exato (sem a cópia em pastas); use "Copiar agora" quando quiser.').replace('/repositorio?ok=', '/repositorio?ok='), status_code=303)
 
     @app.get('/repositorio/zip')
     def repositorio_zip(request: Request, empresa: str = '', mes: str = '', tipo: str = ''):
@@ -881,7 +881,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         aviso = boxe.conferir_servidor(servidor)
         if aviso: return RedirectResponse(_msg('/boxe', 'erro', aviso), status_code=303)
         try: pt = int(porta)
-        except ValueError: return RedirectResponse(_msg('/boxe', 'erro', 'A porta deve ser um número (por exemplo 587).'), status_code=303)
+        except ValueError: return RedirectResponse(_msg('/boxe', 'erro', 'O número da porta deve ser só números (por exemplo 587). Se não souber, escolha o provedor do e-mail na lista.'), status_code=303)
         c = motor.boxe_cfg(); c.update({'destino': destino.strip() or boxe.DESTINO_PADRAO, 'servidor': servidor.strip(), 'porta': pt, 'seguranca': seguranca_ if seguranca_ in ('STARTTLS', 'SSL', 'NENHUMA') else 'STARTTLS',
                                         'usuario': usuario_.strip(), 'remetente': remetente.strip(), 'tomadas': bool(tomadas)})
         if senha: c['senha_protegida'] = cofre.proteger_texto(senha)          # a senha nunca é mostrada de novo

@@ -30,10 +30,10 @@ def preparar_origem(origem):
         tmp = Path(tempfile.mkdtemp(prefix='exato_importar_'))
         with zipfile.ZipFile(origem) as z: z.extractall(tmp)
         pasta = _achar(tmp)
-        if not pasta: shutil.rmtree(tmp, ignore_errors=True); raise ValueError('O backup não tem o banco de dados do Exato (central_fiscal.db).')
+        if not pasta: shutil.rmtree(tmp, ignore_errors=True); raise ValueError('Essa cópia não tem os dados do Exato.')
         return pasta, tmp
     pasta = _achar(origem) if origem.is_dir() else None
-    if not pasta: raise ValueError('Não encontrei o banco de dados do Exato (central_fiscal.db) nessa pasta.')
+    if not pasta: raise ValueError('Não encontrei os dados do Exato nessa pasta.')
     return pasta, None
 
 

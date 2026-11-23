@@ -62,7 +62,7 @@ c.post('/repositorio/copiar', data={'csrf': tk}); time.sleep(.5); assert 'Copian
 import sqlite3 as _sq, web.app as _wa
 repo_mod = __import__('web.nucleo', fromlist=['x']).modulo('exato_repositorio'); orig = repo_mod.resumo
 def cheio(db): raise _sq.OperationalError('database or disk is full')
-repo_mod.resumo = cheio; r = c.get('/repositorio'); assert r.status_code == 200 and 'disco do servidor estiver cheio' in r.text and 'Internal Server Error' not in r.text; repo_mod.resumo = orig
+repo_mod.resumo = cheio; r = c.get('/repositorio'); assert r.status_code == 200 and 'disco do computador estiver cheio' in r.text and 'Internal Server Error' not in r.text; repo_mod.resumo = orig
 c2 = TestClient(app, base_url='http://testserver', follow_redirects=False, raise_server_exceptions=False); c2.get('/login'); tk2 = c2.cookies.get('exato_csrf'); c2.post('/login', data={'email': 'maria@exemplo.com.br', 'senha': 'SenhaForte#2026', 'csrf': tk2})
 def quebra(*a, **k): raise RuntimeError('falha de teste')
 motor_cfg = motor.repo_cfg; motor.repo_cfg = quebra; r = c2.get('/repositorio'); motor.repo_cfg = motor_cfg
