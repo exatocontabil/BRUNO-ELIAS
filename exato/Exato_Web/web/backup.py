@@ -195,7 +195,7 @@ def _discos():
     except Exception: return ['C:\\']
 
 
-def listar_pastas(caminho=''):
+def listar_pastas(caminho='', zips=False):
     """Para o botão "Procurar": as PASTAS (nunca arquivos) de um caminho do servidor. Sem caminho: os discos. Devolve {caminho, pai, pastas:[{nome, caminho}]}."""
     texto = str(caminho or '').strip().strip('"')
     if not texto: return {'caminho': '', 'pai': None, 'pastas': [{'nome': d, 'caminho': d} for d in _discos()]}
@@ -211,4 +211,12 @@ def listar_pastas(caminho=''):
     except OSError: raise BackupErro('Não consegui ler essa pasta (sem permissão?).')
     pastas.sort(key=lambda x: x['nome'].lower())
     pai = str(p.parent) if p.parent != p else ''
-    return {'caminho': str(p), 'pai': pai, 'pastas': pastas[:500], 'cortado': len(pastas) > 500}
+    saida = {'caminho': str(p), 'pai': pai, 'pastas': pastas[:500], 'cortado': len(pastas) > 500}
+    if zips:          # tela Importar: também mostra os arquivos .zip (cópias do programa instalado)
+        arq = []
+        try:
+            for e in os.scandir(p):
+                if e.is_file() and e.name.lower().endswith('.zip'): arq.append({'nome': e.name, 'caminho': str(Path(e.path)), 'mb': round(e.stat().st_size / 1048576)})
+        except OSError: pass
+        saida['arquivos'] = sorted(arq, key=lambda x: x['nome'].lower())[:200]
+    return saida

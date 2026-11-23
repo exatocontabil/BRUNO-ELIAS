@@ -33,6 +33,7 @@ class Motor:
         self.nfse_mod = nucleo.modulo('exato_nfse'); self.motivos = nucleo.modulo('exato_busca_motivos'); self.cobertura = nucleo.modulo('exato_cobertura'); self.proc = nucleo.modulo('exato_nfse_procuracao')
         self.nfse_transport = nfse_transport; self.homologacao = bool(homologacao)
         self.cfg = core.load_config(); self._cancelar = threading.Event(); self._trava = threading.Lock(); self._trava_repo = threading.Lock(); self.estado_repo = {'copiando': False, 'ultimo': None, 'resultado': None}
+        self.estado_importar = {'rodando': False, 'etapa': '', 'inicio': None, 'fim': None, 'origem': '', 'linhas': [], 'erro': ''}
         self._trava_fech = threading.Lock(); self.estado_fech = {'fechando': False, 'ultimo': None, 'resultado': None}; self._trava_boxe = threading.Lock(); self._trava_resumo = threading.Lock(); self.estado_boxe = {'enviando': False, 'ultimo': None, 'resultado': None}; self.boxe_conectar = None; self.manifestador = None
         self.estado = {'rodando': False, 'empresa': '', 'indice': 0, 'total': 0, 'inicio': None, 'ultimo': None, 'resumo': None}
         self.andamento = {'ativo': False, 'cnpj': '', 'empresa': '', 'inicio': 0.0, 'fim': 0.0, 'modo': '', 'de': '', 'ate': '', 'tipos': {}}; self._atrava = threading.Lock()
@@ -407,6 +408,31 @@ class Motor:
     def repo_cfg(self):
         """Cópia automática dos XMLs para a pasta de arquivos: DESLIGADA por padrão (a pessoa liga quando quiser). 'Copiar agora' continua funcionando."""
         c = self.cfg.setdefault('repositorio_web', {}); c.setdefault('auto', False); return c
+
+    def importar_central(self, origem, antes_backup=False, por=''):
+        """Traz para o site as empresas, notas e pontos de busca do Exato Central Fiscal (pasta de dados ou cópia .zip). Roda em segundo plano, sem rodada de busca ao mesmo tempo.
+        Devolve False se não pôde começar (já há busca ou importação). O resultado fica em `estado_importar`."""
+        from . import importar, backup
+        st = self.estado_importar
+        if st['rodando'] or not self.reservar(): return False
+        st.update(rodando=True, etapa='Preparando', inicio=datetime.now().isoformat(timespec='seconds'), fim=None, origem=str(origem), linhas=[], erro='')
+        def trabalho():
+            try:
+                if antes_backup:
+                    st['etapa'] = 'Fazendo a cópia de segurança antes de importar'
+                    r = self.fazer_backup()
+                    if not r.get('ok'): raise ValueError('A cópia de segurança antes de importar não foi feita (' + str(r.get('msg') or 'motivo desconhecido') + '). Nada foi importado.')
+                resumo = importar.importar(origem, self.core, progresso=lambda t: st.update(etapa='Importando ' + str(t)))
+                st['linhas'] = importar.texto_resumo(resumo)
+            except ValueError as exc: st['erro'] = str(exc)
+            except Exception:
+                try: self.core.log_exception('Web: importar do Central Fiscal', sys.exc_info())
+                except Exception: pass
+                st['erro'] = 'A importação não foi concluída por um problema inesperado. O detalhe foi guardado para o suporte (menu Diagnóstico).'
+            finally:
+                st.update(rodando=False, etapa='', fim=datetime.now().isoformat(timespec='seconds'))
+                self.estado.update(rodando=False, empresa=''); self._trava.release()
+        threading.Thread(target=trabalho, daemon=True, name='importar-central').start(); return True
 
     def fazer_backup(self, por=''):
         """Cópia de segurança (ver `backup.py`). Roda em segundo plano; o resultado fica na configuração e aparece na tela Cópia de segurança."""

@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, backup, contas, diagnostico, restauracao, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import auditoria as aud, backup, contas, diagnostico, importar, restauracao, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -601,11 +601,30 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
             lista = backup.listar(c['destino'])
         return pagina(request, 'backup.html', {'restaurou': restauracao.ultimo_resultado(config.DADOS), 'c': c, 'lista': lista, 'aviso_disco': aviso_disco, 'rodando': backup.andamento['rodando'], 'etapa': backup.andamento['etapa'], 'ok': ok, 'erro': erro, 'dados': str(config.DADOS), 'tela': 'backup'}, user=u)
 
+    # ------------------------------------------------------------ importar do Exato Central Fiscal (só administrador)
+    @app.get('/importar', response_class=HTMLResponse)
+    def importar_tela(request: Request, ok: str = '', erro: str = ''):
+        u, r = _so_admin(request)
+        if r: return r
+        st = dict(motor.estado_importar); c = backup.cfg_de(motor.cfg)
+        return pagina(request, 'importar.html', {'st': st, 'candidatos': importar.candidatos() if not st['rodando'] else [], 'backup_ok': bool(c.get('destino')), 'ok': ok, 'erro': erro, 'tela': 'importar'}, user=u)
+
+    @app.post('/importar/iniciar')
+    def importar_iniciar(request: Request, origem: str = Form(''), antes: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/importar', status_code=303)
+        try: info = importar.analisar(origem)
+        except ValueError as e: return RedirectResponse(_msg('/importar', 'erro', str(e)), status_code=303)
+        if not motor.importar_central(origem.strip().strip('"'), antes_backup=(antes == '1'), por=u.get('email', '')): return RedirectResponse(_msg('/importar', 'erro', 'Já existe uma busca ou uma importação em andamento. Espere terminar.'), status_code=303)
+        log(u, 'IMPORTACAO_CENTRAL', f"{info['tipo']} ({info['bytes'] // 1048576} MB)")
+        return RedirectResponse(_msg('/importar', 'ok', 'Importação iniciada. Esta página se atualiza sozinha.'), status_code=303)
+
     @app.get('/backup/pastas')
-    def backup_pastas(request: Request, caminho: str = ''):
+    def backup_pastas(request: Request, caminho: str = '', zips: str = ''):
         u, r = _so_admin(request)
         if r: return JSONResponse({'erro': 'Entre no site como administrador.'}, status_code=403)
-        try: return JSONResponse(backup.listar_pastas(caminho), headers={'Cache-Control': 'no-store'})
+        try: return JSONResponse(backup.listar_pastas(caminho, zips=(zips == '1')), headers={'Cache-Control': 'no-store'})
         except backup.BackupErro as e: return JSONResponse({'erro': str(e)}, status_code=400, headers={'Cache-Control': 'no-store'})
 
     @app.get('/backup/restaurar', response_class=HTMLResponse)

@@ -6,6 +6,7 @@
 Pare o site antes de importar. Pode rodar mais de uma vez (de computadores diferentes): nada é duplicado e nenhum ponto de busca volta atrás.
 Usuários e senhas NÃO são importados (os do site são criados com `python -m web.usuarios`)."""
 import argparse, json, os, shutil, sqlite3, sys, tempfile, zipfile
+from datetime import datetime
 from pathlib import Path
 
 LOTE = 500
@@ -118,6 +119,57 @@ def importar(origem, core, progresso=print):
         return resumo
     finally:
         if tmp: shutil.rmtree(tmp, ignore_errors=True)
+
+
+def analisar(origem):
+    """Confere a origem ANTES de importar (sem copiar nada). Devolve {'tipo': 'pasta'|'zip', 'bytes': tamanho dos dados}. ValueError em português se não serve."""
+    origem = Path(str(origem or '').strip().strip('"'))
+    if not str(origem) or not origem.is_absolute(): raise ValueError('Informe o caminho completo da pasta de dados (ou do arquivo de cópia) do Exato Central Fiscal.')
+    if origem.is_file() and origem.suffix.lower() == '.zip':
+        try:
+            with zipfile.ZipFile(origem) as z:
+                itens = [i for i in z.infolist() if not i.is_dir()]
+                if not any(Path(i.filename.replace('\\', '/')).name == 'central_fiscal.db' for i in itens): raise ValueError('Essa cópia não tem os dados do Exato.')
+                total = sum(i.file_size for i in itens)
+        except zipfile.BadZipFile: raise ValueError('O arquivo da cópia está danificado.')
+        livre = shutil.disk_usage(tempfile.gettempdir()).free
+        if livre < total * 1.1 + 100 * 1024 * 1024: raise ValueError(f'Não há espaço no disco para abrir essa cópia (livre {livre / 1024 ** 3:.1f} GB; precisa de cerca de {(total * 1.1 + 100 * 1024 * 1024) / 1024 ** 3:.1f} GB). Libere espaço ou importe direto da pasta de dados.')
+        return {'tipo': 'zip', 'bytes': total}
+    pasta = _achar(origem) if origem.is_dir() else None
+    if not pasta: raise ValueError('Não encontrei os dados do Exato nessa pasta. Procure a pasta chamada "Dados" do Exato Central Fiscal.')
+    return {'tipo': 'pasta', 'bytes': (pasta / 'central_fiscal.db').stat().st_size}
+
+
+def candidatos(bases=None):
+    """Pastas de dados do Exato Central Fiscal que existem neste computador (de qualquer usuário do Windows que se consiga ler)."""
+    achados = []; vistos = set()
+    if bases is None:
+        bases = []
+        lad = os.environ.get('LOCALAPPDATA')
+        if lad: bases.append(Path(lad) / 'Exato' / 'Central Fiscal' / 'Dados')
+        usuarios = Path(os.environ.get('SystemDrive', 'C:') + '\\Users')
+        try:
+            for u in usuarios.iterdir(): bases.append(u / 'AppData' / 'Local' / 'Exato' / 'Central Fiscal' / 'Dados')
+        except OSError: pass
+    for b in bases:
+        try:
+            b = Path(b); db = b / 'central_fiscal.db'
+            if db.is_file() and str(b.resolve()) not in vistos:
+                vistos.add(str(b.resolve())); st = db.stat()
+                partes = [x.lower() for x in b.parts]; usuario = b.parts[partes.index('users') + 1] if 'users' in partes and partes.index('users') + 1 < len(b.parts) else ''
+                achados.append({'caminho': str(b), 'usuario': usuario, 'mb': round(st.st_size / 1048576), 'quando': datetime.fromtimestamp(st.st_mtime).isoformat(timespec='minutes')})
+        except OSError: continue
+    return achados
+
+
+def texto_resumo(r):
+    """O resultado da importação em frases simples."""
+    linhas = [f"Empresas: {r['companies']['novos']} nova(s) de {r['companies']['total']}.", f"Notas: {r['documents']['novos']} nova(s) de {r['documents']['total']} (as demais já estavam no Exato)."]
+    nomes = {'document_exports': 'Marcas de exportação', 'boxe_envios': 'Envios do Box-e', 'sync_runs': 'Histórico de buscas', 'busca_ocorrencias': 'Resultados das buscas', 'audit_runs': 'Auditorias', 'empresas_removidas': 'Empresas removidas'}
+    for t, nome in nomes.items():
+        if t in r and r[t].get('total'): linhas.append(f"{nome}: {r[t]['novos']} novo(s) de {r[t]['total']}." + (' (não foi possível trazer)' if r[t].get('erro') else ''))
+    linhas.append(f"Pontos de busca e configurações: {r['configuracao']} item(ns) atualizado(s). Nenhuma busca volta atrás.")
+    return linhas
 
 
 def main(argv=None):
