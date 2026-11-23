@@ -33,7 +33,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 CloseApplications=no
 RestartApplications=no
 UsePreviousAppDir=yes
-VersionInfoVersion={#Versao}.0.0
+VersionInfoVersion=1.0.0.0
 VersionInfoCompany=Exato Soluções Contábeis
 VersionInfoDescription=Instalador do Exato Web
 
