@@ -136,6 +136,7 @@ EXEMPLOS = {
  'entrada_saida': ['qual a diferenca entre entrada e saida?', 'o que sao notas tomadas?'],
  'tema': ['como ativo o modo escuro?'],
  'acesso_fora': ['posso usar em casa pelo celular?'],
+ 'primeiros_passos': ['por onde eu começo a configurar o exato?'],
  'atualizar_site': ['como atualizo o exato web?'],
  'copia_seguranca': ['como faco backup dos dados?'],
  'tela_estranha': ['a tela esta com o layout quebrado'],
