@@ -39,11 +39,17 @@ $ok = $false
 for ($i = 0; $i -lt 120 -and -not $ok; $i++) { Start-Sleep -Seconds 1; try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8443/saude' -UseBasicParsing -TimeoutSec 3; if ($r.Content -eq 'ok') { $ok = $true } } catch { } }
 if (-not $ok) { Falha 'o Exato nao voltou depois de atualizar por cima' }
 Write-Host 'Atualizando como o site faz (auxiliar atualizar.pyw)...'
+# Como no AUXILIAR2: um processo do Exato que NAO esta na lista do desligamento normal e segura os arquivos do Python.
+$solto = Start-Process -FilePath (Join-Path $alvo 'python\pythonw.exe') -ArgumentList '-c "import time; time.sleep(900)"' -PassThru
+Start-Sleep -Seconds 2
+if ($solto.HasExited) { Falha 'nao consegui deixar o processo solto ligado para o teste' }
 $ant = "$dados\logs\atualizacao.log"; if (Test-Path $ant) { Remove-Item $ant -Force }
 Start-Process -FilePath (Join-Path $alvo 'python\pythonw.exe') -ArgumentList "`"$(Join-Path $alvo 'app\atualizar.pyw')`" `"$Instalador`" `"$alvo`" `"$dados`"" | Out-Null
 $fim = $false
 for ($i = 0; $i -lt 180 -and -not $fim; $i++) { Start-Sleep -Seconds 1; if (Test-Path $ant) { try { if ((Get-Content $ant -Raw) -match 'Log closed') { $fim = $true } } catch { } } }
 if (-not $fim) { Falha 'a atualizacao pelo auxiliar nao terminou' }
+if (-not ((Get-Content $ant -Raw) -match 'Installation process succeeded')) { Falha 'a atualizacao pelo auxiliar nao foi concluida (ver o registro acima)' }
+if (-not $solto.HasExited) { try { $solto.Kill() } catch { }; Falha 'o instalador nao desligou o processo solto do Exato' }
 $ok = $false
 for ($i = 0; $i -lt 120 -and -not $ok; $i++) { Start-Sleep -Seconds 1; try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8443/saude' -UseBasicParsing -TimeoutSec 3; if ($r.Content -eq 'ok') { $ok = $true } } catch { } }
 if (-not $ok) { Falha 'o Exato nao voltou depois da atualizacao pelo auxiliar' }

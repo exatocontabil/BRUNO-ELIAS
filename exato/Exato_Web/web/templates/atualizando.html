@@ -1,4 +1,4 @@
 {% extends "base.html" %}{% from "_ui.html" import ic %}{% block titulo %}Atualizando — Exato{% endblock %}
 {% block corpo %}<h1>Atualizando o Exato...</h1>
 <div class="card" id="rs-card"><p><b>O Exato está sendo atualizado{% if nova %} para a versão {{ nova }}{% endif %}.</b></p><p class="mu" id="rs-msg">Aguarde. Esta página abre o Exato de novo sozinha, em cerca de 1 ou 2 minutos.</p><div class="barra" style="height:6px;border-radius:99px;background:var(--surface2);overflow:hidden"><i style="display:block;width:40%;height:100%;background:var(--brand);animation:desliza 1.3s ease-in-out infinite"></i></div></div>
-<script src="/static/restaurando.js?v={{ asset_v }}" defer></script>{% endblock %}
+<script src="/static/atualizando.js?v={{ asset_v }}" defer></script>{% endblock %}

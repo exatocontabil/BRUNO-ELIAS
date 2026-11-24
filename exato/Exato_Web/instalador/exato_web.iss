@@ -189,7 +189,7 @@ begin
       Exit;
     end;
     raiz := Copy(pasta, 1, 3);
-    if GetSpaceOnDisk(raiz, True, livre, total) then
+    if (not DirExists(pasta)) and GetSpaceOnDisk(raiz, True, livre, total) then          { aviso de pouco espaco so na instalacao nova; atualizar nao precisa }
       if livre < 1500 then
         if MsgBox('O disco ' + raiz + ' tem pouco espaço livre (' + IntToStr(livre) + ' MB). O Exato pode ficar sem espaço para guardar as notas. Quer escolher outra pasta?', mbConfirmation, MB_YESNO) = IDYES then
         begin
@@ -206,13 +206,32 @@ end;
 
 procedure PararSeInstalado();
 var
-  pythonw, parar: String;
-  codigo: Integer;
+  pythonw, parar, pasta, dll: String;
+  codigo, i: Integer;
 begin
   pythonw := ExpandConstant('{app}\python\pythonw.exe');
   parar := ExpandConstant('{app}\app\parar.pyw');
   if FileExists(pythonw) and FileExists(parar) then
     Exec(pythonw, '"' + parar + '" /silencioso', '', SW_HIDE, ewWaitUntilTerminated, codigo);
+  { Garantia: desliga QUALQUER processo que rode de dentro da pasta do Exato (o que ficou de fora da lista do desligamento normal). }
+  pasta := ExpandConstant('{app}') + '\';
+  if DirExists(pasta + 'python') then
+  begin
+    Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
+      '-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -Command "Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith(''' + pasta + ''', [StringComparison]::OrdinalIgnoreCase) } | Stop-Process -Force -ErrorAction SilentlyContinue"',
+      '', SW_HIDE, ewWaitUntilTerminated, codigo);
+    { Espera (ate 20 s) o Windows soltar os arquivos do Python. }
+    dll := pasta + 'python\python3.dll';
+    for i := 1 to 20 do
+    begin
+      if (not FileExists(dll)) or RenameFile(dll, dll + '.t') then
+      begin
+        if FileExists(dll + '.t') then RenameFile(dll + '.t', dll);
+        Break;
+      end;
+      Sleep(1000);
+    end;
+  end;
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;

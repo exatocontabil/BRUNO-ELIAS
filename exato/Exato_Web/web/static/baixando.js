@@ -21,8 +21,9 @@
     fetch('/saude',{cache:'no-store'}).then(function(r){return r.ok;}).catch(function(){return false;}).then(function(ok){
       if(!ok)caiu=true;
       if(ok&&caiu){location.href='/login';return;}
+      if(ok&&!caiu&&Date.now()-t0>90000){location.href='/atualizacao';return;}
       if(Date.now()-t0>300000){msg.textContent='Está demorando mais que o normal. Se o Exato não voltar sozinho, abra-o pelo atalho do menu Iniciar.';}
-      setTimeout(ciclo,3000);
+      setTimeout(ciclo,2000);
     });
   }
   andamento();

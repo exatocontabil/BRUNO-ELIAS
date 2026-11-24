@@ -49,7 +49,7 @@ r = enviar(adm, tk, entendi=''); assert r.status_code == 400 and 'entendi' in r.
 r = enviar(adm, tk, nome='Exato_Web_Instalador_20261124.11.exe'); assert r.status_code == 400 and 'mesmo assim' in r.text and not rodou          # mesma versão: pede confirmação
 r = enviar(adm, tk, nome='qualquer.exe'); assert r.status_code == 400 and 'não parece' in r.text and not rodou
 r = enviar(adm, tk, marca=b'nada'); assert r.status_code == 400 and not rodou
-r = enviar(adm, tk); assert r.status_code == 200 and 'Atualizando o Exato' in r.text and '20261124.12' in r.text and 'restaurando.js' in r.text and len(rodou) == 1, r.text[:300]
+r = enviar(adm, tk); assert r.status_code == 200 and 'Atualizando o Exato' in r.text and '20261124.12' in r.text and 'atualizando.js' in r.text and len(rodou) == 1, r.text[:300]
 assert rodou[0][1].endswith('atualizar.pyw') and rodou[0][2].endswith('Exato_Web_Instalador_20261124.12.exe') and rodou[0][3] == str(raiz.parent) and rodou[0][5] == ''
 p = at.ultimo_pedido(); assert p['de'] == '20261124.11' and p['para'] == '20261124.12' and p['por'] == 'admin@exemplo.com.br'
 rodou.clear(); r = enviar(adm, tk, nome='Exato_Web_Instalador_20261124.11.exe', repetida='1'); assert r.status_code == 200 and len(rodou) == 1          # mesma versão, com confirmação
