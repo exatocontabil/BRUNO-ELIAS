@@ -60,6 +60,13 @@ def executar(comando, cwd, esperar=time.sleep, agora=time.time, max_rapidas=5, a
         esperar(30 if rapidas >= max_rapidas else 3)
 
 
+def ligar_endereco():
+    """Se a pessoa já usa o endereço do escritório (tarefa do Caddy), liga ele também. Sem a tarefa, não faz nada."""
+    if sys.platform != 'win32': return
+    try: subprocess.run(['schtasks', '/Run', '/TN', 'Exato Web Endereco'], capture_output=True, creationflags=SEM_JANELA, timeout=20)
+    except Exception: pass
+
+
 def principal():
     dados = pasta_dados(); dados.mkdir(parents=True, exist_ok=True); pidf = dados / 'supervisor.pid'
     try:
@@ -67,6 +74,7 @@ def principal():
         if antigo != os.getpid() and processo_vivo(antigo): return 0          # já existe um supervisor
     except (OSError, ValueError): pass
     pidf.write_text(str(os.getpid()), encoding='ascii')
+    ligar_endereco()
     try: return executar(comando_site(), RAIZ)
     finally:
         try:

@@ -2,7 +2,7 @@
 import sys, time, webbrowser
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from supervisor import iniciar_se_preciso, site_responde, pasta_dados, RAIZ, PORTA
+from supervisor import iniciar_se_preciso, ligar_endereco, site_responde, pasta_dados, RAIZ, PORTA
 
 
 def _nome_do_caddyfile(arq):
@@ -16,11 +16,16 @@ def _nome_do_caddyfile(arq):
     return ''
 
 
-def _responde(nome):
+def _responde(nome, espera=0):
+    """Responde na porta do cadeado? Com `espera`, tenta por esse tempo (o endereço pode estar acabando de ligar)."""
     import socket
-    try:
-        with socket.create_connection((nome, 443), timeout=2): return True
-    except OSError: return False
+    fim = time.time() + espera
+    while True:
+        try:
+            with socket.create_connection((nome, 443), timeout=2): return True
+        except OSError: pass
+        if time.time() >= fim: return False
+        time.sleep(1)
 
 
 def endereco():
@@ -38,7 +43,7 @@ def endereco():
     # Quem já usava o endereço do escritório na instalação antiga: aproveita o mesmo nome, sem pedir nada.
     for antiga in (Path('C:/ExatoWeb'), Path.home() / 'ExatoWeb'):
         nome = _nome_do_caddyfile(antiga / 'caddy' / 'Caddyfile')
-        if nome and _responde(nome):
+        if nome and (_responde(nome) or (ligar_endereco() or True) and _responde(nome, 25)):
             try: (pasta_dados() / 'endereco.txt').write_text(f'https://{nome}\n', encoding='utf-8')
             except Exception: pass
             return f'https://{nome}'
