@@ -131,5 +131,12 @@ a = adm.get('/atualizacao/andamento').json(); assert a['fase'] == 'reiniciando' 
 # sem versão nova: recusa; internet fora: mensagem clara
 cli.js['versao'] = '20261124.11'; cli.js['arquivo'] = 'Exato_Web_Instalador_20261124.11.exe'; r = baixar_(); assert r.status_code == 400 and 'já está na versão mais nova' in r.text
 cli.erro = 1; r = baixar_(); assert r.status_code == 400 and 'internet' in r.text
-import web.agendador as ag
+# só administrador, em TODAS as rotas: quem não é administrador é mandado para a tela inicial e nada acontece
+rodou.clear(); antes = dict(at.estado)
+for metodo, rota, dados in (('get', '/atualizacao', None), ('post', '/atualizacao/verificar', {'csrf': tkm}), ('post', '/atualizacao/baixar', {'senha': 'SenhaForte#2026', 'entendi': '1', 'csrf': tkm}), ('post', '/atualizacao/aplicar', {'senha': 'SenhaForte#2026', 'entendi': '1', 'csrf': tkm})):
+    r = getattr(mar, metodo)(rota, **({'data': dados} if dados else {})); assert r.status_code == 303 and r.headers['location'] == '/situacao', (rota, r.status_code)
+anon = TestClient(app, base_url='http://testserver', follow_redirects=False)
+for metodo, rota in (('get', '/atualizacao'), ('get', '/atualizacao/andamento'), ('post', '/atualizacao/baixar')):
+    assert getattr(anon, metodo)(rota).status_code in (303, 401, 403, 422), rota
+assert not rodou and at.estado == antes
 print('Exato Web (atualizar pela tela e automática): OK')
