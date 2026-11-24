@@ -76,6 +76,58 @@ Type: filesandordirs; Name: "{app}\python"
 [Code]
 var
   PaginaDados: TInputDirWizardPage;
+  PaginaEndereco: TInputQueryWizardPage;
+
+function ParametroEndereco(): String;
+var
+  i: Integer;
+  p: String;
+begin
+  Result := '';
+  for i := 1 to ParamCount do
+  begin
+    p := ParamStr(i);
+    if Pos('/ENDERECO=', Uppercase(p)) = 1 then
+      Result := RemoveQuotes(Copy(p, 11, MaxInt));
+  end;
+end;
+
+{ Procura o nome do endereço com cadeado já usado neste computador (instalação antiga). }
+function NomeNoArquivo(arq: String): String;
+var
+  linhas: TArrayOfString;
+  i: Integer;
+  t: String;
+begin
+  Result := '';
+  if not FileExists(arq) then Exit;
+  if not LoadStringsFromFile(arq, linhas) then Exit;
+  for i := 0 to GetArrayLength(linhas) - 1 do
+  begin
+    t := Trim(linhas[i]);
+    if (Length(t) > 3) and (Copy(t, Length(t), 1) = '{') and (Pos('.', t) > 0) and (Copy(t, 1, 1) <> '{') and (Copy(t, 1, 1) <> '#') then
+    begin
+      Result := Trim(Copy(t, 1, Length(t) - 1));
+      Exit;
+    end;
+  end;
+end;
+
+function EnderecoJaUsado(): String;
+begin
+  Result := NomeNoArquivo('C:\ExatoWeb\caddy\Caddyfile');
+  if Result = '' then Result := NomeNoArquivo(ExpandConstant('{%USERPROFILE}\ExatoWeb\caddy\Caddyfile'));
+  if Result = '' then Result := NomeNoArquivo(ExpandConstant('{%USERPROFILE}\Desktop\ExatoWeb\caddy\Caddyfile'));
+end;
+
+function SoONome(t: String): String;
+begin
+  t := Trim(t);
+  if Pos('HTTPS://', Uppercase(t)) = 1 then Delete(t, 1, 8);
+  if Pos('HTTP://', Uppercase(t)) = 1 then Delete(t, 1, 7);
+  while (Length(t) > 0) and (Copy(t, Length(t), 1) = '/') do Delete(t, Length(t), 1);
+  Result := t;
+end;
 
 function ParametroDados(): String;
 var
@@ -106,11 +158,19 @@ begin
   PaginaDados.Values[0] := GetPreviousData('Dados', padrao);
   if ParametroDados() <> '' then
     PaginaDados.Values[0] := ParametroDados();
+  PaginaEndereco := CreateInputQueryPage(PaginaDados.ID, 'Endereço do escritório',
+    'Se o escritório já usa um endereço com cadeado para o Exato, informe-o aqui.',
+    'Exemplo: fiscal.seuescritorio.com.br. Se você não usa um endereço assim, deixe em branco: o Exato abre direto neste computador.');
+  PaginaEndereco.Add('Endereço:', False);
+  PaginaEndereco.Values[0] := GetPreviousData('Endereco', EnderecoJaUsado());
+  if ParametroEndereco() <> '' then
+    PaginaEndereco.Values[0] := ParametroEndereco();
 end;
 
 procedure RegisterPreviousData(PreviousDataKey: Integer);
 begin
   SetPreviousData(PreviousDataKey, 'Dados', PaginaDados.Values[0]);
+  SetPreviousData(PreviousDataKey, 'Endereco', SoONome(PaginaEndereco.Values[0]));
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
@@ -164,5 +224,11 @@ end;
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
+  begin
     SaveStringToFile(ExpandConstant('{app}\app\dados.txt'), Trim(PaginaDados.Values[0]) + #13#10, False);
+    if SoONome(PaginaEndereco.Values[0]) <> '' then
+      SaveStringToFile(ExpandConstant('{app}\app\endereco.txt'), 'https://' + SoONome(PaginaEndereco.Values[0]) + #13#10, False)
+    else
+      DeleteFile(ExpandConstant('{app}\app\endereco.txt'));
+  end;
 end;

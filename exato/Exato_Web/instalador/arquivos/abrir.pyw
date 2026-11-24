@@ -38,6 +38,11 @@ def endereco():
     for arq in candidatos:
         try:
             linha = arq.read_text(encoding='utf-8-sig').splitlines()[0].strip()
+            if linha.startswith('https://'):
+                nome = linha[8:].strip('/')
+                # Endereço com cadeado: liga e espera; se não responder, abre direto neste computador.
+                if _responde(nome) or (ligar_endereco() or True) and _responde(nome, 30): return linha
+                return local
             if linha.startswith('http'): return linha
         except (OSError, IndexError): pass
     # Quem já usava o endereço do escritório na instalação antiga: aproveita o mesmo nome, sem pedir nada.
