@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import auditoria as aud, backup, contas, diagnostico, importar, restauracao, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import atualizacao, auditoria as aud, backup, contas, diagnostico, importar, restauracao, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra
@@ -616,6 +616,39 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if r: return None, r
         if u.get('role') != 'admin': return None, RedirectResponse('/situacao', status_code=303)
         return u, None
+
+    # ------------------------------------------------------------ atualizar o Exato pela tela (só administrador)
+    @app.get('/atualizacao', response_class=HTMLResponse)
+    def atualizacao_tela(request: Request, erro: str = ''):
+        u, r = _so_admin(request)
+        if r: return r
+        est, msg = atualizacao.resultado()
+        return pagina(request, 'atualizacao.html', {'versao': atualizacao.versao_atual(), 'possivel': bool(atualizacao.raiz_instalada()), 'estado': est, 'resumo': msg, 'erro': erro, 'tela': 'atualizacao'}, user=u)
+
+    @app.post('/atualizacao/aplicar', response_class=HTMLResponse)
+    def atualizacao_aplicar(request: Request, arquivo: UploadFile = File(None), senha: str = Form(''), entendi: str = Form(''), repetida: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/atualizacao', status_code=303)
+        def volta(msg, st=400): return pagina(request, 'atualizacao.html', {'versao': atualizacao.versao_atual(), 'possivel': bool(atualizacao.raiz_instalada()), 'estado': '', 'resumo': '', 'erro': msg, 'tela': 'atualizacao'}, status=st, user=u)
+        if not atualizacao.raiz_instalada(): return volta('Este Exato não foi instalado pelo instalador novo. Para atualizar, rode o instalador novo no computador onde o Exato está.')
+        chave = f"atualizar{u['id']}"; falta = limite.bloqueado(ip(request), chave)
+        if falta: return volta(f'Muitas tentativas. Tente de novo em {max(1, falta // 60)} minuto(s).', 429)
+        reg = core.db_auth_get_user_by_id(u['id'])
+        if not core._auth_verify_password(senha, reg.get('password_salt'), reg.get('password_hash'), reg.get('password_iterations')):
+            limite.falhou(ip(request), chave); log(u, 'ATUALIZACAO_SENHA_ERRADA', ''); return volta('A senha não confere.', 401)
+        limite.acertou(ip(request), chave)
+        if arquivo is None or not (arquivo.filename or '').strip(): return volta('Escolha o arquivo de atualização.')
+        if entendi != '1': return volta('Marque a caixa confirmando que você entendeu.')
+        nova = atualizacao.versao_do_nome(arquivo.filename); atual = atualizacao.versao_atual()
+        if nova and atual and atualizacao.comparar(nova, atual) <= 0 and repetida != '1':
+            return volta(f'Esse arquivo é da versão {nova}, e o Exato já está na versão {atual}. Se quiser instalar mesmo assim, marque "Instalar mesmo assim" e envie de novo.')
+        try: exe = atualizacao.guardar(arquivo.file, arquivo.filename)
+        except atualizacao.AtualizacaoErro as e: return volta(str(e))
+        try: atualizacao.iniciar(exe, por=u.get('email', ''))
+        except (atualizacao.AtualizacaoErro, OSError) as e: return volta(str(e) if isinstance(e, atualizacao.AtualizacaoErro) else 'Não consegui iniciar a atualização. Tente de novo.', 500)
+        log(u, 'ATUALIZACAO_PEDIDA', f'{atual} -> {nova}')
+        return pagina(request, 'atualizando.html', {'nova': nova, 'tela': 'atualizacao'}, user=u)
 
     @app.get('/backup', response_class=HTMLResponse)
     def backup_tela(request: Request, ok: str = '', erro: str = ''):

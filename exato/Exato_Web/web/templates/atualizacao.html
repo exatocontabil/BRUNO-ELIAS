@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% from "_ui.html" import ic %}{% block titulo %}Atualizar o Exato{% endblock %}
+{% block corpo %}<h1>Atualizar o Exato</h1><p class="sub">Versão instalada agora: <b>{{ versao or '—' }}</b></p>
+{% if estado == 'ok' %}<div class="aviso ok">{{ ic('check-circle') }}<span>{{ resumo }}</span></div>{% elif estado == 'falhou' %}<div class="aviso erro">{{ ic('alert') }}<span>{{ resumo }}</span></div>{% endif %}
+{% if erro %}<div class="aviso erro">{{ ic('alert') }}<span>{{ erro }}</span></div>{% endif %}
+{% if not possivel %}<div class="card"><p><b>Esta instalação não se atualiza por aqui.</b></p><p class="mu">Para atualizar, rode o instalador novo do Exato Web no computador onde o Exato está instalado.</p></div>
+{% else %}<div class="card"><h2>Como funciona</h2><ul class="mu"><li>Baixe o arquivo novo (<b>Exato_Web_Instalador_...exe</b>) e escolha-o abaixo.</li><li>O Exato se desliga, troca os arquivos e liga de novo sozinho, em cerca de 1 ou 2 minutos. <b>Ninguém consegue usar o site nesse tempo.</b></li><li>Suas empresas, notas, usuários e certificados <b>não são tocados</b>. Se quiser, faça uma cópia de segurança antes.</li></ul></div>
+<form method="post" action="/atualizacao/aplicar" enctype="multipart/form-data" class="card" id="at-form" style="max-width:560px"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label for="at-arq">Arquivo de atualização</label><input id="at-arq" name="arquivo" type="file" accept=".exe" required>
+<label for="at-senha">Confirme com a sua senha</label><input id="at-senha" name="senha" type="password" autocomplete="current-password" required>
+<label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-weight:500"><input type="checkbox" name="entendi" value="1" style="margin-top:3px"><span>Entendi: o Exato vai ficar fora do ar por uns minutos.</span></label>
+<label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-weight:500"><input type="checkbox" name="repetida" value="1" style="margin-top:3px"><span>Instalar mesmo assim, se for a mesma versão ou uma mais antiga.</span></label>
+<div class="linha"><button id="at-botao">Atualizar agora</button></div><p class="mu" id="at-msg" hidden>Enviando o arquivo... não feche esta página.</p></form>
+<script src="/static/atualizacao.js?v={{ asset_v }}" defer></script>{% endif %}{% endblock %}

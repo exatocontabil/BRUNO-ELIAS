@@ -38,6 +38,15 @@ if ($codigo -ne 0) { Falha "a atualizacao por cima saiu com codigo $($codigo)" }
 $ok = $false
 for ($i = 0; $i -lt 120 -and -not $ok; $i++) { Start-Sleep -Seconds 1; try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8443/saude' -UseBasicParsing -TimeoutSec 3; if ($r.Content -eq 'ok') { $ok = $true } } catch { } }
 if (-not $ok) { Falha 'o Exato nao voltou depois de atualizar por cima' }
+Write-Host 'Atualizando como o site faz (auxiliar atualizar.pyw)...'
+$ant = "$dados\logs\atualizacao.log"; if (Test-Path $ant) { Remove-Item $ant -Force }
+Start-Process -FilePath (Join-Path $alvo 'python\pythonw.exe') -ArgumentList "`"$(Join-Path $alvo 'app\atualizar.pyw')`" `"$Instalador`" `"$alvo`" `"$dados`"" | Out-Null
+$fim = $false
+for ($i = 0; $i -lt 180 -and -not $fim; $i++) { Start-Sleep -Seconds 1; if (Test-Path $ant) { try { if ((Get-Content $ant -Raw) -match 'Log closed') { $fim = $true } } catch { } } }
+if (-not $fim) { Falha 'a atualizacao pelo auxiliar nao terminou' }
+$ok = $false
+for ($i = 0; $i -lt 120 -and -not $ok; $i++) { Start-Sleep -Seconds 1; try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8443/saude' -UseBasicParsing -TimeoutSec 3; if ($r.Content -eq 'ok') { $ok = $true } } catch { } }
+if (-not $ok) { Falha 'o Exato nao voltou depois da atualizacao pelo auxiliar' }
 Write-Host 'Desinstalando...'
 $u = Get-ChildItem $alvo -Filter 'unins*.exe' | Select-Object -First 1
 if (-not $u) { Falha 'nao achei o desinstalador' }
