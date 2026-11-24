@@ -32,7 +32,7 @@ assert 'value="ana@escritorio.com.br"' not in loc.post('/configurar', data=dict(
 r = loc.post('/configurar', data=dados); assert r.status_code == 303 and r.headers['location'] == '/conta/2fa' and 'exato_pre' in loc.cookies and not contas.sem_usuarios(core)
 u = core.db_auth_get_user('ana@escritorio.com.br'); assert u['role'] == 'admin' and not u['must_set_password'] and u['status'] == 'active'
 seg = re.search(r'<code class="seg">([A-Z2-7]+)</code>', loc.get('/conta/2fa').text).group(1)
-assert loc.post('/conta/2fa', data={'codigo': seguranca.codigo_totp(seg), 'csrf': tk}).status_code == 303 and loc.get('/situacao').status_code == 200 and loc.get('/usuarios').status_code == 200          # já entra como administrador
+assert loc.post('/conta/2fa', data={'codigo': seguranca.codigo_totp(seg), 'csrf': tk}).status_code == 303 and loc.get('/situacao').headers['location'] == '/comecar' and loc.get('/comecar').status_code == 200 and loc.get('/usuarios').status_code == 200          # já entra como administrador e cai no assistente de primeira instalação
 # depois disso a tela de configuração se fecha
 assert loc.get('/configurar').headers['location'] == '/login' and loc.post('/configurar', data=dict(dados, email='outra@x.com')).headers['location'] == '/login' and core.db_auth_get_user('outra@x.com') is None
 assert loc.get('/login').status_code == 200 or True

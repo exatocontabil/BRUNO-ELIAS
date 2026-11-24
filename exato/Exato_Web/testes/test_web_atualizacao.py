@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from web import atualizacao as at, config, cofre as cm
 from web.app import criar_app
 app = criar_app(importador=cm.ImportadorFalso()); core = app.state.core; config.EXIGIR_2FA = False
+app.state.motor.cfg['primeiros_passos'] = {'concluido': True}          # instalação já configurada: sem o assistente de primeira instalação
 core.db_auth_register_user('Admin Um', 'admin@exemplo.com.br', 'SenhaForte#2026'); core.db_auth_register_user('Maria', 'maria@exemplo.com.br', 'SenhaForte#2026')
 c_ = core._auth_connect(); c_.execute("UPDATE users SET role='admin' WHERE email='admin@exemplo.com.br'"); c_.commit(); c_.close()
 def cliente(email):

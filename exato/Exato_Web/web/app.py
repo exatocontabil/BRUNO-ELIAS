@@ -8,10 +8,10 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import atualizacao, auditoria as aud, backup, contas, diagnostico, importar, restauracao, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import atualizacao, primeiros_passos as pp, auditoria as aud, backup, contas, diagnostico, importar, restauracao, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
-from .cofre import Cofre, CofreErro, carregar_chave_mestra
+from .cofre import Cofre, CofreErro, carregar_chave_mestra, ler_pfx
 
 AQUI = Path(__file__).resolve().parent
 ROTULOS_TIPO = {'nfe': 'NF-e', 'nfce': 'NFC-e', 'cte': 'CT-e', 'nfse': 'NFS-e'}
@@ -42,6 +42,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
     app.state.reiniciar = None
     app.state.cofre, app.state.totp, app.state.limite, app.state.core, app.state.sessoes, app.state.dispositivos = cofre, totp, limite, core, sessoes, dispositivos
     motor = Motor(core, cofre, nfse_transport=nfse_transport); motor.manifestador = manif.Manifestador(core, cofre, motor.certificado_para, transporte=manif_transporte); agendador = Agendador(motor); app.state.motor, app.state.agendador = motor, agendador
+    app.state.motor = motor
     if iniciar_agendador: agendador.iniciar()
     motivos = nucleo.modulo('exato_busca_motivos'); situacao = nucleo.modulo('exato_situacao_busca')
 
@@ -59,9 +60,18 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
 
     def csrf_do_pedido(request): return request.cookies.get('exato_csrf') or secrets.token_urlsafe(24)
 
+    def _pp_pendente(user):
+        """Mostra "Primeiros passos" no menu do administrador enquanto o assistente não terminou. Instalação que já tem empresa ou certificado não precisa dele."""
+        if (user or {}).get('role') != 'admin': return False
+        m = pp.memoria(motor.cfg)
+        if 'concluido' not in m:
+            try: m['concluido'] = bool(core.db_list_companies(1) or cofre.listar()); motor.salvar_cfg()
+            except Exception: return False
+        return not m['concluido']
+
     def pagina(request, nome, ctx=None, status=200, user=None):
         c = dict(ctx or {}); tk = csrf_do_pedido(request)
-        c.update({'request': request, 'csrf': tk, 'usuario': user, 'atu_nova': ((motor.cfg.get('atualizacao') or {}).get('nova', '') if (user or {}).get('role') == 'admin' else ''), 'rotulos': ROTULOS_TIPO, 'asset_v': int(max((f.stat().st_mtime for f in (AQUI / 'static').iterdir() if f.is_file()), default=0))})
+        c.update({'request': request, 'csrf': tk, 'usuario': user, 'atu_nova': ((motor.cfg.get('atualizacao') or {}).get('nova', '') if (user or {}).get('role') == 'admin' else ''), 'pp_pendente': _pp_pendente(user), 'rotulos': ROTULOS_TIPO, 'asset_v': int(max((f.stat().st_mtime for f in (AQUI / 'static').iterdir() if f.is_file()), default=0))})
         resp = tpl.TemplateResponse(request, nome, c, status_code=status)
         if 'exato_csrf' not in request.cookies: cookie(resp, 'exato_csrf', tk, 86400 * 30, http_only=False)
         resp.headers['Cache-Control'] = 'no-store'
@@ -326,6 +336,9 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
     def situacao_tela(request: Request):
         u, r = exigir(request)
         if r: return r
+        m = pp.memoria(motor.cfg)
+        if _pp_pendente(u) and not m.get('abriu') and not m.get('pulou') and not cofre.listar() and not core.db_list_companies(1):
+            m['abriu'] = True; motor.salvar_cfg(); return RedirectResponse('/comecar', status_code=303)          # instalação nova: abre o assistente uma vez
         cfg = motor.cfg; oc = motivos.ultimas(str(core.DB_PATH)); linhas = situacao.linhas(str(core.DB_PATH), cfg, None, ocorrencias=oc, diagnostico={}, acessos=dict(cfg.get('nfse_acesso') or {}))
         for l in linhas: l['cnpj_fmt'] = core._format_cnpj(l['cnpj']); l['certificado'] = cofre.info(l['cnpj'])
         return pagina(request, 'situacao.html', {'backup_aviso': (backup.aviso(motor.cfg) if u.get('role') == 'admin' else ''), 'linhas': linhas, 'totais': situacao.totais(linhas), 'tipos': situacao.TIPOS, 'tela': 'situacao', 'rodando': bool(motor.estado['rodando']), 'auto': agendador.ligado(), 'proxima': agendador.proxima()}, user=u)
@@ -616,6 +629,86 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if r: return None, r
         if u.get('role') != 'admin': return None, RedirectResponse('/situacao', status_code=303)
         return u, None
+
+    # ------------------------------------------------------------ primeiros passos (só administrador)
+    def _ctx_comecar(passo='', ok='', erro='', extra=None):
+        certs = cofre.listar(); emps = empresas_lista(); c = backup.cfg_de(motor.cfg)
+        est = pp.estado(motor.cfg, certs, emps, c.get('destino') or '')
+        if est['concluido'] and not pp.memoria(motor.cfg).get('concluido'): pp.memoria(motor.cfg)['concluido'] = True; motor.salvar_cfg()
+        atual = passo if passo in [x[0] for x in pp.PASSOS] else (est['proximo'] or 'busca')
+        nomes = {e['cnpj']: e['nome'] for e in emps}
+        lista = [dict(x, nome=nomes.get(x.get('id'), 'Certificado do escritório' if x.get('id') == 'escritorio' else x.get('id'))) for x in certs]
+        d = {'est': est, 'atual': atual, 'certs': lista, 'empresas': emps, 'copia': c, 'ok': ok, 'erro': erro, 'tela': 'comecar', 'pode_buscar': bool(certs and emps)}
+        d.update(extra or {}); return d
+
+    @app.get('/comecar', response_class=HTMLResponse)
+    def comecar_tela(request: Request, passo: str = '', ok: str = '', erro: str = ''):
+        u, r = _so_admin(request)
+        if r: return r
+        return pagina(request, 'comecar.html', _ctx_comecar(passo, ok, erro), user=u)
+
+    @app.post('/comecar/certificado', response_class=HTMLResponse)
+    async def comecar_certificado(request: Request, tipo: str = Form('empresa'), cnpj: str = Form(''), senha: str = Form(''), csrf: str = Form(''), arquivo: UploadFile = File(None)):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/comecar', status_code=303)
+        def volta(msg): return pagina(request, 'comecar.html', _ctx_comecar('certificado', erro=msg), status=400, user=u)
+        dados = await arquivo.read(5 * 1024 * 1024 + 1) if arquivo else b''
+        if not dados or len(dados) > 5 * 1024 * 1024: return volta('Escolha o arquivo do certificado A1 (termina em .pfx ou .p12).')
+        try: info = ler_pfx(dados, senha)
+        except CofreErro as e: return volta(str(e))
+        if info['vencido']: return volta(f"Este certificado venceu em {info['validade']}. Envie o certificado novo.")
+        if tipo == 'escritorio': chave = 'escritorio'
+        else:
+            chave = info.get('titular_cnpj') or re.sub(r'\D', '', cnpj)
+            if len(chave) != 14 or not core._is_valid_cnpj(chave): return volta('Não consegui ler o CNPJ deste certificado. Digite o CNPJ da empresa no campo "CNPJ", ou escolha "Certificado do escritório".')
+        try: guardado = cofre.guardar(chave, dados, senha, enviado_por=u.get('email', ''))
+        except CofreErro as e: return volta(str(e))
+        if chave != 'escritorio': core.db_register_company(chave, pp.nome_do_certificado(info.get('titular')))
+        log(u, 'CERTIFICADO_ENVIADO', f"{chave} (primeiros passos) validade {guardado['validade']}")
+        quem = 'do escritório' if chave == 'escritorio' else f"da empresa {core._format_cnpj(chave)}"
+        return RedirectResponse(_msg('/comecar', 'ok', f"Certificado {quem} guardado com segurança. Vence em {guardado['validade'][8:10]}/{guardado['validade'][5:7]}/{guardado['validade'][:4]}."), status_code=303)
+
+    @app.post('/comecar/empresas', response_class=HTMLResponse)
+    def comecar_empresas(request: Request, texto: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/comecar', status_code=303)
+        bons, ruins = pp.ler_cnpjs(texto, core._is_valid_cnpj)
+        if not bons: return pagina(request, 'comecar.html', _ctx_comecar('empresas', erro='Não encontrei nenhum CNPJ válido. Cole os CNPJs, um por linha.'), status=400, user=u)
+        for d in bons: core.db_register_company(d, '')
+        log(u, 'EMPRESAS_CADASTRADAS', f'{len(bons)} (primeiros passos)')
+        msg = f"{len(bons)} empresa(s) cadastrada(s)." + (f" Não entendi: {', '.join(ruins[:5])}." if ruins else '')
+        return RedirectResponse(_msg('/comecar', 'ok' if not ruins else 'erro', msg), status_code=303)
+
+    @app.post('/comecar/copia', response_class=HTMLResponse)
+    def comecar_copia(request: Request, destino: str = Form(''), pular: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/comecar', status_code=303)
+        m = pp.memoria(motor.cfg)
+        if pular == '1':
+            m.setdefault('pulados', []).append('copia'); motor.salvar_cfg(); return RedirectResponse('/comecar', status_code=303)
+        try: pasta, _aviso = backup.validar_destino(destino)
+        except backup.BackupErro as e: return pagina(request, 'comecar.html', _ctx_comecar('copia', erro=str(e)), status=400, user=u)
+        c = backup.cfg_de(motor.cfg); c.update(destino=str(pasta), hora=c.get('hora') or '02:00', manter=c.get('manter') or 7, ativo=True); motor.salvar_cfg(); log(u, 'BACKUP_CONFIG', f'ligado {c["destino"]} (primeiros passos)')
+        return RedirectResponse(_msg('/comecar', 'ok', 'Cópia de segurança ligada: o Exato copia tudo uma vez por dia, sozinho.'), status_code=303)
+
+    @app.post('/comecar/buscar')
+    def comecar_buscar(request: Request, pular: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/comecar', status_code=303)
+        m = pp.memoria(motor.cfg); m['busca_feita'] = True; m['concluido'] = True; motor.salvar_cfg()
+        if pular != '1' and agendador.disparar(only=None, manual=True): log(u, 'BUSCA_PEDIDA', 'todas (primeiros passos)')
+        return RedirectResponse('/situacao', status_code=303)
+
+    @app.post('/comecar/pular')
+    def comecar_pular(request: Request, csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if csrf_ok(request, csrf): pp.memoria(motor.cfg)['pulou'] = True; motor.salvar_cfg()
+        return RedirectResponse('/situacao', status_code=303)
 
     # ------------------------------------------------------------ atualizar o Exato pela tela (só administrador)
     def _ctx_atualizacao(erro='', ok=''):

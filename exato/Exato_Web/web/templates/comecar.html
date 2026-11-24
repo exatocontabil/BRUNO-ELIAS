@@ -1,0 +1,42 @@
+{% extends "base.html" %}{% from "_ui.html" import ic %}{% block titulo %}Primeiros passos — Exato{% endblock %}
+{% block corpo %}<h1>Primeiros passos</h1><p class="sub">Vamos deixar o Exato pronto para buscar as notas. Leva poucos minutos e dá para fazer depois.</p>
+{% if ok %}<div class="aviso ok">{{ ic('check-circle') }}<span>{{ ok }}</span></div>{% endif %}{% if erro %}<div class="aviso erro">{{ ic('alert') }}<span>{{ erro }}</span></div>{% endif %}
+<div class="card" style="max-width:720px"><ol style="list-style:none;margin:0;padding:0;display:grid;gap:8px">
+{% for p in est.passos %}<li style="display:flex;gap:10px;align-items:center"><span style="width:26px;height:26px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;background:{{ 'var(--brand)' if p.feito else 'var(--surface2)' }};color:{{ '#fff' if p.feito else 'inherit' }}">{% if p.feito %}✓{% else %}{{ loop.index }}{% endif %}</span>
+<a href="/comecar?passo={{ p.id }}" style="{{ 'font-weight:700' if p.id == atual }}">{{ p.titulo }}</a></li>{% endfor %}</ol></div>
+
+{% if atual == 'certificado' %}<div class="card" style="max-width:720px;margin-top:14px"><h2>1. Certificado digital</h2>
+<p class="mu">O Exato precisa do <b>certificado A1</b> para buscar as notas na SEFAZ e no portal. Ele fica guardado com segurança, só neste computador, e a senha nunca é mostrada.</p>
+{% if certs %}<ul class="mu">{% for c in certs %}<li><b>{{ c.nome }}</b> — vence em {{ c.validade[8:10] }}/{{ c.validade[5:7] }}/{{ c.validade[:4] }}</li>{% endfor %}</ul>{% endif %}
+<form method="post" action="/comecar/certificado" enctype="multipart/form-data"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label for="pp-arq">Arquivo do certificado (termina em .pfx ou .p12)</label><input id="pp-arq" name="arquivo" type="file" accept=".pfx,.p12" required>
+<label for="pp-senha">Senha do certificado</label><input id="pp-senha" name="senha" type="password" autocomplete="off" required style="max-width:340px">
+<label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-weight:500"><input type="radio" name="tipo" value="empresa" checked style="margin-top:3px"><span>É o certificado de <b>uma empresa</b>. O Exato lê o CNPJ e o nome sozinho.</span></label>
+<label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-weight:500"><input type="radio" name="tipo" value="escritorio" style="margin-top:3px"><span>É o certificado <b>do escritório</b>, com procuração para várias empresas.</span></label>
+<label for="pp-cnpj">CNPJ <small class="mu">(só se o Exato não conseguir ler do certificado)</small></label><input id="pp-cnpj" name="cnpj" inputmode="numeric" maxlength="20" style="max-width:240px">
+<div class="linha" style="margin-top:12px"><button>Guardar o certificado</button>{% if certs %}<a class="botao sec" href="/comecar?passo=empresas">Continuar</a>{% endif %}</div></form></div>
+
+{% elif atual == 'empresas' %}<div class="card" style="max-width:720px;margin-top:14px"><h2>2. Empresas</h2>
+{% if empresas %}<p class="mu"><b>{{ empresas|length }}</b> empresa(s) cadastrada(s){% if empresas|length <= 8 %}: {% for e in empresas %}{{ e.nome }}{{ ', ' if not loop.last }}{% endfor %}{% endif %}.</p>{% endif %}
+<p class="mu">Cole os <b>CNPJs</b> das empresas que o Exato deve acompanhar, um por linha (pode colar de uma planilha). O nome de cada empresa o Exato descobre sozinho pelas notas.</p>
+<form method="post" action="/comecar/empresas"><input type="hidden" name="csrf" value="{{ csrf }}"><textarea name="texto" rows="6" placeholder="00.000.000/0001-00" style="width:100%;max-width:420px"></textarea>
+<div class="linha" style="margin-top:10px"><button>Cadastrar empresas</button>{% if empresas %}<a class="botao sec" href="/comecar?passo=copia">Continuar</a>{% endif %}</div></form></div>
+
+{% elif atual == 'copia' %}<div class="card" style="max-width:720px;margin-top:14px"><h2>3. Cópia de segurança</h2>
+<p class="mu">Todo dia o Exato copia as suas empresas, notas e usuários para outro lugar, para você não perder nada se o disco estragar. Escolha uma pasta em <b>outro disco</b>, num HD externo ou numa pasta de rede.</p>
+{% if copia.destino %}<div class="aviso ok">{{ ic('check-circle') }}<span>Cópia diária ligada em <b>{{ copia.destino }}</b>.</span></div>{% endif %}
+<form method="post" action="/comecar/copia"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label for="bk-destino">Pasta onde guardar as cópias</label><div class="linha" style="gap:8px;flex-wrap:nowrap"><input id="bk-destino" name="destino" value="{{ copia.destino }}" placeholder="E:\CopiaExato  ou  \\SERVIDOR\Copias" style="flex:1;min-width:0"><button type="button" class="sec" id="bk-procurar">Procurar...</button></div>
+<div id="bk-nav" class="bk-nav" hidden><div class="bk-topo"><b id="bk-atual"></b></div><div id="bk-lista" class="bk-lista"></div><div class="linha" style="gap:8px;margin-top:8px"><button type="button" id="bk-usar">Usar esta pasta</button><button type="button" class="sec" id="bk-fechar">Fechar</button></div><small class="mu" id="bk-erro"></small></div>
+<div class="linha" style="margin-top:12px"><button>Ligar a cópia diária</button><a class="botao sec" href="/comecar?passo=busca">Continuar</a></div></form>
+<form method="post" action="/comecar/copia" style="margin-top:8px"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="pular" value="1"><button class="sec">Fazer isto depois</button></form></div>
+<script src="/static/backup.js?v={{ asset_v }}" defer></script>
+
+{% else %}<div class="card" style="max-width:720px;margin-top:14px"><h2>4. Primeira busca</h2>
+{% if pode_buscar %}<p class="mu">Tudo pronto! O Exato vai buscar agora as notas de todas as empresas. Pode demorar um pouco na primeira vez, e você acompanha na tela <b>Situação da busca</b>. Depois disso, ele busca sozinho de tempos em tempos.</p>
+<form method="post" action="/comecar/buscar"><input type="hidden" name="csrf" value="{{ csrf }}"><div class="linha"><button>Buscar as notas agora</button></div></form>
+{% else %}<div class="aviso">{{ ic('alert') }}<span>Para buscar, ainda faltam {% if not certs %}o <b>certificado</b>{% endif %}{% if not certs and not empresas %} e {% endif %}{% if not empresas %}as <b>empresas</b>{% endif %}. Volte aos passos acima.</span></div>
+<form method="post" action="/comecar/buscar" style="margin-top:8px"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="pular" value="1"><button class="sec">Terminar sem buscar agora</button></form>{% endif %}</div>{% endif %}
+
+<form method="post" action="/comecar/pular" style="margin-top:14px"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="sec">Fazer o resto depois</button></form>
+{% endblock %}

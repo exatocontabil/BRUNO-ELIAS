@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from web import config, cofre as cm, contas
 from web.app import criar_app
 app = criar_app(importador=cm.ImportadorFalso()); core = app.state.core; sessoes = app.state.sessoes; disp = app.state.dispositivos; totp = app.state.totp; config.EXIGIR_2FA = False
+app.state.motor.cfg['primeiros_passos'] = {'concluido': True}          # instalação já configurada: sem o assistente de primeira instalação
 core.db_auth_register_user('Admin Um', 'admin@exemplo.com.br', 'SenhaForte#2026'); c_ = core._auth_connect(); c_.execute("UPDATE users SET role='admin' WHERE email='admin@exemplo.com.br'"); c_.commit(); c_.close()
 def cliente(email, senha='SenhaForte#2026'):
     c = TestClient(app, base_url='http://testserver', follow_redirects=False); c.get('/login'); tk = c.cookies.get('exato_csrf'); r = c.post('/login', data={'email': email, 'senha': senha, 'csrf': tk}); return c, tk, r
