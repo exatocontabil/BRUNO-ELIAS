@@ -30,8 +30,18 @@ class Agendador:
             from . import backup
             if backup.devida(self.motor.cfg) and not self.motor.estado['rodando']: threading.Thread(target=self.motor.fazer_backup, daemon=True, name='backup-diario').start()          # 1 vez por dia, fora de rodada de busca
         except Exception: pass
+        try:
+            from . import atualizacao
+            if atualizacao.consulta_devida(self.motor.cfg) and not self.motor.estado['rodando']: threading.Thread(target=self._consultar_atualizacao, daemon=True, name='consulta-atualizacao').start()          # 1 vez por dia
+        except Exception: pass
         if not self.ligado() or not self.motor.vencida() or not self.motor.reservar(): return False
         threading.Thread(target=self.motor.rodada, kwargs={'reservado': True}, daemon=True, name='rodada-automatica').start(); return True
+
+    def _consultar_atualizacao(self):
+        from . import atualizacao
+        try:
+            info = atualizacao.consultar(); atualizacao.guardar_consulta(self.motor.cfg, info); self.motor.salvar_cfg()
+        except Exception: pass
 
     def disparar(self, only=None, manual=True, tipos=None, recomecar=False, de=None, ate=None, zip_formato=None):
         """Pedido de uma pessoa (botão): começa já, em segundo plano. False se já há rodada."""

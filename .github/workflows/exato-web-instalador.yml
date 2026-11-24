@@ -63,3 +63,17 @@ jobs:
           $exe = (Get-ChildItem exato/Exato_Web/dist -Filter 'Exato_Web_Instalador_*.exe' | Select-Object -First 1)
           $tag = 'exato-web-instalador-' + $env:GITHUB_RUN_NUMBER
           gh release create $tag $exe.FullName --title "Instalador do Exato Web ($tag)" --notes "Instalador único do Exato Web. Baixe o arquivo Exato_Web_Instalador e dê dois cliques." --repo $env:GITHUB_REPOSITORY
+      - name: Publicar no lugar das atualizações (o Exato confere e baixa sozinho)
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publicar != 'false' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.ATUALIZACOES_TOKEN }}
+          REPO_ATUALIZACOES: exatocontabil/exato-web-atualizacoes
+        run: |
+          if (-not $env:GH_TOKEN) { Write-Host '::warning::Falta o segredo ATUALIZACOES_TOKEN: a versao NAO foi publicada para o Exato baixar sozinho (o instalador ficou so na pagina Releases).'; exit 0 }
+          $exe = Get-ChildItem exato/Exato_Web/dist -Filter 'Exato_Web_Instalador_*.exe' | Select-Object -First 1
+          $versao = $exe.BaseName -replace '^Exato_Web_Instalador_', ''
+          $sha = (Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower()
+          $json = [ordered]@{ versao = $versao; arquivo = $exe.Name; sha256 = $sha; tamanho = $exe.Length; notas = '' } | ConvertTo-Json
+          $arq = Join-Path $env:RUNNER_TEMP 'versao.json'; [System.IO.File]::WriteAllText($arq, $json, (New-Object System.Text.UTF8Encoding($false)))
+          gh release create ("v" + $versao) $exe.FullName $arq --repo $env:REPO_ATUALIZACOES --title "Exato Web $versao" --notes "Versao $versao do Exato Web." --latest

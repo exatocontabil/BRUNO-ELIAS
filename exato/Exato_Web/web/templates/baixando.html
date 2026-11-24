@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% from "_ui.html" import ic %}{% block titulo %}Atualizando — Exato{% endblock %}
+{% block corpo %}<h1>Atualizando o Exato...</h1>
+<div class="card" id="bx-card" style="max-width:640px"><p><b>Versão {{ nova }}</b></p><p class="mu" id="bx-msg">Baixando a versão nova...</p>
+<div style="height:8px;border-radius:99px;background:var(--surface2);overflow:hidden"><i id="bx-barra" style="display:block;width:2%;height:100%;background:var(--brand);transition:width .4s"></i></div>
+<p class="mu" id="bx-erro" hidden></p><p id="bx-volta" hidden><a class="botao sec" href="/atualizacao">Voltar</a></p></div>
+<script src="/static/baixando.js?v={{ asset_v }}" defer></script>{% endblock %}

@@ -61,7 +61,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
 
     def pagina(request, nome, ctx=None, status=200, user=None):
         c = dict(ctx or {}); tk = csrf_do_pedido(request)
-        c.update({'request': request, 'csrf': tk, 'usuario': user, 'rotulos': ROTULOS_TIPO, 'asset_v': int(max((f.stat().st_mtime for f in (AQUI / 'static').iterdir() if f.is_file()), default=0))})
+        c.update({'request': request, 'csrf': tk, 'usuario': user, 'atu_nova': ((motor.cfg.get('atualizacao') or {}).get('nova', '') if (user or {}).get('role') == 'admin' else ''), 'rotulos': ROTULOS_TIPO, 'asset_v': int(max((f.stat().st_mtime for f in (AQUI / 'static').iterdir() if f.is_file()), default=0))})
         resp = tpl.TemplateResponse(request, nome, c, status_code=status)
         if 'exato_csrf' not in request.cookies: cookie(resp, 'exato_csrf', tk, 86400 * 30, http_only=False)
         resp.headers['Cache-Control'] = 'no-store'
@@ -618,19 +618,58 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         return u, None
 
     # ------------------------------------------------------------ atualizar o Exato pela tela (só administrador)
+    def _ctx_atualizacao(erro='', ok=''):
+        est, msg = atualizacao.resultado(); m = atualizacao.memoria(motor.cfg)
+        return {'versao': atualizacao.versao_atual(), 'possivel': bool(atualizacao.raiz_instalada()), 'estado': est, 'resumo': msg, 'erro': erro, 'ok': ok, 'nova': m.get('nova', ''), 'notas': m.get('notas', ''), 'ultima': m.get('ultima', ''), 'erro_consulta': m.get('erro', ''), 'tela': 'atualizacao'}
+
     @app.get('/atualizacao', response_class=HTMLResponse)
-    def atualizacao_tela(request: Request, erro: str = ''):
+    def atualizacao_tela(request: Request, erro: str = '', ok: str = ''):
         u, r = _so_admin(request)
         if r: return r
-        est, msg = atualizacao.resultado()
-        return pagina(request, 'atualizacao.html', {'versao': atualizacao.versao_atual(), 'possivel': bool(atualizacao.raiz_instalada()), 'estado': est, 'resumo': msg, 'erro': erro, 'tela': 'atualizacao'}, user=u)
+        return pagina(request, 'atualizacao.html', _ctx_atualizacao(erro, ok), user=u)
+
+    @app.post('/atualizacao/verificar')
+    def atualizacao_verificar(request: Request, csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/atualizacao', status_code=303)
+        info = atualizacao.consultar(); atualizacao.guardar_consulta(motor.cfg, info); motor.salvar_cfg(); log(u, 'ATUALIZACAO_CONSULTA', info.get('versao') or info.get('erro', ''))
+        if not info['ok']: return RedirectResponse(_msg('/atualizacao', 'erro', info['erro']), status_code=303)
+        return RedirectResponse(_msg('/atualizacao', 'ok', f"Há uma versão nova: {info['versao']}." if info['nova'] else 'O Exato já está na versão mais nova.'), status_code=303)
+
+    @app.post('/atualizacao/baixar', response_class=HTMLResponse)
+    def atualizacao_baixar(request: Request, senha: str = Form(''), entendi: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/atualizacao', status_code=303)
+        def volta(msg, st=400): return pagina(request, 'atualizacao.html', _ctx_atualizacao(erro=msg), status=st, user=u)
+        if not atualizacao.raiz_instalada(): return volta('Este Exato não foi instalado pelo instalador novo. Para atualizar, rode o instalador novo no computador onde o Exato está.')
+        chave = f"atualizar{u['id']}"; falta = limite.bloqueado(ip(request), chave)
+        if falta: return volta(f'Muitas tentativas. Tente de novo em {max(1, falta // 60)} minuto(s).', 429)
+        reg = core.db_auth_get_user_by_id(u['id'])
+        if not core._auth_verify_password(senha, reg.get('password_salt'), reg.get('password_hash'), reg.get('password_iterations')):
+            limite.falhou(ip(request), chave); log(u, 'ATUALIZACAO_SENHA_ERRADA', ''); return volta('A senha não confere.', 401)
+        limite.acertou(ip(request), chave)
+        if entendi != '1': return volta('Marque a caixa confirmando que você entendeu.')
+        info = atualizacao.consultar(); atualizacao.guardar_consulta(motor.cfg, info); motor.salvar_cfg()
+        if not info['ok']: return volta(info['erro'])
+        if not info['nova']: return volta('O Exato já está na versão mais nova.')
+        if not atualizacao.baixar_e_iniciar(info, por=u.get('email', '')): return volta('Já existe uma atualização em andamento.')
+        log(u, 'ATUALIZACAO_AUTOMATICA', f"{atualizacao.versao_atual()} -> {info['versao']}")
+        return pagina(request, 'baixando.html', {'nova': info['versao'], 'tela': 'atualizacao'}, user=u)
+
+    @app.get('/atualizacao/andamento')
+    def atualizacao_andamento(request: Request):
+        u, r = _so_admin(request)
+        if r: return JSONResponse({'fase': ''}, status_code=401)
+        return JSONResponse(dict(atualizacao.estado), headers={'Cache-Control': 'no-store'})
 
     @app.post('/atualizacao/aplicar', response_class=HTMLResponse)
     def atualizacao_aplicar(request: Request, arquivo: UploadFile = File(None), senha: str = Form(''), entendi: str = Form(''), repetida: str = Form(''), csrf: str = Form('')):
         u, r = _so_admin(request)
         if r: return r
         if not csrf_ok(request, csrf): return RedirectResponse('/atualizacao', status_code=303)
-        def volta(msg, st=400): return pagina(request, 'atualizacao.html', {'versao': atualizacao.versao_atual(), 'possivel': bool(atualizacao.raiz_instalada()), 'estado': '', 'resumo': '', 'erro': msg, 'tela': 'atualizacao'}, status=st, user=u)
+        def volta(msg, st=400): return pagina(request, 'atualizacao.html', _ctx_atualizacao(erro=msg), status=st, user=u)
         if not atualizacao.raiz_instalada(): return volta('Este Exato não foi instalado pelo instalador novo. Para atualizar, rode o instalador novo no computador onde o Exato está.')
         chave = f"atualizar{u['id']}"; falta = limite.bloqueado(ip(request), chave)
         if falta: return volta(f'Muitas tentativas. Tente de novo em {max(1, falta // 60)} minuto(s).', 429)
