@@ -5,7 +5,7 @@ Nada é apagado: a pasta antiga `C:\ExatoWeb` fica como está, para você poder 
 
 ## Antes de começar
 1. Entre no Exato (pelo endereço de sempre) > **Cópia de segurança** > **Fazer cópia agora**. Espere terminar.
-2. Baixe o instalador: https://github.com/exatocontabil/BRUNO-ELIAS/releases/tag/exato-web-instalador-5
+2. Baixe o instalador: https://github.com/exatocontabil/BRUNO-ELIAS/releases/tag/exato-web-instalador-11
    (arquivo `Exato_Web_Instalador_...exe`, no fim da página). Deixe na Área de Trabalho.
 
 ## Passo 1 - Parar o Exato antigo
@@ -20,7 +20,8 @@ Nada é apagado: a pasta antiga `C:\ExatoWeb` fica como está, para você poder 
 2. Na tela da pasta de dados, o instalador deve sugerir a pasta **ExatoWebDados** que já existe no usuário do AUXILIAR2. **Confira o caminho e deixe esse mesmo.**
    Se você já tinha mudado os dados para outro disco, escolha aqui a pasta onde eles estão.
    (NÃO aceite uma pasta nova e vazia: o Exato abriria como se fosse a primeira vez.)
-3. Avance até o fim. O Exato abre sozinho no navegador.
+3. Na tela **Endereço do escritório**, confira se aparece `fiscal.exatosolucoescontabeis.com` (se vier em branco, digite). Assim o Exato abre pelo endereço com cadeado.
+4. Avance até o fim. O Exato abre sozinho no navegador.
 
 ## Passo 3 - Conferir
 1. Abra https://fiscal.exatosolucoescontabeis.com. Deve pedir o seu usuário, senha e código do autenticador, como sempre.
