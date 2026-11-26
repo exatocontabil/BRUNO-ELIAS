@@ -3,7 +3,7 @@
 O administrador escolhe o arquivo `Exato_Web_Instalador_<versão>.exe`; o site confere o arquivo, guarda-o e pede a um pequeno auxiliar (`atualizar.pyw`) para rodar o instalador em
 silêncio. O auxiliar é quem inicia o instalador (assim ele não morre quando o instalador desliga o site para trocar os arquivos). Os dados não são tocados: ficam fora da pasta do programa.
 Só funciona numa instalação feita pelo instalador do Exato Web (a antiga, por pacote, continua com o atalho de atualizar)."""
-import hashlib, json, os, re, subprocess, sys, threading
+import hashlib, json, os, re, shutil, subprocess, sys, threading
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -47,6 +47,7 @@ def guardar(arquivo, nome, dados=None, ler=None):
     nome = Path(str(nome or '')).name
     if not PADRAO_NOME.match(nome): raise AtualizacaoErro('Esse não parece ser o arquivo de atualização do Exato. O nome deve ser parecido com Exato_Web_Instalador_20261124.11.exe.')
     pasta = Path(dados or config.DADOS) / PASTA; pasta.mkdir(parents=True, exist_ok=True)
+    garantir_espaco(pasta, 400 * 1048576)
     parcial = pasta / (nome + '.parcial'); total = 0
     try:
         with open(parcial, 'wb') as f:
@@ -172,9 +173,18 @@ def consultar(url=None, atual=None, cliente=None):
     return r
 
 
+def garantir_espaco(dados, precisa):
+    """Antes de baixar/gravar o instalador: confere se o disco aguenta (instalador + cópia dos arquivos trocados). Mensagem em português com o caminho para liberar espaço."""
+    try: livre = shutil.disk_usage(str(dados)).free
+    except OSError: return
+    if livre < precisa:
+        raise AtualizacaoErro(f'Falta espaço no disco para atualizar: são necessários uns {precisa // 1048576} MB livres e há só {livre // 1048576} MB. Abra "Espaço em disco" no menu, libere espaço e tente de novo.')
+
+
 def baixar(info, dados=None, progresso=None, cliente=None):
     """Baixa o instalador novo (por partes) para <dados>/atualizacao e confere tamanho, impressão digital e tipo. Devolve o caminho. Levanta AtualizacaoErro em português."""
     pasta = Path(dados or config.DADOS) / PASTA; pasta.mkdir(parents=True, exist_ok=True)
+    garantir_espaco(pasta, int(info['tamanho']) * 2 + 150 * 1048576)
     nome = info['arquivo']; parcial = pasta / (nome + '.parcial'); h = hashlib.sha256(); total = 0
     try:
         c = cliente or _http(info['url_arquivo'], timeout=60)

@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import atualizacao, primeiros_passos as pp, auditoria as aud, backup, contas, diagnostico, importar, restauracao, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
+from . import atualizacao, espaco, primeiros_passos as pp, auditoria as aud, backup, contas, diagnostico, importar, restauracao, exatinho as exa, exatinho_log as exalog, exportar as exp, nfse_conferencia as nfc, config, manifestacao as manif, nucleo, relatorios as rel, seguranca
 from .agendador import Agendador
 from .busca import Motor
 from .cofre import Cofre, CofreErro, carregar_chave_mestra, ler_pfx
@@ -60,6 +60,12 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
 
     def csrf_do_pedido(request): return request.cookies.get('exato_csrf') or secrets.token_urlsafe(24)
 
+    def _disco_ctx(user):
+        """Aviso de pouco espaço (só administrador): leitura rápida do disco da pasta de dados."""
+        if (user or {}).get('role') != 'admin': return {}
+        livre = espaco.disco_de(config.DADOS).get('livre', 0); av = espaco.situacao_disco(livre)
+        return {'disco_aviso': av, 'disco_livre': espaco.legivel(livre)} if av else {}
+
     def _pp_pendente(user):
         """Mostra "Primeiros passos" no menu do administrador enquanto o assistente não terminou. Instalação que já tem empresa ou certificado não precisa dele."""
         if (user or {}).get('role') != 'admin': return False
@@ -71,7 +77,7 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
 
     def pagina(request, nome, ctx=None, status=200, user=None):
         c = dict(ctx or {}); tk = csrf_do_pedido(request)
-        c.update({'request': request, 'csrf': tk, 'usuario': user, 'atu_nova': ((motor.cfg.get('atualizacao') or {}).get('nova', '') if (user or {}).get('role') == 'admin' else ''), 'pp_pendente': _pp_pendente(user), 'rotulos': ROTULOS_TIPO, 'asset_v': int(max((f.stat().st_mtime for f in (AQUI / 'static').iterdir() if f.is_file()), default=0))})
+        c.update({'request': request, 'csrf': tk, 'usuario': user, 'atu_nova': ((motor.cfg.get('atualizacao') or {}).get('nova', '') if (user or {}).get('role') == 'admin' else ''), 'pp_pendente': _pp_pendente(user), **_disco_ctx(user), 'rotulos': ROTULOS_TIPO, 'asset_v': int(max((f.stat().st_mtime for f in (AQUI / 'static').iterdir() if f.is_file()), default=0))})
         resp = tpl.TemplateResponse(request, nome, c, status_code=status)
         if 'exato_csrf' not in request.cookies: cookie(resp, 'exato_csrf', tk, 86400 * 30, http_only=False)
         resp.headers['Cache-Control'] = 'no-store'
@@ -629,6 +635,33 @@ def criar_app(importador=None, iniciar_agendador=False, nfse_transport=None, man
         if r: return None, r
         if u.get('role') != 'admin': return None, RedirectResponse('/situacao', status_code=303)
         return u, None
+
+    # ------------------------------------------------------------ espaço em disco (só administrador)
+    def _ctx_espaco(ok='', erro=''):
+        espaco.medir_em_segundo_plano()
+        m = espaco.medicao; d = m.get('disco') or espaco.disco_de(config.DADOS); itens = m.get('itens') or []
+        total = max(1, d.get('total') or 1); maior = max([i['bytes'] for i in itens] or [1]) or 1
+        return {'m': m, 'disco': d, 'itens': itens, 'maior': maior, 'pct_usado': round(100 * (d.get('usado') or 0) / total), 'situacao': espaco.situacao_disco(d.get('livre', 0)), 'legivel': espaco.legivel, 'pasta_dados': str(config.DADOS),
+                'pasta_copias': str(config.ARQUIVOS), 'copias_outro_disco': (m.get('disco_copias') or {}).get('total') not in (None, 0, d.get('total')), 'ok': ok, 'erro': erro, 'tela': 'espaco', 'idade': espaco.IDADE_DIAS}
+
+    @app.get('/espaco', response_class=HTMLResponse)
+    def espaco_tela(request: Request, ok: str = '', erro: str = '', medir: str = ''):
+        u, r = _so_admin(request)
+        if r: return r
+        if medir == '1': espaco.medir_em_segundo_plano(forcar=True)
+        return pagina(request, 'espaco.html', _ctx_espaco(ok, erro), user=u)
+
+    @app.post('/espaco/limpar')
+    def espaco_limpar(request: Request, partes: list[str] = Form(default=[]), entendi: str = Form(''), csrf: str = Form('')):
+        u, r = _so_admin(request)
+        if r: return r
+        if not csrf_ok(request, csrf): return RedirectResponse('/espaco', status_code=303)
+        validas = [p for p in partes if p in ('atualizacao', 'relatorios', 'exportacoes', 'restauracao')]
+        if not validas: return RedirectResponse(_msg('/espaco', 'erro', 'Marque o que você quer limpar.'), status_code=303)
+        if entendi != '1': return RedirectResponse(_msg('/espaco', 'erro', 'Marque a caixa confirmando que você entendeu.'), status_code=303)
+        res = espaco.limpar(validas); log(u, 'ESPACO_LIMPEZA', f"{','.join(validas)}: {res['arquivos']} arquivos, {espaco.legivel(res['bytes'])}")
+        espaco.medir_em_segundo_plano(forcar=True)
+        return RedirectResponse(_msg('/espaco', 'ok', f"Pronto: {res['arquivos']} arquivo(s) apagado(s), {espaco.legivel(res['bytes'])} liberados."), status_code=303)
 
     # ------------------------------------------------------------ primeiros passos (só administrador)
     def _ctx_comecar(passo='', ok='', erro='', extra=None):

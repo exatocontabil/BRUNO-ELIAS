@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% from "_ui.html" import ic %}{% block titulo %}Espaço em disco — Exato{% endblock %}
+{% block corpo %}<h1>Espaço em disco</h1><p class="sub">Veja o que o Exato guarda neste computador e limpe com segurança o que se refaz sozinho.</p>
+{% if ok %}<div class="aviso ok">{{ ic('check-circle') }}<span>{{ ok }}</span></div>{% endif %}{% if erro %}<div class="aviso erro">{{ ic('alert') }}<span>{{ erro }}</span></div>{% endif %}
+<div class="card" style="max-width:760px"><h2>O disco</h2>
+<div style="height:14px;border-radius:99px;background:var(--surface2);overflow:hidden;margin:8px 0"><i style="display:block;height:100%;width:{{ pct_usado }}%;background:{{ 'var(--brand)' if situacao else 'var(--ok, #2e9d5b)' }}"></i></div>
+<p>{{ legivel(disco.usado) }} usados de {{ legivel(disco.total) }} — <b>{{ legivel(disco.livre) }} livres</b>.</p>
+{% if situacao == 'critico' %}<div class="aviso erro">{{ ic('alert') }}<span>Está <b>quase cheio</b>. O Exato pode parar de gravar notas e atualizações. Libere espaço agora.</span></div>{% elif situacao == 'baixo' %}<div class="aviso">{{ ic('alert') }}<span>O espaço está ficando curto. Vale liberar antes que acabe.</span></div>{% endif %}
+<small class="mu">Pasta dos dados do Exato: {{ pasta_dados }}</small></div>
+
+<div class="card" style="max-width:760px;margin-top:14px"><h2>O que ocupa espaço</h2>
+{% if m.rodando and not itens %}<p class="mu">Medindo as pastas... pode levar um minuto. Esta página se atualiza sozinha.</p><script src="/static/recarregar.js"></script>
+{% else %}{% if m.rodando %}<p class="mu">Atualizando a medição...</p><script src="/static/recarregar.js"></script>{% endif %}
+{% if m.erro %}<div class="aviso erro">{{ ic('alert') }}<span>{{ m.erro }}</span></div>{% endif %}
+<div style="display:grid;gap:12px">{% for i in itens|sort(attribute='bytes', reverse=True) %}<div><div style="display:flex;justify-content:space-between;gap:10px"><b>{{ i.nome }}</b><span>{{ legivel(i.bytes) }}{% if not i.completo %}+{% endif %}</span></div>
+<div style="height:6px;border-radius:99px;background:var(--surface2);overflow:hidden;margin:4px 0"><i style="display:block;height:100%;width:{{ [2, (100 * i.bytes / maior)|round|int]|max if i.bytes else 0 }}%;background:var(--brand)"></i></div>
+<small class="mu">{{ i.que }}{% if i.arquivos %} ({{ i.arquivos }} arquivos){% endif %}</small></div>{% endfor %}</div>
+<form method="get" action="/espaco" style="margin-top:12px"><input type="hidden" name="medir" value="1"><button class="sec">Medir de novo</button></form>{% endif %}</div>
+
+<form method="post" action="/espaco/limpar" class="card" style="max-width:760px;margin-top:14px"><input type="hidden" name="csrf" value="{{ csrf }}"><h2>Limpar o que se refaz sozinho</h2>
+<p class="mu">Marque o que quer apagar. Isso <b>nunca</b> mexe nas empresas, notas, usuários, certificados, auditorias nem nas cópias dos XMLs.</p>
+{% for i in itens if i.limpavel %}<label style="display:flex;gap:8px;align-items:flex-start;margin:8px 0;font-weight:500"><input type="checkbox" name="partes" value="{{ i.chave }}" style="margin-top:3px"><span><b>{{ i.nome }}</b> — {{ legivel(i.bytes) }}<br><small class="mu">{{ i.que }}{% if i.chave in ('relatorios', 'exportacoes') %} Só os com mais de {{ idade }} dias.{% endif %}</small></span></label>{% endfor %}
+<label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-weight:500"><input type="checkbox" name="entendi" value="1" style="margin-top:3px"><span>Entendi: o que for apagado não volta para a Lixeira.</span></label>
+<div class="linha"><button>Apagar o que marquei</button></div></form>
+
+<div class="card" style="max-width:760px;margin-top:14px"><h2>Cópias dos XMLs</h2><p class="mu">Hoje ficam em <b>{{ pasta_copias }}</b>{% if copias_outro_disco %} (em outro disco){% endif %}. É a parte que mais cresce com o tempo, e dá para guardá-la no servidor, liberando o disco deste computador. Em breve você poderá fazer isso aqui, pela tela.</p></div>
+{% endblock %}
