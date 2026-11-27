@@ -51,6 +51,7 @@ Name: "atalho_area"; Description: "Criar um atalho na Área de Trabalho"; GroupD
 [Files]
 Source: "{#Origem}\python\*"; DestDir: "{app}\python"; Flags: recursesubdirs createallsubdirs ignoreversion
 Source: "{#Origem}\app\*"; DestDir: "{app}\app"; Flags: recursesubdirs createallsubdirs ignoreversion
+Source: "{#Origem}\caddy\*"; DestDir: "{app}\caddy"; Flags: recursesubdirs createallsubdirs ignoreversion skipifsourcedoesntexist
 Source: "{#Origem}\exato.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
@@ -72,6 +73,7 @@ Filename: "{app}\python\pythonw.exe"; Parameters: """{app}\app\parar.pyw"" /sile
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\app"
 Type: filesandordirs; Name: "{app}\python"
+Type: filesandordirs; Name: "{app}\caddy"
 
 [Code]
 var
@@ -159,8 +161,8 @@ begin
   if ParametroDados() <> '' then
     PaginaDados.Values[0] := ParametroDados();
   PaginaEndereco := CreateInputQueryPage(PaginaDados.ID, 'Endereço do escritório',
-    'Se o escritório já usa um endereço com cadeado para o Exato, informe-o aqui.',
-    'Exemplo: fiscal.seuescritorio.com.br. Se você não usa um endereço assim, deixe em branco: o Exato abre direto neste computador.');
+    'Se o escritório quer abrir o Exato por um endereço seguro (com cadeado), informe-o aqui.',
+    'Exemplo: fiscal.seuescritorio.com.br. O Exato prepara o endereço sozinho; o Windows pode pedir permissão de administrador uma vez. Se não quiser um endereço assim, deixe em branco: o Exato abre direto neste computador.');
   PaginaEndereco.Add('Endereço:', False);
   PaginaEndereco.Values[0] := GetPreviousData('Endereco', EnderecoJaUsado());
   if ParametroEndereco() <> '' then
@@ -240,6 +242,31 @@ begin
   Result := '';
 end;
 
+{ Prepara o endereco seguro (com cadeado) uma vez, com permissao de administrador. Nao repete se ja esta pronto para o mesmo endereco; instalacao antiga fica como esta. }
+procedure ConfigurarEndereco(nome, dados: String);
+var
+  marca: String;
+  linhas: TArrayOfString;
+  i, codigo: Integer;
+begin
+  if nome = '' then Exit;
+  marca := dados + '\caddy\configurado.json';
+  if FileExists(marca) then
+    if LoadStringsFromFile(marca, linhas) then
+      for i := 0 to GetArrayLength(linhas) - 1 do
+        if Pos('"nome": "' + nome + '"', linhas[i]) > 0 then Exit;
+  if FileExists('C:\ExatoWeb\caddy\caddy.exe') or FileExists(ExpandConstant('{%USERPROFILE}\ExatoWeb\caddy\caddy.exe')) then
+  begin
+    ForceDirectories(dados + '\caddy');
+    SaveStringToFile(marca, '{"nome": "' + nome + '", "modo": "legado", "versao": 1}', False);
+    Exit;
+  end;
+  if not FileExists(ExpandConstant('{app}\caddy\caddy.exe')) then Exit;
+  ShellExec('runas', ExpandConstant('{app}\python\pythonw.exe'),
+    '"' + ExpandConstant('{app}\app\endereco.pyw') + '" "' + ExpandConstant('{app}') + '" "' + dados + '" "' + nome + '"',
+    '', SW_HIDE, ewWaitUntilTerminated, codigo);
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
@@ -249,5 +276,6 @@ begin
       SaveStringToFile(ExpandConstant('{app}\app\endereco.txt'), 'https://' + SoONome(PaginaEndereco.Values[0]) + #13#10, False)
     else
       DeleteFile(ExpandConstant('{app}\app\endereco.txt'));
+    ConfigurarEndereco(SoONome(PaginaEndereco.Values[0]), Trim(PaginaDados.Values[0]));
   end;
 end;

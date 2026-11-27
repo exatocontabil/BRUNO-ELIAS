@@ -14,7 +14,7 @@ def encerrar(pid):
 
 
 feitos = 0
-for nome in ('supervisor.pid', 'servidor.pid'):          # primeiro o supervisor (para não religar), depois o site
+for nome in ('supervisor.pid', 'servidor.pid', 'caddy.pid'):          # primeiro o supervisor (para não religar), depois o site e o endereço seguro
     arq = pasta_dados() / nome
     try: feitos += 1 if encerrar(arq.read_text(encoding='ascii').strip()) else 0
     except (OSError, ValueError): pass

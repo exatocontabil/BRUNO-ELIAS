@@ -7,7 +7,7 @@ do site e o Tk que o Exato usa). Quem instala não precisa de Python nem de mais
     python instalador/montar_instalador.py            ->  dist/Exato_Web_Instalador_<versão>.exe
 
 Opções: --sem-python (monta só a pasta do site, para testar fora do Windows) e --sem-compilar (para antes do Inno Setup)."""
-import argparse, os, shutil, subprocess, sys, tempfile
+import argparse, hashlib, io, os, shutil, subprocess, sys, tempfile, urllib.request, zipfile
 from datetime import date
 from pathlib import Path
 
@@ -37,6 +37,29 @@ def preparar_app(destino, v=None):
     for p in (AQUI / 'arquivos').iterdir():
         if p.is_file(): shutil.copy2(p, destino / p.name)
     (destino / 'VERSAO.txt').write_text(f'Exato Web {v}\r\n', encoding='utf-8')
+    return destino
+
+
+CADDY_VERSAO = '2.8.4'
+
+
+def _baixar(url):
+    req = urllib.request.Request(url, headers={'User-Agent': 'ExatoWeb-montagem'})
+    with urllib.request.urlopen(req, timeout=120) as r: return r.read()
+
+
+def preparar_caddy(destino):
+    """Coloca o Caddy (programinha do endereço seguro, Apache-2.0) dentro do instalador. Baixa do site oficial e CONFERE a impressão digital publicada junto."""
+    destino = Path(destino); base = f'https://github.com/caddyserver/caddy/releases/download/v{CADDY_VERSAO}/'; zipn = f'caddy_{CADDY_VERSAO}_windows_amd64.zip'
+    pacote = _baixar(base + zipn); soma = _baixar(base + f'caddy_{CADDY_VERSAO}_checksums.txt').decode('utf-8', 'replace')
+    esperado = next((l.split()[0].lower() for l in soma.splitlines() if l.strip().endswith(zipn)), '')
+    if not esperado or hashlib.new('sha512' if len(esperado) == 128 else 'sha256', pacote).hexdigest() != esperado: raise SystemExit('O Caddy baixado não bate com a impressão digital publicada. Montagem interrompida.')
+    if destino.exists(): shutil.rmtree(destino)
+    destino.mkdir(parents=True)
+    with zipfile.ZipFile(io.BytesIO(pacote)) as z:
+        for n in z.namelist():
+            if n.lower().endswith('caddy.exe'): (destino / 'caddy.exe').write_bytes(z.read(n)); break
+    if not (destino / 'caddy.exe').exists(): raise SystemExit('O pacote do Caddy não tem o caddy.exe.')
     return destino
 
 
@@ -76,12 +99,14 @@ def achar_iscc():
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(); ap.add_argument('--sem-python', action='store_true'); ap.add_argument('--sem-compilar', action='store_true'); ap.add_argument('--saida', default=str(RAIZ / 'dist')); ap.add_argument('--stage', default=str(RAIZ / 'stage'))
+    ap = argparse.ArgumentParser(); ap.add_argument('--sem-python', action='store_true'); ap.add_argument('--sem-caddy', action='store_true'); ap.add_argument('--sem-compilar', action='store_true'); ap.add_argument('--saida', default=str(RAIZ / 'dist')); ap.add_argument('--stage', default=str(RAIZ / 'stage'))
     a = ap.parse_args(argv); v = versao(); stage = Path(a.stage)
     if stage.exists(): shutil.rmtree(stage)
     stage.mkdir(parents=True); app = preparar_app(stage / 'app', v); gerar_icone(stage / 'exato.ico')
     if not a.sem_python:
         py = copiar_python(stage / 'python'); conferir_python(py, app)
+    if not a.sem_caddy: preparar_caddy(stage / 'caddy')
+    else: (stage / 'caddy').mkdir(exist_ok=True)
     if a.sem_compilar: print('Pasta preparada em', stage); return 0
     iscc = achar_iscc()
     if not iscc: raise SystemExit('Inno Setup não encontrado (instale com "choco install innosetup" ou defina ISCC).')

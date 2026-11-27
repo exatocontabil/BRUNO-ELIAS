@@ -2,7 +2,7 @@
 
 Roda escondido (pythonw). Só uma cópia por vez (arquivo de número do processo na pasta de dados). Fechar de propósito = `parar.pyw`.
 Código de saída 0 do site = parada normal (o supervisor também termina); qualquer outro = religar em poucos segundos."""
-import os, socket, subprocess, sys, time
+import os, socket, subprocess, sys, threading, time
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
@@ -61,8 +61,12 @@ def executar(comando, cwd, esperar=time.sleep, agora=time.time, max_rapidas=5, a
 
 
 def ligar_endereco():
-    """Se a pessoa já usa o endereço do escritório (tarefa do Caddy), liga ele também. Sem a tarefa, não faz nada."""
+    """Endereço do escritório de instalação ANTIGA (tarefa do Caddy em C:\\ExatoWeb): liga a tarefa. No modo novo o supervisor liga o cadeado sozinho (veja `endereco`)."""
     if sys.platform != 'win32': return
+    try:
+        import endereco
+        if endereco.configurado(pasta_dados()).get('modo') == 'novo': return
+    except Exception: pass
     try: subprocess.run(['schtasks', '/Run', '/TN', 'Exato Web Endereco'], capture_output=True, creationflags=SEM_JANELA, timeout=20)
     except Exception: pass
 
@@ -74,9 +78,14 @@ def principal():
         if antigo != os.getpid() and processo_vivo(antigo): return 0          # já existe um supervisor
     except (OSError, ValueError): pass
     pidf.write_text(str(os.getpid()), encoding='ascii')
-    ligar_endereco()
+    ligar_endereco(); parar_caddy = threading.Event()
+    try:
+        import endereco
+        threading.Thread(target=endereco.supervisionar_caddy, args=(RAIZ, dados, parar_caddy), daemon=True, name='cadeado').start()
+    except Exception: pass
     try: return executar(comando_site(), RAIZ)
     finally:
+        parar_caddy.set(); time.sleep(0.5)
         try:
             if pidf.read_text(encoding='ascii').strip() == str(os.getpid()): pidf.unlink()
         except OSError: pass

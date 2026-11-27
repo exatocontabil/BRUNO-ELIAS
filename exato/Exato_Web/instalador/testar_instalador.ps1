@@ -53,6 +53,25 @@ if (-not $solto.HasExited) { try { $solto.Kill() } catch { }; Falha 'o instalado
 $ok = $false
 for ($i = 0; $i -lt 120 -and -not $ok; $i++) { Start-Sleep -Seconds 1; try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8443/saude' -UseBasicParsing -TimeoutSec 3; if ($r.Content -eq 'ok') { $ok = $true } } catch { } }
 if (-not $ok) { Falha 'o Exato nao voltou depois da atualizacao pelo auxiliar' }
+Write-Host 'Endereco seguro (cadeado): instalando por cima com um endereco de teste...'
+$nomeTeste = 'exato-teste.test'
+$codigo = Rodar $Instalador "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- /DIR=`"$alvo`" /DADOS=`"$dados`" /LOG=`"$Base\setup3.log`" /ENDERECO=`"$nomeTeste`""
+if ($codigo -ne 0) { Falha "a instalacao com endereco saiu com codigo $($codigo)" }
+$ok = $false
+for ($i = 0; $i -lt 150 -and -not $ok; $i++) { Start-Sleep -Seconds 1; try { $r = Invoke-WebRequest -Uri "https://$nomeTeste/saude" -UseBasicParsing -TimeoutSec 5; if ($r.Content -eq 'ok') { $ok = $true } } catch { } }
+if (-not $ok) {
+    if (Test-Path "$dados\logs\endereco.log") { Write-Host '--- registro do endereco ---'; Get-Content "$dados\logs\endereco.log" -Tail 20 }
+    if (Test-Path "$dados\caddy\configurado.json") { Get-Content "$dados\caddy\configurado.json" }
+    Falha 'o endereco seguro (cadeado) nao abriu depois da instalacao'
+}
+$cad = Get-Process -Name caddy -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($alvo, [StringComparison]::OrdinalIgnoreCase) }
+if (-not $cad) { Falha 'o programa do endereco seguro nao esta ligado' }
+Write-Host 'Endereco seguro ok. Instalando de novo com o mesmo endereco (nao deve pedir nada nem refazer)...'
+$codigo = Rodar $Instalador "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- /DIR=`"$alvo`" /DADOS=`"$dados`" /LOG=`"$Base\setup4.log`" /ENDERECO=`"$nomeTeste`""
+if ($codigo -ne 0) { Falha "a reinstalacao com endereco saiu com codigo $($codigo)" }
+$ok = $false
+for ($i = 0; $i -lt 150 -and -not $ok; $i++) { Start-Sleep -Seconds 1; try { $r = Invoke-WebRequest -Uri "https://$nomeTeste/saude" -UseBasicParsing -TimeoutSec 5; if ($r.Content -eq 'ok') { $ok = $true } } catch { } }
+if (-not $ok) { Falha 'o endereco seguro nao voltou depois de reinstalar' }
 Write-Host 'Desinstalando...'
 $u = Get-ChildItem $alvo -Filter 'unins*.exe' | Select-Object -First 1
 if (-not $u) { Falha 'nao achei o desinstalador' }
@@ -61,5 +80,7 @@ Start-Sleep -Seconds 5
 $ainda = $false; try { Invoke-WebRequest -Uri 'http://127.0.0.1:8443/saude' -UseBasicParsing -TimeoutSec 3 | Out-Null; $ainda = $true } catch { }
 if ($ainda) { Falha 'o Exato continuou ligado depois de desinstalar' }
 if (Test-Path (Join-Path $alvo 'python')) { Falha 'a desinstalacao deixou o Python dentro da pasta do programa' }
+$sobrou = Get-Process -Name caddy -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($alvo, [StringComparison]::OrdinalIgnoreCase) }
+if ($sobrou) { Falha 'a desinstalacao deixou o programa do endereco seguro ligado' }
 if (-not (Test-Path $dados)) { Falha 'a desinstalacao apagou a pasta de dados (ela deve ficar)' }
 Write-Host 'TUDO CERTO: instala, liga sozinho, atualiza por cima, desinstala e mantem os dados.' -ForegroundColor Green
