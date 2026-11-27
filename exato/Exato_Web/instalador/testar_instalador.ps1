@@ -62,6 +62,15 @@ for ($i = 0; $i -lt 150 -and -not $ok; $i++) { Start-Sleep -Seconds 1; try { $r 
 if (-not $ok) {
     if (Test-Path "$dados\logs\endereco.log") { Write-Host '--- registro do endereco ---'; Get-Content "$dados\logs\endereco.log" -Tail 20 }
     if (Test-Path "$dados\caddy\configurado.json") { Get-Content "$dados\caddy\configurado.json" }
+    Write-Host '--- processos caddy ---'; Get-Process caddy -ErrorAction SilentlyContinue | Format-Table Id, Path
+    Write-Host '--- supervisor/site ---'; Get-Process pythonw -ErrorAction SilentlyContinue | Format-Table Id, Path
+    Write-Host '--- porta 443 ---'; Get-NetTCPConnection -LocalPort 443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, State, OwningProcess
+    Write-Host '--- caddy.log ---'; if (Test-Path "$dados\logs\caddy.log") { Get-Content "$dados\logs\caddy.log" -Tail 30 } else { Write-Host '(sem caddy.log)' }
+    Write-Host '--- caddy_preparo.log ---'; if (Test-Path "$dados\logs\caddy_preparo.log") { Get-Content "$dados\logs\caddy_preparo.log" -Tail 15 }
+    Write-Host '--- caddy.pid / supervisor.pid ---'; foreach ($n in 'caddy.pid', 'supervisor.pid', 'servidor.pid') { if (Test-Path "$dados\$n") { Write-Host "$n = $(Get-Content "$dados\$n")" } else { Write-Host "$n ausente" } }
+    Write-Host '--- hosts ---'; Get-Content "$env:SystemRoot\System32\drivers\etc\hosts" -Tail 5
+    Write-Host '--- tentativa sem conferir o certificado ---'
+    try { $x = Invoke-WebRequest -Uri "https://$nomeTeste/saude" -UseBasicParsing -TimeoutSec 10 -SkipCertificateCheck; Write-Host "respondeu $($x.StatusCode) $($x.Content)" } catch { Write-Host "falhou: $($_.Exception.Message)" }
     Falha 'o endereco seguro (cadeado) nao abriu depois da instalacao'
 }
 $cad = Get-Process -Name caddy -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($alvo, [StringComparison]::OrdinalIgnoreCase) }

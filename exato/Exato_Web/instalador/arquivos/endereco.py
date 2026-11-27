@@ -65,6 +65,13 @@ def _administrador():
     except Exception: return False
 
 
+def _log_caddy(dados, nome='caddy.log'):
+    """Arquivo onde o programinha do cadeado escreve o que está acontecendo (ajuda o suporte)."""
+    try:
+        (Path(dados) / 'logs').mkdir(parents=True, exist_ok=True); return open(Path(dados) / 'logs' / nome, 'ab')
+    except OSError: return subprocess.DEVNULL
+
+
 def _parar_caddy_do_exato(dados):
     """Desliga o programinha do cadeado que o supervisor tenha ligado (para liberar a porta durante a configuração)."""
     pidf = Path(dados) / 'caddy.pid'
@@ -93,7 +100,7 @@ def configurar(app_dir, dados, nome, hosts=None, esperar_ca=60):
         r = _rodar(['netsh', 'advfirewall', 'firewall', 'add', 'rule', f'name={REGRA_FIREWALL}', 'dir=in', 'action=allow', 'protocol=TCP', 'localport=443', 'remoteip=localsubnet', 'profile=any'])
         if r.returncode != 0: return False, 'Não consegui liberar o endereço seguro para a rede do escritório.'
     # liga o programinha só para ele criar o certificado do escritório, confia nele e desliga
-    p = subprocess.Popen([str(exe), 'run', '--config', str(arquivo_config(dados)), '--adapter', 'caddyfile'], cwd=str(pasta_caddy(dados)), env=ambiente(dados), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=SEM_JANELA if sys.platform == 'win32' else 0)
+    p = subprocess.Popen([str(exe), 'run', '--config', str(arquivo_config(dados)), '--adapter', 'caddyfile'], cwd=str(pasta_caddy(dados)), env=ambiente(dados), stdout=_log_caddy(dados, 'caddy_preparo.log'), stderr=subprocess.STDOUT, creationflags=SEM_JANELA if sys.platform == 'win32' else 0)
     try:
         for _ in range(int(esperar_ca)):
             if ca_raiz(dados).exists() or p.poll() is not None: break
@@ -117,7 +124,7 @@ def supervisionar_caddy(app_dir, dados, parar, abrir=None, esperar=time.sleep, a
     if configurado(dados).get('modo') != 'novo': return
     exe = exe_caddy(app_dir); cfg = arquivo_config(dados)
     if not exe.exists() or not cfg.exists(): return
-    abrir = abrir or (lambda: subprocess.Popen([str(exe), 'run', '--config', str(cfg), '--adapter', 'caddyfile'], cwd=str(pasta_caddy(dados)), env=ambiente(dados), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=SEM_JANELA if sys.platform == 'win32' else 0))
+    abrir = abrir or (lambda: subprocess.Popen([str(exe), 'run', '--config', str(cfg), '--adapter', 'caddyfile'], cwd=str(pasta_caddy(dados)), env=ambiente(dados), stdout=_log_caddy(dados), stderr=subprocess.STDOUT, creationflags=SEM_JANELA if sys.platform == 'win32' else 0))
     rapidas = 0; pidf = Path(dados) / 'caddy.pid'
     while not parar.is_set():
         inicio = agora(); p = abrir()
