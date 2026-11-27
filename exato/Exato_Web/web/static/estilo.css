@@ -249,3 +249,4 @@ a.botao.peq{padding:5px 11px;min-height:30px;font-size:13px}
 .senha-nova{border-color:color-mix(in srgb,var(--green) 45%,var(--line));background:var(--green-soft)}
 .senha-prov{font:700 22px/1.2 ui-monospace,Consolas,monospace;letter-spacing:.06em;padding:8px 14px;border-radius:10px;background:var(--surface);border:1px dashed var(--line);user-select:all}
 .selo-novo{margin-left:8px;padding:1px 7px;border-radius:99px;background:var(--brand);color:#fff;font-size:11px;font-weight:700;letter-spacing:.02em;vertical-align:middle}
+.salvar-linha{display:flex;gap:8px;align-items:center;margin:12px 0 4px;font-weight:500;cursor:pointer}.salvar-linha[hidden]{display:none}.salvar-linha input{width:auto;margin:0}.salvar-ajuda{display:block;margin:0 0 12px}.salvar-ajuda[hidden]{display:none}
