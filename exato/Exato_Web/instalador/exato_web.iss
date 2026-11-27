@@ -247,7 +247,7 @@ procedure ConfigurarEndereco(nome, dados: String);
 var
   marca: String;
   linhas: TArrayOfString;
-  i, codigo: Integer;
+  i, j, k, codigo: Integer;
 begin
   if nome = '' then Exit;
   marca := dados + '\caddy\configurado.json';
@@ -265,6 +265,15 @@ begin
   ShellExec('runas', ExpandConstant('{app}\python\pythonw.exe'),
     '"' + ExpandConstant('{app}\app\endereco.pyw') + '" "' + ExpandConstant('{app}') + '" "' + dados + '" "' + nome + '"',
     '', SW_HIDE, ewWaitUntilTerminated, codigo);
+  { O Windows nem sempre devolve a espera do programa com permissao de administrador: confere a marca de "pronto" por ate 3 minutos. }
+  for k := 1 to 180 do
+  begin
+    if FileExists(marca) then
+      if LoadStringsFromFile(marca, linhas) then
+        for j := 0 to GetArrayLength(linhas) - 1 do
+          if Pos('"nome": "' + nome + '"', linhas[j]) > 0 then Exit;
+    Sleep(1000);
+  end;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);

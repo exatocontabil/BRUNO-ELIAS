@@ -38,25 +38,35 @@ sem = Path(tempfile.mkdtemp(prefix='inst_')) / 'app'; sem.mkdir(); assert 'não 
 app2 = instalacao('exit 0\n'); d2 = Path(tempfile.mkdtemp(prefix='dados_')); ok, msg = en.configurar(app2, d2, 'a.b', hosts=hosts, esperar_ca=3)
 assert not ok and 'certificado do escritório não foi criado' in msg and en.configurado(d2) == {}
 
-# supervisão do cadeado: só no modo novo; religa se cair; desliga quando mandado
+# supervisão do cadeado: só no modo novo; espera a configuração ficar pronta; religa se cair; desliga quando mandado
 class Proc:
     def __init__(s, vive): s.pid = 4242; s.vivo = vive
     def poll(s): return None if s.vivo else 1
     def terminate(s): s.vivo = False
-parar = threading.Event(); sem_marca = Path(tempfile.mkdtemp()); abertos = []
-en.supervisionar_caddy(app, sem_marca, parar, abrir=lambda: abertos.append(1) or Proc(True)); assert not abertos                   # sem configuração: nada
-dl = Path(tempfile.mkdtemp(prefix='dados_')); en.marcar(dl, 'a.b', 'legado'); en.supervisionar_caddy(app, dl, parar, abrir=lambda: abertos.append(1) or Proc(True)); assert not abertos          # instalação antiga: não mexe
-en.arquivo_config(d).parent.mkdir(parents=True, exist_ok=True); en.arquivo_config(d).write_text('x')
-procs = []
-def abrir():
-    p = Proc(len(procs) >= 1); procs.append(p); return p          # o 1º "cai" na hora (poll != None), o 2º fica vivo
-fim = threading.Event(); t = threading.Thread(target=en.supervisionar_caddy, args=(app, d, fim), kwargs={'abrir': lambda: abrir_real(), 'esperar': lambda s: None}); 
+def esperar_ate(cond, seg=5):
+    for _ in range(int(seg * 40)):
+        if cond(): return True
+        time.sleep(0.025)
+    return False
+abertos = []
+sem_marca = Path(tempfile.mkdtemp()); parar = threading.Event()
+t1 = threading.Thread(target=en.supervisionar_caddy, args=(app, sem_marca, parar), kwargs={'abrir': lambda: abertos.append(1) or Proc(True), 'espera_config': 0.05}); t1.start()
+time.sleep(0.3); assert not abertos                                              # sem configuração: nada
+dl = Path(tempfile.mkdtemp(prefix='dados_')); parar_b = threading.Event(); en.marcar(dl, 'a.b', 'legado')
+t2 = threading.Thread(target=en.supervisionar_caddy, args=(app, dl, parar_b), kwargs={'abrir': lambda: abertos.append(2) or Proc(True), 'espera_config': 0.05}); t2.start()
+time.sleep(0.3); assert not abertos                                              # instalação antiga (legado): não mexe
+# a configuração fica pronta DEPOIS de o supervisor começar (o instalador prepara em paralelo): ele percebe e liga
+en.pasta_caddy(sem_marca).mkdir(parents=True, exist_ok=True); en.arquivo_config(sem_marca).write_text('x'); en.marcar(sem_marca, 'a.b', 'novo')
+assert esperar_ate(lambda: abertos == [1]), abertos
+assert (sem_marca / 'caddy.pid').read_text() == '4242'
+parar.set(); t1.join(5); parar_b.set(); t2.join(5); assert not t1.is_alive() and not t2.is_alive() and not (sem_marca / 'caddy.pid').exists()
+# religa depois de cair
+d.joinpath('caddy').mkdir(parents=True, exist_ok=True); en.arquivo_config(d).write_text('x'); procs = []
 def abrir_real():
-    p = Proc(len(procs) >= 1); procs.append(p); return p
-t.start()
-for _ in range(100):
-    if len(procs) >= 2: break
-    time.sleep(0.05)
-assert len(procs) >= 2 and (d / 'caddy.pid').exists() and (d / 'caddy.pid').read_text() == '4242'                                  # religou depois de cair e guardou o número
-fim.set(); t.join(5); assert not t.is_alive() and not (d / 'caddy.pid').exists() and not procs[-1].vivo                              # parou: desligou e limpou
+    p = Proc(len(procs) >= 1); procs.append(p); return p          # o 1º "cai" na hora, o 2º fica vivo
+fim = threading.Event(); t3 = threading.Thread(target=en.supervisionar_caddy, args=(app, d, fim), kwargs={'abrir': abrir_real, 'esperar': lambda s: None}); t3.start()
+assert esperar_ate(lambda: len(procs) >= 2) and (d / 'caddy.pid').exists()                                          # religou depois de cair e guardou o número
+fim.set(); t3.join(5); assert not t3.is_alive() and not (d / 'caddy.pid').exists() and not procs[-1].vivo                              # parou: desligou e limpou
+# o cadeado não tenta instalar o certificado sozinho (isso abriria uma janela de segurança no Windows): o instalador já fez
+assert 'skip_install_trust' in en.caddyfile('a.b')
 print('Exato Web (endereço seguro): OK')

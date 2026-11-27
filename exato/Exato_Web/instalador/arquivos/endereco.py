@@ -31,7 +31,7 @@ def arquivo_marca(dados): return pasta_caddy(dados) / 'configurado.json'
 
 
 def caddyfile(nome, porta_site=8443):
-    return ('{\n\tauto_https disable_redirects\n}\n' + f'{normalizar(nome)} {{\n\ttls internal\n\tencode gzip\n\treverse_proxy 127.0.0.1:{int(porta_site)}\n}}\n')
+    return ('{\n\tauto_https disable_redirects\n\tskip_install_trust\n}\n' + f'{normalizar(nome)} {{\n\ttls internal\n\tencode gzip\n\treverse_proxy 127.0.0.1:{int(porta_site)}\n}}\n')
 
 
 def ambiente(dados):
@@ -119,14 +119,15 @@ def configurar(app_dir, dados, nome, hosts=None, esperar_ca=60):
     marcar(dados, nome, 'novo'); return True, 'Endereço seguro pronto.'
 
 
-def supervisionar_caddy(app_dir, dados, parar, abrir=None, esperar=time.sleep, agora=time.time, max_rapidas=5):
-    """Mantém o programinha do cadeado ligado (religa se cair). `parar` é um threading.Event; ao ser acionado, desliga. Só age se a configuração é do modo 'novo'."""
-    if configurado(dados).get('modo') != 'novo': return
-    exe = exe_caddy(app_dir); cfg = arquivo_config(dados)
-    if not exe.exists() or not cfg.exists(): return
+def supervisionar_caddy(app_dir, dados, parar, abrir=None, esperar=time.sleep, agora=time.time, max_rapidas=5, espera_config=5):
+    """Mantém o programinha do cadeado ligado (religa se cair). `parar` é um threading.Event; ao ser acionado, desliga.
+    Só age quando a configuração é do modo 'novo'. Se ainda não está pronta (o instalador prepara o endereço em paralelo) ou se for trocada depois, confere de tempos em tempos."""
+    exe = exe_caddy(app_dir); cfg = arquivo_config(dados); pidf = Path(dados) / 'caddy.pid'
     abrir = abrir or (lambda: subprocess.Popen([str(exe), 'run', '--config', str(cfg), '--adapter', 'caddyfile'], cwd=str(pasta_caddy(dados)), env=ambiente(dados), stdout=_log_caddy(dados), stderr=subprocess.STDOUT, creationflags=SEM_JANELA if sys.platform == 'win32' else 0))
-    rapidas = 0; pidf = Path(dados) / 'caddy.pid'
+    rapidas = 0
     while not parar.is_set():
+        if configurado(dados).get('modo') != 'novo' or not exe.exists() or not cfg.exists():
+            parar.wait(espera_config); continue
         inicio = agora(); p = abrir()
         try: pidf.write_text(str(getattr(p, 'pid', 0)), encoding='ascii')
         except OSError: pass
